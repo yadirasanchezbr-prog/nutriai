@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
@@ -157,7 +158,13 @@ export default function DashboardPage() {
 
         {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}
 
-        <div className="mt-8">
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Link
+            href="/progreso"
+            className="rounded-lg border border-[#0F6E56] px-4 py-2.5 font-semibold text-[#0F6E56] transition hover:bg-emerald-50"
+          >
+            Progreso
+          </Link>
           <button
             type="button"
             onClick={handleSignOut}
