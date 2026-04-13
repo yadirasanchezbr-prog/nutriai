@@ -1,0 +1,31 @@
+---
+description: Contexto NutriAI — producto, stack y prioridades para nuevas sesiones
+alwaysApply: true
+---
+
+# NutriAI
+
+- **Producto:** nutrición personalizada con IA (planes, menús semanales, recetas, chat “Nuria” 24h, diario clínico, calculadora de nevera, seguimiento, ajuste semanal).
+- **Idioma de la UI:** español por defecto.
+- **Marca:** verde `#0F6E56`, fondo blanco, tipografía limpia (Geist / sans).
+
+## Stack
+
+- Next.js **16** App Router, React **19**, TypeScript, Tailwind **v4** (`app/globals.css` con `@import "tailwindcss"`).
+- No asumir APIs de Next 14; comprobar docs de la versión instalada.
+
+## Estado actual
+
+- Landing completa en **`app/page.tsx`** (navbar, hero, testimonios, funcionalidades, precios, footer). CTAs genéricos (`#`, `#precios`, `#funcionalidades`) hasta existan rutas.
+
+## Prioridad inmediata (MVP)
+
+1. Rutas reales: login/registro y app autenticada.
+2. Auth + modelo de usuario/suscripción alineado a planes (9,99 / 19,99 / 39,99 €).
+3. Sustituir placeholders de la landing por `Link` de Next donde corresponda.
+
+## Convenciones
+
+- Cambios **pequeños y enfocados**; no refactors masivos no pedidos.
+- Tras tocar código: `npm run lint`. Mantener **responsive** y paleta de marca.
+- Memoria extendida y roadmap: leer **`PROJECT_MEMORY.md`** al planificar hitos.

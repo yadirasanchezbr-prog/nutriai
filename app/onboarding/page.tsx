@@ -1,0 +1,538 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { FormEvent, useEffect, useMemo, useState } from "react";
+import { supabase } from "@/lib/supabase";
+
+type ClinicalFormState = {
+  full_name: string;
+  age: number | "";
+  weight_kg: number | "";
+  height_cm: number | "";
+  biological_sex: string;
+  activity_level: string;
+  main_goal: string;
+  eating_type: string;
+  health_conditions: string[];
+  intolerances: string[];
+  bloating: string;
+  heavy_digestions: string;
+  constipation: string;
+  bowel_movements_per_day: string;
+  sleep_hours: number;
+  stress_level: number;
+  cooks_at_home: string;
+  supplements: string[];
+  food_relationship: string;
+  emotional_eating: string;
+  disliked_foods: string;
+  note_for_nuria: string;
+};
+
+const TOTAL_STEPS = 6;
+
+const initialState: ClinicalFormState = {
+  full_name: "",
+  age: "",
+  weight_kg: "",
+  height_cm: "",
+  biological_sex: "",
+  activity_level: "",
+  main_goal: "",
+  eating_type: "",
+  health_conditions: [],
+  intolerances: [],
+  bloating: "",
+  heavy_digestions: "",
+  constipation: "",
+  bowel_movements_per_day: "",
+  sleep_hours: 7,
+  stress_level: 3,
+  cooks_at_home: "",
+  supplements: [],
+  food_relationship: "",
+  emotional_eating: "",
+  disliked_foods: "",
+  note_for_nuria: "",
+};
+
+function SingleSelectButtons({
+  options,
+  value,
+  onChange,
+}: {
+  options: string[];
+  value: string;
+  onChange: (next: string) => void;
+}) {
+  return (
+    <div className="mt-2 flex flex-wrap gap-2">
+      {options.map((option) => {
+        const active = value === option;
+        return (
+          <button
+            key={option}
+            type="button"
+            onClick={() => onChange(option)}
+            className={`rounded-lg border px-3 py-2 text-sm transition ${
+              active
+                ? "border-[#0F6E56] bg-emerald-50 text-[#0F6E56]"
+                : "border-neutral-300 text-neutral-700 hover:border-[#0F6E56]/60"
+            }`}
+          >
+            {option}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function MultiSelectButtons({
+  options,
+  values,
+  onChange,
+}: {
+  options: string[];
+  values: string[];
+  onChange: (next: string[]) => void;
+}) {
+  function toggleOption(option: string) {
+    if (values.includes(option)) {
+      onChange(values.filter((value) => value !== option));
+      return;
+    }
+    onChange([...values, option]);
+  }
+
+  return (
+    <div className="mt-2 flex flex-wrap gap-2">
+      {options.map((option) => {
+        const active = values.includes(option);
+        return (
+          <button
+            key={option}
+            type="button"
+            onClick={() => toggleOption(option)}
+            className={`rounded-lg border px-3 py-2 text-sm transition ${
+              active
+                ? "border-[#0F6E56] bg-emerald-50 text-[#0F6E56]"
+                : "border-neutral-300 text-neutral-700 hover:border-[#0F6E56]/60"
+            }`}
+          >
+            {option}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+export default function OnboardingPage() {
+  const router = useRouter();
+  const [step, setStep] = useState(1);
+  const [form, setForm] = useState<ClinicalFormState>(initialState);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function validateSession() {
+      const { data } = await supabase.auth.getUser();
+      if (!data.user) {
+        router.replace("/login");
+      }
+    }
+    validateSession();
+  }, [router]);
+
+  const progressPercentage = useMemo(() => Math.round((step / TOTAL_STEPS) * 100), [step]);
+
+  function updateField<K extends keyof ClinicalFormState>(field: K, value: ClinicalFormState[K]) {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  }
+
+  function nextStep() {
+    setStep((prev) => Math.min(prev + 1, TOTAL_STEPS));
+  }
+
+  function previousStep() {
+    setStep((prev) => Math.max(prev - 1, 1));
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError || !userData.user) {
+      console.error("Error obteniendo usuario autenticado:", { userError, userData });
+      setLoading(false);
+      router.replace("/login");
+      return;
+    }
+
+    try {
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .upsert({
+          id: userData.user.id,
+          form_data: form,
+        });
+
+      if (profileError) {
+        console.error("Error completo al guardar en profiles:", profileError);
+        setError(profileError.message);
+        setLoading(false);
+        return;
+      }
+
+      setLoading(false);
+      router.push("/dashboard");
+    } catch (unexpectedError) {
+      console.error("Error inesperado guardando onboarding:", unexpectedError);
+      setError("Ha ocurrido un error inesperado al guardar el formulario.");
+      setLoading(false);
+    }
+  }
+
+  return (
+    <main className="min-h-screen bg-white px-4 py-10">
+      <section className="mx-auto w-full max-w-3xl rounded-2xl border border-neutral-200 p-6 shadow-sm sm:p-8">
+        <div className="mb-8">
+          <div className="flex items-center justify-between text-sm text-neutral-600">
+            <span>Paso {step} de 6</span>
+            <span>{progressPercentage}%</span>
+          </div>
+          <div className="mt-2 h-2 w-full rounded-full bg-neutral-200">
+            <div
+              className="h-2 rounded-full bg-[#0F6E56] transition-all"
+              style={{ width: `${progressPercentage}%` }}
+            />
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {step === 1 ? (
+            <>
+              <h1 className="text-2xl font-semibold text-[#0F6E56]">Datos fisicos</h1>
+              <div>
+                <label htmlFor="full_name" className="block text-sm font-medium text-neutral-700">
+                  Nombre completo
+                </label>
+                <input
+                  id="full_name"
+                  type="text"
+                  value={form.full_name}
+                  onChange={(event) => updateField("full_name", event.target.value)}
+                  className="mt-2 w-full rounded-lg border border-neutral-300 px-3 py-2 outline-none ring-[#0F6E56] focus:ring-2"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div>
+                  <label htmlFor="age" className="block text-sm font-medium text-neutral-700">
+                    Edad
+                  </label>
+                  <input
+                    id="age"
+                    type="number"
+                    min={0}
+                    value={form.age}
+                    onChange={(event) => updateField("age", event.target.value ? Number(event.target.value) : "")}
+                    className="mt-2 w-full rounded-lg border border-neutral-300 px-3 py-2 outline-none ring-[#0F6E56] focus:ring-2"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="weight_kg" className="block text-sm font-medium text-neutral-700">
+                    Peso en kg
+                  </label>
+                  <input
+                    id="weight_kg"
+                    type="number"
+                    min={0}
+                    value={form.weight_kg}
+                    onChange={(event) =>
+                      updateField("weight_kg", event.target.value ? Number(event.target.value) : "")
+                    }
+                    className="mt-2 w-full rounded-lg border border-neutral-300 px-3 py-2 outline-none ring-[#0F6E56] focus:ring-2"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="height_cm" className="block text-sm font-medium text-neutral-700">
+                    Altura en cm
+                  </label>
+                  <input
+                    id="height_cm"
+                    type="number"
+                    min={0}
+                    value={form.height_cm}
+                    onChange={(event) =>
+                      updateField("height_cm", event.target.value ? Number(event.target.value) : "")
+                    }
+                    className="mt-2 w-full rounded-lg border border-neutral-300 px-3 py-2 outline-none ring-[#0F6E56] focus:ring-2"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <p className="text-sm font-medium text-neutral-700">Sexo biologico</p>
+                <SingleSelectButtons
+                  options={["Mujer", "Hombre", "Prefiero no decir"]}
+                  value={form.biological_sex}
+                  onChange={(value) => updateField("biological_sex", value)}
+                />
+              </div>
+
+              <div>
+                <p className="text-sm font-medium text-neutral-700">Nivel de actividad</p>
+                <SingleSelectButtons
+                  options={["Sedentario", "Ligero", "Moderado", "Activo", "Muy activo"]}
+                  value={form.activity_level}
+                  onChange={(value) => updateField("activity_level", value)}
+                />
+              </div>
+            </>
+          ) : null}
+
+          {step === 2 ? (
+            <>
+              <h1 className="text-2xl font-semibold text-[#0F6E56]">Objetivo y dieta</h1>
+              <div>
+                <p className="text-sm font-medium text-neutral-700">Objetivo principal</p>
+                <SingleSelectButtons
+                  options={[
+                    "Perdida de grasa",
+                    "Recomposicion corporal",
+                    "Salud digestiva",
+                    "Antiinflamatorio",
+                    "Mejorar energia",
+                    "Mantenimiento",
+                    "Tratamiento de patologias",
+                    "Nutricion para la longevidad",
+                  ]}
+                  value={form.main_goal}
+                  onChange={(value) => updateField("main_goal", value)}
+                />
+              </div>
+
+              <div>
+                <p className="text-sm font-medium text-neutral-700">Tipo de alimentacion</p>
+                <SingleSelectButtons
+                  options={["Omnivoro", "Vegetariano", "Vegano", "Sin gluten", "Sin lactosa", "Ayuno intermitente", "Personalizado"]}
+                  value={form.eating_type}
+                  onChange={(value) => updateField("eating_type", value)}
+                />
+              </div>
+            </>
+          ) : null}
+
+          {step === 3 ? (
+            <>
+              <h1 className="text-2xl font-semibold text-[#0F6E56]">Salud</h1>
+              <div>
+                <p className="text-sm font-medium text-neutral-700">Condiciones de salud</p>
+                <MultiSelectButtons
+                  options={[
+                    "Problemas digestivos",
+                    "Alteracion hormonal",
+                    "Tiroides",
+                    "Diabetes",
+                    "Hipertension",
+                    "Colesterol alto",
+                    "Ninguna",
+                  ]}
+                  values={form.health_conditions}
+                  onChange={(values) => updateField("health_conditions", values)}
+                />
+              </div>
+
+              <div>
+                <p className="text-sm font-medium text-neutral-700">Intolerancias</p>
+                <MultiSelectButtons
+                  options={["Gluten", "Lactosa", "Fructosa", "Huevo", "Frutos secos", "Ninguna"]}
+                  values={form.intolerances}
+                  onChange={(values) => updateField("intolerances", values)}
+                />
+              </div>
+            </>
+          ) : null}
+
+          {step === 4 ? (
+            <>
+              <h1 className="text-2xl font-semibold text-[#0F6E56]">Digestion</h1>
+              <div>
+                <p className="text-sm font-medium text-neutral-700">Hinchazon</p>
+                <SingleSelectButtons
+                  options={["Nunca", "A veces", "Frecuente", "Siempre"]}
+                  value={form.bloating}
+                  onChange={(value) => updateField("bloating", value)}
+                />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-neutral-700">Digestiones pesadas</p>
+                <SingleSelectButtons
+                  options={["Nunca", "A veces", "Frecuente", "Siempre"]}
+                  value={form.heavy_digestions}
+                  onChange={(value) => updateField("heavy_digestions", value)}
+                />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-neutral-700">Estrenimiento</p>
+                <SingleSelectButtons
+                  options={["Nunca", "A veces", "Frecuente", "Siempre"]}
+                  value={form.constipation}
+                  onChange={(value) => updateField("constipation", value)}
+                />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-neutral-700">Deposiciones al dia</p>
+                <SingleSelectButtons
+                  options={["0", "1", "2", "3+"]}
+                  value={form.bowel_movements_per_day}
+                  onChange={(value) => updateField("bowel_movements_per_day", value)}
+                />
+              </div>
+            </>
+          ) : null}
+
+          {step === 5 ? (
+            <>
+              <h1 className="text-2xl font-semibold text-[#0F6E56]">Habitos</h1>
+              <div>
+                <label htmlFor="sleep_hours" className="block text-sm font-medium text-neutral-700">
+                  Horas de sueno: <span className="font-semibold text-[#0F6E56]">{form.sleep_hours}</span>
+                </label>
+                <input
+                  id="sleep_hours"
+                  type="range"
+                  min={4}
+                  max={10}
+                  step={1}
+                  value={form.sleep_hours}
+                  onChange={(event) => updateField("sleep_hours", Number(event.target.value))}
+                  className="mt-2 w-full accent-[#0F6E56]"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="stress_level" className="block text-sm font-medium text-neutral-700">
+                  Nivel de estres: <span className="font-semibold text-[#0F6E56]">{form.stress_level}</span>
+                </label>
+                <input
+                  id="stress_level"
+                  type="range"
+                  min={1}
+                  max={5}
+                  step={1}
+                  value={form.stress_level}
+                  onChange={(event) => updateField("stress_level", Number(event.target.value))}
+                  className="mt-2 w-full accent-[#0F6E56]"
+                />
+              </div>
+
+              <div>
+                <p className="text-sm font-medium text-neutral-700">Cocinas en casa?</p>
+                <SingleSelectButtons
+                  options={["Si", "A veces", "Casi nunca"]}
+                  value={form.cooks_at_home}
+                  onChange={(value) => updateField("cooks_at_home", value)}
+                />
+              </div>
+
+              <div>
+                <p className="text-sm font-medium text-neutral-700">Suplementacion</p>
+                <MultiSelectButtons
+                  options={["Magnesio", "Vitamina D", "Omega-3", "Probioticos", "Proteina", "Ninguno"]}
+                  values={form.supplements}
+                  onChange={(values) => updateField("supplements", values)}
+                />
+              </div>
+            </>
+          ) : null}
+
+          {step === 6 ? (
+            <>
+              <h1 className="text-2xl font-semibold text-[#0F6E56]">Relacion con la comida</h1>
+              <div>
+                <p className="text-sm font-medium text-neutral-700">Relacion con la comida</p>
+                <SingleSelectButtons
+                  options={["Tranquila", "Con conflictos", "Mucha ansiedad", "Muy dificil"]}
+                  value={form.food_relationship}
+                  onChange={(value) => updateField("food_relationship", value)}
+                />
+              </div>
+
+              <div>
+                <p className="text-sm font-medium text-neutral-700">Comer emocional</p>
+                <SingleSelectButtons
+                  options={["Raramente", "A veces", "Con frecuencia"]}
+                  value={form.emotional_eating}
+                  onChange={(value) => updateField("emotional_eating", value)}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="disliked_foods" className="block text-sm font-medium text-neutral-700">
+                  Alimentos que no te gustan
+                </label>
+                <input
+                  id="disliked_foods"
+                  type="text"
+                  value={form.disliked_foods}
+                  onChange={(event) => updateField("disliked_foods", event.target.value)}
+                  className="mt-2 w-full rounded-lg border border-neutral-300 px-3 py-2 outline-none ring-[#0F6E56] focus:ring-2"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="note_for_nuria" className="block text-sm font-medium text-neutral-700">
+                  Nota para Nuria
+                </label>
+                <textarea
+                  id="note_for_nuria"
+                  value={form.note_for_nuria}
+                  onChange={(event) => updateField("note_for_nuria", event.target.value)}
+                  rows={4}
+                  className="mt-2 w-full rounded-lg border border-neutral-300 px-3 py-2 outline-none ring-[#0F6E56] focus:ring-2"
+                />
+              </div>
+            </>
+          ) : null}
+
+          {error ? <p className="text-sm text-red-600">{error}</p> : null}
+
+          <div className="flex items-center justify-between pt-4">
+            <button
+              type="button"
+              onClick={previousStep}
+              disabled={step === 1 || loading}
+              className="rounded-lg border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 transition hover:border-[#0F6E56] hover:text-[#0F6E56] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Atras
+            </button>
+
+            {step < TOTAL_STEPS ? (
+              <button
+                type="button"
+                onClick={nextStep}
+                disabled={loading}
+                className="rounded-lg bg-[#0F6E56] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0d5f4a] disabled:opacity-60"
+              >
+                Siguiente
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={loading}
+                className="rounded-lg bg-[#0F6E56] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0d5f4a] disabled:opacity-60"
+              >
+                {loading ? "Generando plan..." : "Generar mi plan"}
+              </button>
+            )}
+          </div>
+        </form>
+      </section>
+    </main>
+  );
+}
