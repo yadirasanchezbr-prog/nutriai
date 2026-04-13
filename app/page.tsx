@@ -1,433 +1,303 @@
-import type { SVGProps } from "react";
+"use client";
 
-function Logo({ className = "" }: { className?: string }) {
-  return (
-    <span className={`text-xl font-semibold tracking-tight text-[#0F6E56] ${className}`}>NutriAI</span>
-  );
-}
+import Link from "next/link";
 
-function IconMenuSemanal(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden {...props}>
-      <rect x="3" y="4" width="18" height="18" rx="2" />
-      <path d="M16 2v4M8 2v4M3 10h18" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function IconChat(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden {...props}>
+const features = [
+  {
+    title: "Menú semanal personalizado",
+    description:
+      "7 días de platos adaptados a tu objetivo, intolerancias y tipo de dieta. Con ingredientes en gramos en crudo.",
+    icon: (
       <path
-        d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+        d="M7 3v3M17 3v3M4 8h16M6 5h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zm3 6h6m-6 4h4"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-    </svg>
-  );
-}
-
-function IconDiario(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden {...props}>
-      <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
-      <rect x="9" y="3" width="6" height="4" rx="1" />
-      <path d="M9 12h6M9 16h4" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function IconNevera(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden {...props}>
-      <rect x="4" y="2" width="16" height="20" rx="2" />
-      <path d="M4 10h16M9 6v4M12 14v6" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function IconProgreso(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden {...props}>
-      <path d="M3 3v18h18" strokeLinecap="round" />
-      <path d="M7 16l4-4 4 4 5-7" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function IconAjuste(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden {...props}>
+    ),
+  },
+  {
+    title: "Chat con Nuria 24h",
+    description:
+      "Resuelve dudas, gestiona síntomas y recibe apoyo emocional cuando lo necesitas. Nuria nunca te juzga.",
+    icon: (
       <path
-        d="M4 4v5h.01M4 9a5 5 0 0 0 5 5M20 20v-5h-.01M20 15a5 5 0 0 0-5-5M9 20h5M15 4h-5"
+        d="M8 10h8m-8 4h5M21 12a8.5 8.5 0 0 1-8.5 8.5A8.5 8.5 0 0 1 8 19l-5 2 2-5A8.5 8.5 0 1 1 21 12Z"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-    </svg>
-  );
-}
-
-function InitialAvatar({ initials, tone }: { initials: string; tone: "a" | "b" | "c" }) {
-  const tones = {
-    a: "bg-emerald-100 text-[#0F6E56]",
-    b: "bg-teal-100 text-[#0F6E56]",
-    c: "bg-green-100 text-[#0F6E56]",
-  } as const;
-  return (
-    <div
-      className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${tones[tone]}`}
-      aria-hidden
-    >
-      {initials}
-    </div>
-  );
-}
+    ),
+  },
+  {
+    title: "Ingredientes en gramos en crudo",
+    description:
+      "Todos los pesos antes de cocinar, como hacen los nutricionistas de verdad. Sin confusiones ni errores.",
+    icon: (
+      <path
+        d="M4 14h16M6 14V8a6 6 0 1 1 12 0v6m-7 0v5m-2-2h4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    ),
+  },
+  {
+    title: "Calculadora de nevera",
+    description:
+      "Dile a Nuria qué tienes en casa y te genera un plato que cuadra tus macros con lo que tienes disponible.",
+    icon: (
+      <path
+        d="M8 3h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm0 8h10M10 7h1m0 8h1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    ),
+  },
+  {
+    title: "Diario clínico diario",
+    description:
+      "Registra cómo te sientes cada día. Nuria usa esos datos para mejorar tu plan semana a semana.",
+    icon: (
+      <path
+        d="M7 3h10a2 2 0 0 1 2 2v15l-3-2-3 2-3-2-3 2V5a2 2 0 0 1 2-2Zm3 6h4m-4 4h4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    ),
+  },
+  {
+    title: "Ajuste automático semanal",
+    description:
+      "Cada domingo Nuria analiza tu progreso y adapta el menú. El plan mejora solo, sin que hagas nada.",
+    icon: (
+      <path
+        d="M20 6v5h-5M4 18v-5h5M6.5 10A6 6 0 0 1 17 7l3 4M17.5 14A6 6 0 0 1 7 17l-3-4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    ),
+  },
+];
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white font-sans text-neutral-900 antialiased">
-      <header className="sticky top-0 z-50 border-b border-neutral-100 bg-white/90 backdrop-blur-md">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-          <a href="#" className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F6E56]">
-            <Logo />
+    <div className="scroll-smooth bg-white text-neutral-900">
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-neutral-200 bg-white/95 backdrop-blur">
+        <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+          <a href="#" className="flex items-center gap-2 text-xl font-bold text-[#0F6E56]">
+            NutriAI
+            <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
           </a>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <a
-              href="#"
-              className="rounded-full px-3 py-2 text-sm font-medium text-neutral-700 transition hover:text-[#0F6E56] sm:px-4"
-            >
+          <div className="hidden items-center gap-6 text-sm font-medium text-neutral-700 md:flex">
+            <a href="#como-funciona" className="transition hover:text-[#0F6E56]">
+              Cómo funciona
+            </a>
+            <a href="#precios" className="transition hover:text-[#0F6E56]">
+              Precios
+            </a>
+            <Link href="/login" className="transition hover:text-[#0F6E56]">
               Entrar
-            </a>
-            <a
-              href="#precios"
-              className="rounded-full border border-neutral-200 px-3 py-2 text-sm font-medium text-[#0F6E56] transition hover:border-[#0F6E56]/40 hover:bg-emerald-50/60 sm:px-4"
-            >
-              Empezar gratis
-            </a>
+            </Link>
           </div>
+          <Link
+            href="/registro"
+            className="rounded-full bg-[#0F6E56] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0d604b]"
+          >
+            Empezar gratis
+          </Link>
         </nav>
       </header>
 
-      <main>
-        {/* Hero */}
-        <section className="mx-auto max-w-6xl px-4 pb-20 pt-12 sm:px-6 sm:pb-24 sm:pt-16 lg:px-8 lg:pb-28 lg:pt-20">
-          <div className="mx-auto max-w-3xl text-center">
-            <h1 className="text-balance text-3xl font-semibold leading-tight tracking-tight text-neutral-900 sm:text-4xl lg:text-5xl">
-              Tu nutricionista con IA que se adapta cada semana a cómo te sientes
+      <main className="pt-24">
+        <section className="reveal px-4 py-16 sm:py-24">
+          <div className="mx-auto max-w-5xl text-center">
+            <p className="mx-auto inline-flex rounded-full bg-[#E8F5F0] px-4 py-1.5 text-sm font-medium text-[#0F6E56]">
+              ✦ Nutrición personalizada con IA
+            </p>
+            <h1 className="mt-6 text-balance text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">
+              Tu plan nutricional que cambia cada semana
             </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-pretty text-base leading-relaxed text-neutral-600 sm:text-lg">
-              Plan nutricional personalizado, menús semanales con recetas, y una IA disponible 24h para resolver tus
-              dudas.
+            <p className="mx-auto mt-6 max-w-3xl text-lg text-neutral-600">
+              Nuria, tu nutricionista IA, aprende de ti cada semana y adapta tu menú según cómo te sientes.
             </p>
-            <div className="mt-10 flex flex-col items-center gap-3">
+            <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Link
+                href="/registro"
+                className="rounded-full bg-[#0F6E56] px-7 py-3 text-sm font-semibold text-white transition hover:bg-[#0d604b]"
+              >
+                Empezar gratis →
+              </Link>
               <a
-                href="#precios"
-                className="inline-flex w-full max-w-xs items-center justify-center rounded-full bg-[#0F6E56] px-8 py-3.5 text-base font-semibold text-white shadow-sm transition hover:bg-[#0d5f4a] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F6E56] sm:w-auto"
+                href="#como-funciona"
+                className="rounded-full border border-[#0F6E56]/30 px-7 py-3 text-sm font-semibold text-[#0F6E56] transition hover:border-[#0F6E56]"
               >
-                Quiero mi plan gratis
+                Ver cómo funciona
               </a>
-              <p className="text-sm text-neutral-500">Sin tarjeta de crédito · Cancela cuando quieras</p>
+            </div>
+            <p className="mt-5 text-sm text-neutral-500">Sin tarjeta · Cancela cuando quieras · Primer menú en 60 segundos</p>
+            <div className="mt-12 grid gap-4 sm:grid-cols-3">
+              {[
+                "2 min para tu primer menú",
+                "+500 recetas personalizadas",
+                "Ajuste semanal automático",
+              ].map((item) => (
+                <div key={item} className="rounded-2xl bg-[#F8F9FA] px-5 py-4 text-sm font-semibold text-[#0F6E56]">
+                  {item}
+                </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* Testimonios */}
-        <section className="border-y border-neutral-100 bg-neutral-50/80 py-16 sm:py-20">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <h2 className="text-center text-sm font-semibold uppercase tracking-wider text-[#0F6E56]">
-              Historias reales
+        <section id="como-funciona" className="reveal bg-[#F8F9FA] px-4 py-16 sm:py-24">
+          <div className="mx-auto max-w-6xl">
+            <h2 className="text-center text-3xl font-bold sm:text-4xl">Tres pasos. Un plan que funciona.</h2>
+            <div className="mt-12 grid gap-6 md:grid-cols-3">
+              {[
+                ["01", "Cuéntale a Nuria cómo eres", "Rellena tu perfil clínico en 3 minutos"],
+                ["02", "Recibe tu menú personalizado", "Con ingredientes en gramos en crudo y recetas incluidas"],
+                ["03", "Nuria se adapta cada semana", "Según tu feedback, síntomas y progreso real"],
+              ].map(([number, title, desc]) => (
+                <article key={number} className="rounded-2xl bg-white p-6 shadow-sm">
+                  <p className="text-4xl font-bold text-[#0F6E56]">{number}</p>
+                  <h3 className="mt-4 text-xl font-semibold">{title}</h3>
+                  <p className="mt-3 text-neutral-600">{desc}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="funcionalidades" className="reveal px-4 py-16 sm:py-24">
+          <div className="mx-auto max-w-6xl">
+            <h2 className="text-center text-3xl font-bold sm:text-4xl">
+              Todo lo que necesitas para comer bien de verdad
             </h2>
-            <p className="mx-auto mt-2 max-w-2xl text-center text-2xl font-semibold tracking-tight text-neutral-900 sm:text-3xl">
-              Personas como tú ya notan el cambio
-            </p>
-            <ul className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              <li className="flex flex-col rounded-2xl border border-neutral-100 bg-white p-6 shadow-sm">
-                <div className="flex items-start gap-4">
-                  <InitialAvatar initials="LM" tone="a" />
-                  <div>
-                    <p className="font-semibold text-neutral-900">Laura Méndez</p>
-                    <p className="text-sm font-medium text-[#0F6E56]">−6 kg en 4 meses</p>
-                  </div>
-                </div>
-                <p className="mt-4 text-sm leading-relaxed text-neutral-600">
-                  “Por fin entiendo qué comer sin obsesionarme. Los menús encajan con mi trabajo y Nuria me calma cuando
-                  me pongo nerviosa con la báscula.”
-                </p>
-              </li>
-              <li className="flex flex-col rounded-2xl border border-neutral-100 bg-white p-6 shadow-sm">
-                <div className="flex items-start gap-4">
-                  <InitialAvatar initials="JR" tone="b" />
-                  <div>
-                    <p className="font-semibold text-neutral-900">Javier Ruiz</p>
-                    <p className="text-sm font-medium text-[#0F6E56]">Colesterol en rango</p>
-                  </div>
-                </div>
-                <p className="mt-4 text-sm leading-relaxed text-neutral-600">
-                  “Mi médico notó la mejora antes que yo. El diario clínico me ayudó a ser constante y la IA responde
-                  dudas tontas a las 2 de la mañana.”
-                </p>
-              </li>
-              <li className="flex flex-col rounded-2xl border border-neutral-100 bg-white p-6 shadow-sm">
-                <div className="flex items-start gap-4">
-                  <InitialAvatar initials="AC" tone="c" />
-                  <div>
-                    <p className="font-semibold text-neutral-900">Ana Costa</p>
-                    <p className="text-sm font-medium text-[#0F6E56]">Más energía, menos hinchazón</p>
-                  </div>
-                </div>
-                <p className="mt-4 text-sm leading-relaxed text-neutral-600">
-                  “Soy vegetariana y siempre me faltaba proteína. El plan semanal y la calculadora de nevera me salvaron
-                  el fin de semana.”
-                </p>
-              </li>
-            </ul>
+            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {features.map((feature) => (
+                <article key={feature.title} className="rounded-2xl bg-[#E8F5F0] p-6">
+                  <svg className="h-8 w-8 text-[#0F6E56]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                    {feature.icon}
+                  </svg>
+                  <h3 className="mt-4 text-lg font-semibold text-[#0F6E56]">{feature.title}</h3>
+                  <p className="mt-2 text-sm text-neutral-700">{feature.description}</p>
+                </article>
+              ))}
+            </div>
           </div>
         </section>
 
-        {/* Funcionalidades */}
-        <section id="funcionalidades" className="scroll-mt-24 mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
-          <h2 className="text-center text-sm font-semibold uppercase tracking-wider text-[#0F6E56]">Funcionalidades</h2>
-          <p className="mx-auto mt-2 max-w-2xl text-center text-2xl font-semibold tracking-tight text-neutral-900 sm:text-3xl">
-            Todo lo que necesitas en un solo lugar
-          </p>
-          <ul className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              {
-                title: "Menú semanal personalizado",
-                desc: "Recetas equilibradas según tus objetivos, alergias y ritmo de vida.",
-                Icon: IconMenuSemanal,
-              },
-              {
-                title: "Chat con Nuria (IA)",
-                desc: "Pregunta lo que quieras sobre porciones, sustitutos o motivación.",
-                Icon: IconChat,
-              },
-              {
-                title: "Diario clínico diario",
-                desc: "Registra síntomas, sueño y digestión para afinar tu plan con datos.",
-                Icon: IconDiario,
-              },
-              {
-                title: "Calculadora de nevera",
-                desc: "Introduce lo que tienes y obtén ideas de comidas sin desperdiciar.",
-                Icon: IconNevera,
-              },
-              {
-                title: "Seguimiento de progreso",
-                desc: "Visualiza peso, medidas y hábitos con gráficas claras y sin ruido.",
-                Icon: IconProgreso,
-              },
-              {
-                title: "Ajuste automático semanal",
-                desc: "Tu plan evoluciona según cómo te sientes y lo que va funcionando.",
-                Icon: IconAjuste,
-              },
-            ].map(({ title, desc, Icon }) => (
-              <li
-                key={title}
-                className="rounded-2xl border border-neutral-100 bg-white p-6 shadow-sm transition hover:border-[#0F6E56]/20"
-              >
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-[#0F6E56]">
-                  <Icon className="h-6 w-6" />
-                </div>
-                <h3 className="mt-4 text-lg font-semibold text-neutral-900">{title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-neutral-600">{desc}</p>
-              </li>
-            ))}
-          </ul>
+        <section className="reveal bg-[#E8F5F0] px-4 py-16 sm:py-24">
+          <div className="mx-auto max-w-6xl">
+            <h2 className="text-center text-3xl font-bold sm:text-4xl">Personas reales, resultados reales</h2>
+            <div className="mt-12 grid gap-6 md:grid-cols-3">
+              {[
+                ["LM", "Laura Méndez", "−6 kg en 4 meses", "Sigo el plan sin sentir ansiedad. Es práctico y fácil."],
+                ["JR", "Javier Ruiz", "Más energía diaria", "Mi digestión ha mejorado y mantengo constancia semanal."],
+                ["AC", "Ana Costa", "Menos hinchazón", "Nuria se adapta a mis síntomas y me da seguridad al comer."],
+              ].map(([initials, name, result, text]) => (
+                <article key={name} className="rounded-2xl bg-white p-6 shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0F6E56] text-sm font-bold text-white">
+                      {initials}
+                    </div>
+                    <div>
+                      <p className="font-semibold">{name}</p>
+                      <p className="text-sm font-semibold text-[#0F6E56]">{result}</p>
+                    </div>
+                  </div>
+                  <p className="mt-4 text-sm text-neutral-600">{text}</p>
+                </article>
+              ))}
+            </div>
+          </div>
         </section>
 
-        {/* Precios */}
-        <section id="precios" className="scroll-mt-24 border-t border-neutral-100 bg-neutral-50/80 py-16 sm:py-20">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <h2 className="text-center text-sm font-semibold uppercase tracking-wider text-[#0F6E56]">Precios</h2>
-            <p className="mx-auto mt-2 max-w-2xl text-center text-2xl font-semibold tracking-tight text-neutral-900 sm:text-3xl">
-              Elige el plan que encaje contigo
-            </p>
-            <div className="mt-12 grid gap-6 lg:grid-cols-3 lg:items-stretch">
-              {/* Básico */}
-              <article className="flex flex-col rounded-2xl border border-neutral-200 bg-white p-8 shadow-sm">
-                <h3 className="text-lg font-semibold text-neutral-900">Básico</h3>
-                <p className="mt-2 text-sm text-neutral-600">Para empezar con buen pie.</p>
-                <p className="mt-6 flex items-baseline gap-1">
-                  <span className="text-4xl font-semibold tracking-tight text-neutral-900">9,99€</span>
-                  <span className="text-sm text-neutral-500">/mes</span>
-                </p>
-                <ul className="mt-8 flex flex-1 flex-col gap-3 text-sm text-neutral-600">
-                  <li className="flex gap-2">
-                    <span className="mt-0.5 text-[#0F6E56]" aria-hidden>
-                      ✓
-                    </span>
-                    Menú semanal con 12 recetas
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="mt-0.5 text-[#0F6E56]" aria-hidden>
-                      ✓
-                    </span>
-                    Chat con Nuria (límite mensual)
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="mt-0.5 text-[#0F6E56]" aria-hidden>
-                      ✓
-                    </span>
-                    Seguimiento de peso básico
-                  </li>
-                </ul>
-                <a
-                  href="#"
-                  className="mt-8 inline-flex w-full items-center justify-center rounded-full border border-neutral-300 px-5 py-3 text-sm font-semibold text-neutral-900 transition hover:border-[#0F6E56] hover:text-[#0F6E56]"
-                >
-                  Elegir Básico
-                </a>
-              </article>
-
-              {/* Pro — destacado */}
-              <article className="relative flex flex-col rounded-2xl border-2 border-[#0F6E56] bg-white p-8 shadow-lg ring-1 ring-[#0F6E56]/10 lg:scale-[1.02] lg:shadow-xl">
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#0F6E56] px-3 py-1 text-xs font-semibold text-white">
-                  Más popular
-                </span>
-                <h3 className="text-lg font-semibold text-neutral-900">Pro</h3>
-                <p className="mt-2 text-sm text-neutral-600">Equilibrio entre guía y autonomía.</p>
-                <p className="mt-6 flex items-baseline gap-1">
-                  <span className="text-4xl font-semibold tracking-tight text-neutral-900">19,99€</span>
-                  <span className="text-sm text-neutral-500">/mes</span>
-                </p>
-                <ul className="mt-8 flex flex-1 flex-col gap-3 text-sm text-neutral-600">
-                  <li className="flex gap-2">
-                    <span className="mt-0.5 text-[#0F6E56]" aria-hidden>
-                      ✓
-                    </span>
-                    Todo lo del plan Básico
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="mt-0.5 text-[#0F6E56]" aria-hidden>
-                      ✓
-                    </span>
-                    Chat con Nuria ilimitado
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="mt-0.5 text-[#0F6E56]" aria-hidden>
-                      ✓
-                    </span>
-                    Diario clínico y calculadora de nevera
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="mt-0.5 text-[#0F6E56]" aria-hidden>
-                      ✓
-                    </span>
-                    Ajuste automático semanal del menú
-                  </li>
-                </ul>
-                <a
-                  href="#"
-                  className="mt-8 inline-flex w-full items-center justify-center rounded-full bg-[#0F6E56] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#0d5f4a] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F6E56]"
-                >
-                  Empezar con Pro
-                </a>
-              </article>
-
-              {/* Élite */}
-              <article className="flex flex-col rounded-2xl border border-neutral-200 bg-white p-8 shadow-sm">
-                <h3 className="text-lg font-semibold text-neutral-900">Élite</h3>
-                <p className="mt-2 text-sm text-neutral-600">Máximo acompañamiento y datos.</p>
-                <p className="mt-6 flex items-baseline gap-1">
-                  <span className="text-4xl font-semibold tracking-tight text-neutral-900">39,99€</span>
-                  <span className="text-sm text-neutral-500">/mes</span>
-                </p>
-                <ul className="mt-8 flex flex-1 flex-col gap-3 text-sm text-neutral-600">
-                  <li className="flex gap-2">
-                    <span className="mt-0.5 text-[#0F6E56]" aria-hidden>
-                      ✓
-                    </span>
-                    Todo lo del plan Pro
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="mt-0.5 text-[#0F6E56]" aria-hidden>
-                      ✓
-                    </span>
-                    Informes mensuales exportables
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="mt-0.5 text-[#0F6E56]" aria-hidden>
-                      ✓
-                    </span>
-                    Prioridad en nuevas funciones y soporte
-                  </li>
-                </ul>
-                <a
-                  href="#"
-                  className="mt-8 inline-flex w-full items-center justify-center rounded-full border border-neutral-300 px-5 py-3 text-sm font-semibold text-neutral-900 transition hover:border-[#0F6E56] hover:text-[#0F6E56]"
-                >
-                  Elegir Élite
-                </a>
-              </article>
+        <section id="precios" className="reveal px-4 py-16 sm:py-24">
+          <div className="mx-auto max-w-6xl">
+            <h2 className="text-center text-3xl font-bold sm:text-4xl">Elige tu plan</h2>
+            <div className="mt-6 flex justify-center">
+              <div className="inline-flex items-center gap-2 rounded-full bg-[#F8F9FA] p-1 text-sm">
+                <span className="rounded-full bg-white px-4 py-1.5 font-semibold text-[#0F6E56]">Mensual</span>
+                <span className="rounded-full px-4 py-1.5 text-neutral-600">Anual</span>
+                <span className="rounded-full bg-[#0F6E56] px-2.5 py-1 text-xs font-semibold text-white">Ahorra 30%</span>
+              </div>
             </div>
+
+            <div className="mt-12 grid gap-6 lg:grid-cols-3">
+              {[
+                ["Básico", "9,99€", ["✓ Menú semanal", "✓ Chat limitado", "— Ajuste semanal"]],
+                ["Pro", "19,99€", ["✓ Menú + recetas", "✓ Chat ilimitado", "✓ Ajuste semanal"]],
+                ["Élite", "39,99€", ["✓ Todo Pro", "✓ Seguimiento avanzado", "✓ Prioridad soporte"]],
+              ].map(([name, price, items]) => (
+                <article
+                  key={name}
+                  className={`rounded-2xl bg-white p-7 shadow-sm ${
+                    name === "Pro" ? "border-2 border-[#0F6E56]" : "border border-neutral-200"
+                  }`}
+                >
+                  <h3 className="text-xl font-semibold">{name}</h3>
+                  <p className="mt-4 text-4xl font-bold text-[#0F6E56]">{price}</p>
+                  <ul className="mt-6 space-y-2 text-sm">
+                    {(items as string[]).map((item) => (
+                      <li key={item} className={item.startsWith("—") ? "text-neutral-400" : "text-neutral-700"}>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="reveal bg-[#0F6E56] px-4 py-16 text-center text-white sm:py-20">
+          <div className="mx-auto max-w-3xl">
+            <h2 className="text-4xl font-bold sm:text-5xl">¿Lista para empezar?</h2>
+            <p className="mt-4 text-white/85">Tu primer menú personalizado en menos de 2 minutos</p>
+            <Link
+              href="/registro"
+              className="mt-8 inline-flex rounded-full bg-white px-7 py-3 text-sm font-semibold text-[#0F6E56]"
+            >
+              Crear mi cuenta gratis
+            </Link>
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-neutral-100 bg-white">
-        <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-10 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <Logo />
-              <p className="mt-3 max-w-xs text-sm leading-relaxed text-neutral-600">
-                Nutrición personalizada con IA, pensada para encajar en tu vida real.
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 sm:gap-12">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-neutral-400">Producto</p>
-                <ul className="mt-3 space-y-2 text-sm">
-                  <li>
-                    <a href="#precios" className="text-neutral-600 transition hover:text-[#0F6E56]">
-                      Precios
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#funcionalidades" className="text-neutral-600 transition hover:text-[#0F6E56]">
-                      Funcionalidades
-                    </a>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-neutral-400">Empresa</p>
-                <ul className="mt-3 space-y-2 text-sm">
-                  <li>
-                    <a href="#" className="text-neutral-600 transition hover:text-[#0F6E56]">
-                      Sobre nosotros
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="text-neutral-600 transition hover:text-[#0F6E56]">
-                      Contacto
-                    </a>
-                  </li>
-                </ul>
-              </div>
-              <div className="col-span-2 sm:col-span-1">
-                <p className="text-xs font-semibold uppercase tracking-wider text-neutral-400">Legal</p>
-                <ul className="mt-3 space-y-2 text-sm">
-                  <li>
-                    <a href="#" className="text-neutral-600 transition hover:text-[#0F6E56]">
-                      Privacidad
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="text-neutral-600 transition hover:text-[#0F6E56]">
-                      Términos
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </div>
+      <footer className="bg-[#0F6E56] px-4 py-10 text-white">
+        <div className="mx-auto flex max-w-6xl flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xl font-bold">NutriAI</p>
+          <div className="flex gap-5 text-sm text-white/85">
+            <a href="#" className="hover:text-white">
+              Privacidad
+            </a>
+            <a href="#" className="hover:text-white">
+              Términos
+            </a>
+            <a href="#" className="hover:text-white">
+              Cookies
+            </a>
           </div>
-          <p className="mt-10 border-t border-neutral-100 pt-8 text-center text-sm text-neutral-500">
-            © {new Date().getFullYear()} NutriAI. Todos los derechos reservados.
-          </p>
         </div>
+        <p className="mx-auto mt-6 max-w-6xl text-sm text-white/70">© {new Date().getFullYear()} NutriAI. Todos los derechos reservados.</p>
       </footer>
+
+      <style jsx global>{`
+        .reveal {
+          animation: fadeInUp linear both;
+          animation-timeline: view();
+          animation-range: entry 10% cover 30%;
+        }
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(18px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </div>
   );
 }
