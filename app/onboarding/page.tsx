@@ -45,6 +45,10 @@ type ClinicalFormState = {
   emotional_eating: string;
   disliked_foods: string;
   note_for_nuria: string;
+  sintomas_hormonales: string[];
+  sintomas_piel_cabello: string[];
+  ciclo_irregular: string;
+  dolor_menstrual: string;
 };
 
 const TOTAL_STEPS = 6;
@@ -90,6 +94,10 @@ const initialState: ClinicalFormState = {
   emotional_eating: "",
   disliked_foods: "",
   note_for_nuria: "",
+  sintomas_hormonales: [],
+  sintomas_piel_cabello: [],
+  ciclo_irregular: "",
+  dolor_menstrual: "",
 };
 
 function SingleSelectButtons({
@@ -755,6 +763,44 @@ export default function OnboardingPage() {
           {step === 6 ? (
             <>
               <h1 className="text-2xl font-semibold text-[#0F6E56]">Relacion con la comida</h1>
+
+              {form.biological_sex === "Mujer" ? (
+                <div className="rounded-xl border border-pink-100 bg-pink-50 p-4 space-y-4">
+                  <p className="text-sm font-semibold text-pink-700">Sintomas hormonales (solo para mujeres)</p>
+                  <div>
+                    <p className="text-sm font-medium text-neutral-700">Sintomas hormonales frecuentes</p>
+                    <MultiSelectButtons
+                      options={["Ninguno", "Fatiga cronica", "Cambios de humor", "Irritabilidad", "Ansiedad premenstrual", "Depresion leve", "Falta de libido", "Sofocos", "Sudoracion nocturna", "Retención de liquidos", "Sensacion de frio constante", "Palpitaciones", "Niebla mental", "Insomnio hormonal"]}
+                      values={form.sintomas_hormonales}
+                      onChange={(values) => updateField("sintomas_hormonales", values)}
+                    />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-neutral-700">Sintomas de piel y cabello</p>
+                    <MultiSelectButtons
+                      options={["Ninguno", "Acne hormonal", "Piel seca", "Piel grasa", "Caida de cabello", "Cabello fino o fragil", "Exceso de vello", "Unas debiles", "Hiperpigmentacion", "Eccema o psoriasis"]}
+                      values={form.sintomas_piel_cabello}
+                      onChange={(values) => updateField("sintomas_piel_cabello", values)}
+                    />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-neutral-700">Ciclo menstrual regular</p>
+                    <SingleSelectButtons
+                      options={["Si, muy regular", "Bastante regular", "Irregular", "Muy irregular", "Sin ciclo (menopausia, DIU, etc)"]}
+                      value={form.ciclo_irregular}
+                      onChange={(value) => updateField("ciclo_irregular", value)}
+                    />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-neutral-700">Dolor menstrual</p>
+                    <SingleSelectButtons
+                      options={["Sin dolor", "Leve", "Moderado", "Intenso", "Muy intenso / incapacitante"]}
+                      value={form.dolor_menstrual}
+                      onChange={(value) => updateField("dolor_menstrual", value)}
+                    />
+                  </div>
+                </div>
+              ) : null}
               <div>
                 <p className="text-sm font-medium text-neutral-700">Relacion con la comida</p>
                 <SingleSelectButtons
