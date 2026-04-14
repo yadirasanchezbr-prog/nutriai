@@ -1,15 +1,15 @@
 "use client";
-
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import DailyCheckin from "@/components/DailyCheckin";
+import NutriScoreCard from "@/components/NutriScoreCard";
 
 type UserState = {
   id: string;
   email: string;
 };
-
 type MenuData = {
   dias: Array<{
     dia: string;
@@ -25,16 +25,16 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [checkinDone, setCheckinDone] = useState(false);
+  const [showCheckin, setShowCheckin] = useState(false);
 
   useEffect(() => {
     async function validateSession() {
       const { data, error } = await supabase.auth.getUser();
-
       if (error || !data.user) {
         router.replace("/login");
         return;
       }
-
       const currentUser = { id: data.user.id, email: data.user.email ?? "usuario@nutriai.com" };
       setUser(currentUser);
 
@@ -42,19 +42,23 @@ export default function DashboardPage() {
         .from("weekly_menus")
         .select("menu_data")
         .eq("user_id", data.user.id);
-
-      if (menuError) {
-        console.error("Error leyendo menu semanal:", menuError);
-      } else if (menuRows && menuRows.length > 0) {
+      if (!menuError && menuRows && menuRows.length > 0) {
         const latestMenu = menuRows[menuRows.length - 1]?.menu_data as MenuData | undefined;
-        if (latestMenu?.dias?.length) {
-          setMenu(latestMenu);
-        }
+        if (latestMenu?.dias?.length) setMenu(latestMenu);
       }
+
+      // Verificar si ya hizo check-in hoy
+      const today = new Date().toISOString().split('T')[0];
+      const { data: checkin } = await supabase
+        .from('daily_checkins')
+        .select('id')
+        .eq('user_id', data.user.id)
+        .eq('date', today)
+        .single();
+      if (checkin) setCheckinDone(true);
 
       setLoading(false);
     }
-
     validateSession();
   }, [router]);
 
@@ -65,25 +69,20 @@ export default function DashboardPage() {
 
   async function handleGeneratePlan() {
     if (!user?.id) return;
-
     setGenerating(true);
     setError(null);
-
     try {
       const response = await fetch("/api/generar-menu", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user_id: user.id }),
       });
-
       const data = await response.json();
-
       if (!response.ok) {
         setError(data?.error ?? "No se pudo generar el menu.");
         setGenerating(false);
         return;
       }
-
       setMenu(data.menu as MenuData);
       setGenerating(false);
     } catch (generateError) {
@@ -103,62 +102,100 @@ export default function DashboardPage() {
 
   return (
     <main className="min-h-screen bg-white px-4 py-10">
-      <section className="mx-auto w-full max-w-4xl rounded-2xl border border-neutral-200 p-8 shadow-sm">
-        <h1 className="text-3xl font-semibold text-[#0F6E56]">Bienvenido a NutriAI</h1>
-        <p className="mt-3 text-neutral-700">Sesion iniciada como: {user?.email}</p>
+      <section className="mx-auto w-full max-w-4xl space-y-6">
 
-        {!menu ? (
-          <div className="mt-8 rounded-xl border border-emerald-100 bg-emerald-50/50 p-5">
-            <p className="text-sm text-neutral-700">Todavia no tienes un menu semanal generado.</p>
-            <button
-              type="button"
-              onClick={handleGeneratePlan}
-              disabled={generating}
-              className="mt-4 rounded-lg bg-[#0F6E56] px-4 py-2.5 font-semibold text-white transition hover:bg-[#0d5f4a] disabled:opacity-60"
-            >
-              {generating ? "Generando plan..." : "Generar mi plan con Nuria"}
-            </button>
+        {/* Header */}
+        <div className="rounded-2xl border border-neutral-200 p-8 shadow-sm">
+          <h1 className="text-3xl font-semibold text-[#0F6E56]">Bienvenido a NutriAI</h1>
+          <p className="mt-3 text-neutral-700">Sesion iniciada como: {user?.email}</p>
+        </div>
+
+        {/* Check-in diario */}
+        <div className="rounded-2xl border border-neutral-200 p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-lg font-semibold text-[#0F6E56]">Check-in de hoy</h2>
+              <p className="text-sm text-neutral-500 mt-1">
+                {checkinDone ? "Ya registraste tu check-in hoy" : "Cuéntale a Nuria cómo estás"}
+              </p>
+            </div>
+            {checkinDone ? (
+              <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-700">
+                ✓ Completado
+              </span>
+            ) : (
+              <button
+                onClick={() => setShowCheckin(!showCheckin)}
+                className="rounded-lg bg-[#0F6E56] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0d5f4a] transition"
+              >
+                {showCheckin ? "Cerrar" : "Hacer check-in"}
+              </button>
+            )}
           </div>
-        ) : (
-          <div className="mt-8 space-y-4">
-            <h2 className="text-xl font-semibold text-[#0F6E56]">Tu menu semanal</h2>
-            <ul className="space-y-4">
-              {menu.dias.map((dia) => (
-                <li key={dia.dia} className="rounded-xl border border-neutral-200 p-5">
-                  <h3 className="text-lg font-semibold text-neutral-900">{dia.dia}</h3>
+          {showCheckin && !checkinDone && (
+            <DailyCheckin onComplete={() => { setCheckinDone(true); setShowCheckin(false); }} />
+          )}
+        </div>
 
-                  <div className="mt-3 grid gap-4 md:grid-cols-2">
-                    <article className="rounded-lg bg-neutral-50 p-4">
-                      <p className="font-medium text-[#0F6E56]">Comida: {dia.comida.nombre}</p>
-                      <ul className="mt-2 list-disc pl-5 text-sm text-neutral-700">
-                        {dia.comida.ingredientes.map((ing) => (
-                          <li key={`${dia.dia}-comida-${ing.nombre}`}>
-                            {ing.nombre} - {ing.cantidad_g} g (crudo)
-                          </li>
-                        ))}
-                      </ul>
-                    </article>
+        {/* NutriScore */}
+        <div className="rounded-2xl border border-neutral-200 p-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-[#0F6E56] mb-4">Tu NutriScore semanal</h2>
+          <NutriScoreCard />
+        </div>
 
-                    <article className="rounded-lg bg-neutral-50 p-4">
-                      <p className="font-medium text-[#0F6E56]">Cena: {dia.cena.nombre}</p>
-                      <ul className="mt-2 list-disc pl-5 text-sm text-neutral-700">
-                        {dia.cena.ingredientes.map((ing) => (
-                          <li key={`${dia.dia}-cena-${ing.nombre}`}>
-                            {ing.nombre} - {ing.cantidad_g} g (crudo)
-                          </li>
-                        ))}
-                      </ul>
-                    </article>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        {/* Menú semanal */}
+        <div className="rounded-2xl border border-neutral-200 p-6 shadow-sm">
+          {!menu ? (
+            <div className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-5">
+              <p className="text-sm text-neutral-700">Todavia no tienes un menu semanal generado.</p>
+              <button
+                type="button"
+                onClick={handleGeneratePlan}
+                disabled={generating}
+                className="mt-4 rounded-lg bg-[#0F6E56] px-4 py-2.5 font-semibold text-white transition hover:bg-[#0d5f4a] disabled:opacity-60"
+              >
+                {generating ? "Generando plan..." : "Generar mi plan con Nuria"}
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold text-[#0F6E56]">Tu menu semanal</h2>
+              <ul className="space-y-4">
+                {menu.dias.map((dia) => (
+                  <li key={dia.dia} className="rounded-xl border border-neutral-200 p-5">
+                    <h3 className="text-lg font-semibold text-neutral-900">{dia.dia}</h3>
+                    <div className="mt-3 grid gap-4 md:grid-cols-2">
+                      <article className="rounded-lg bg-neutral-50 p-4">
+                        <p className="font-medium text-[#0F6E56]">Comida: {dia.comida.nombre}</p>
+                        <ul className="mt-2 list-disc pl-5 text-sm text-neutral-700">
+                          {dia.comida.ingredientes.map((ing) => (
+                            <li key={`${dia.dia}-comida-${ing.nombre}`}>
+                              {ing.nombre} - {ing.cantidad_g} g (crudo)
+                            </li>
+                          ))}
+                        </ul>
+                      </article>
+                      <article className="rounded-lg bg-neutral-50 p-4">
+                        <p className="font-medium text-[#0F6E56]">Cena: {dia.cena.nombre}</p>
+                        <ul className="mt-2 list-disc pl-5 text-sm text-neutral-700">
+                          {dia.cena.ingredientes.map((ing) => (
+                            <li key={`${dia.dia}-cena-${ing.nombre}`}>
+                              {ing.nombre} - {ing.cantidad_g} g (crudo)
+                            </li>
+                          ))}
+                        </ul>
+                      </article>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}
+        </div>
 
-        {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}
-
-        <div className="mt-8 flex flex-wrap gap-3">
+        {/* Navegación */}
+        <div className="flex flex-wrap gap-3 pb-6">
           <Link
             href="/progreso"
             className="rounded-lg border border-[#0F6E56] px-4 py-2.5 font-semibold text-[#0F6E56] transition hover:bg-emerald-50"
@@ -173,6 +210,7 @@ export default function DashboardPage() {
             Cerrar sesion
           </button>
         </div>
+
       </section>
     </main>
   );
