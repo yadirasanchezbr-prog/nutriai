@@ -10,6 +10,9 @@ type ClinicalFormState = {
   weight_kg: number | "";
   height_cm: number | "";
   biological_sex: string;
+  tiene_ciclo: boolean;
+  duracion_ciclo: number;
+  ultima_menstruacion: string;
   activity_level: string;
   main_goal: string;
   eating_type: string;
@@ -37,6 +40,9 @@ const initialState: ClinicalFormState = {
   weight_kg: "",
   height_cm: "",
   biological_sex: "",
+  tiene_ciclo: false,
+  duracion_ciclo: 28,
+  ultima_menstruacion: "",
   activity_level: "",
   main_goal: "",
   eating_type: "",
@@ -187,6 +193,17 @@ export default function OnboardingPage() {
         return;
       }
 
+      if (form.tiene_ciclo && form.ultima_menstruacion) {
+        await supabase
+          .from("clinical_forms")
+          .upsert({
+            user_id: userData.user.id,
+            tiene_ciclo: form.tiene_ciclo,
+            duracion_ciclo: form.duracion_ciclo,
+            ultima_menstruacion: form.ultima_menstruacion,
+          }, { onConflict: "user_id" });
+      }
+
       setLoading(false);
       router.push("/dashboard");
     } catch (unexpectedError) {
@@ -283,6 +300,52 @@ export default function OnboardingPage() {
                   onChange={(value) => updateField("biological_sex", value)}
                 />
               </div>
+              {form.biological_sex === "Mujer" ? (
+                <>
+                  <div>
+                    <p className="text-sm font-medium text-neutral-700">¿Tienes ciclo menstrual activo?</p>
+                    <SingleSelectButtons
+                      options={["Si", "No"]}
+                      value={form.tiene_ciclo ? "Si" : "No"}
+                      onChange={(value) => updateField("tiene_ciclo", value === "Si")}
+                    />
+                  </div>
+                  {form.tiene_ciclo ? (
+                    <>
+                      <div>
+                        <label htmlFor="duracion_ciclo" className="block text-sm font-medium text-neutral-700">
+                          Duracion habitual del ciclo (dias): <span className="font-semibold text-[#0F6E56]">{form.duracion_ciclo}</span>
+                        </label>
+                        <input
+                          id="duracion_ciclo"
+                          type="range"
+                          min={21}
+                          max={35}
+                          step={1}
+                          value={form.duracion_ciclo}
+                          onChange={(event) => updateField("duracion_ciclo", Number(event.target.value))}
+                          className="mt-2 w-full accent-[#0F6E56]"
+                        />
+                        <div className="flex justify-between text-xs text-neutral-500 mt-1">
+                          <span>21 dias</span><span>35 dias</span>
+                        </div>
+                      </div>
+                      <div>
+                        <label htmlFor="ultima_menstruacion" className="block text-sm font-medium text-neutral-700">
+                          Fecha de inicio de tu ultima menstruacion
+                        </label>
+                        <input
+                          id="ultima_menstruacion"
+                          type="date"
+                          value={form.ultima_menstruacion}
+                          onChange={(event) => updateField("ultima_menstruacion", event.target.value)}
+                          className="mt-2 w-full rounded-lg border border-neutral-300 px-3 py-2 outline-none ring-[#0F6E56] focus:ring-2"
+                        />
+                      </div>
+                    </>
+                  ) : null}
+                </>
+              ) : null}
 
               <div>
                 <p className="text-sm font-medium text-neutral-700">Nivel de actividad</p>
