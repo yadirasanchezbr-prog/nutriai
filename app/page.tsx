@@ -222,19 +222,29 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="mt-12 grid gap-6 lg:grid-cols-3">
+            <div className="mt-12 grid gap-6 lg:grid-cols-4">
               {[
                 ["Básico", "9,99€", ["✓ Menú semanal", "✓ Chat limitado", "— Ajuste semanal"]],
                 ["Pro", "19,99€", ["✓ Menú + recetas", "✓ Chat ilimitado", "✓ Ajuste semanal"]],
                 ["Élite", "39,99€", ["✓ Todo Pro", "✓ Seguimiento avanzado", "✓ Prioridad soporte"]],
+                ["Longevity", "59,99€", ["✓ Todo Élite", "✓ Plan antiedad con IA", "✓ Protocolo antioxidante", "✓ Menú longevidad", "✓ Suplementacion antiedad"]],
               ].map(([name, price, items]) => (
                 <article
                   key={Array.isArray(name) ? name.join('-') : name}
-                  className={`rounded-2xl bg-white p-7 shadow-sm ${
+                  className={`rounded-2xl bg-white p-7 shadow-sm relative ${
+                    name === "Longevity" ? "border-2 border-amber-400" :
                     name === "Pro" ? "border-2 border-[#0F6E56]" : "border border-neutral-200"
                   }`}
                 >
+                  {name === "Longevity" ? (
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-amber-400 px-3 py-1 text-xs font-semibold text-amber-900">
+                      NUEVO
+                    </span>
+                  ) : null}
                   <h3 className="text-xl font-semibold">{name}</h3>
+                  {name === "Longevity" ? (
+                    <p className="mt-1 text-xs font-medium text-amber-600">Nutricion antiedad y longevidad</p>
+                  ) : null}
                   <p className="mt-4 text-4xl font-bold text-[#0F6E56]">{price}</p>
                   <ul className="mt-6 space-y-2 text-sm">
                     {(items as string[]).map((item) => (
