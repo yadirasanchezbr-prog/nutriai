@@ -63,6 +63,12 @@ export async function POST(request: Request) {
       .eq("id", userId)
       .maybeSingle();
 
+    const { data: clinicalForm } = await supabase
+      .from("clinical_forms")
+      .select("longevity_data")
+      .eq("user_id", userId)
+      .maybeSingle();
+
     if (profileError) {
       console.error("Error leyendo perfil para generar menu:", profileError);
       return NextResponse.json({ error: profileError.message }, { status: 500 });
@@ -79,7 +85,7 @@ export async function POST(request: Request) {
         {
           role: "system",
           content:
-            "Eres Nuria, nutricionista clínica experta. Genera un menú semanal personalizado de 7 días. Cada día tiene: comida principal y cena. Incluye el nombre del plato y los ingredientes con sus pesos exactos en gramos en CRUDO antes de cocinar. NUNCA uses pesos cocinados. Responde SOLO en JSON con esta estructura: { dias: [ { dia: 'Lunes', comida: { nombre: string, ingredientes: [{nombre: string, cantidad_g: number}] }, cena: { nombre: string, ingredientes: [{nombre: string, cantidad_g: number}] } } ] }",
+            `Eres Nuria, nutricionista clínica experta. Genera un menú semanal personalizado de 7 días. Cada día tiene: comida principal y cena. Incluye el nombre del plato y los ingredientes con sus pesos exactos en gramos en CRUDO antes de cocinar. NUNCA uses pesos cocinados. Responde SOLO en JSON con esta estructura: { dias: [ { dia: 'Lunes', comida: { nombre: string, ingredientes: [{nombre: string, cantidad_g: number}] }, cena: { nombre: string, ingredientes: [{nombre: string, cantidad_g: number}] } } ] }${longevityPart}`,
         },
         {
           role: "user",
