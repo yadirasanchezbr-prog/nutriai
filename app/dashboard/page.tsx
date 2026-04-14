@@ -202,6 +202,12 @@ export default function DashboardPage() {
           >
             Progreso
           </Link>
+          <Link
+            href="/lista-compra"
+            className="rounded-lg border border-[#0F6E56] px-4 py-2.5 font-semibold text-[#0F6E56] transition hover:bg-emerald-50"
+          >
+            Lista de la compra
+          </Link>
           <button
             type="button"
             onClick={handleSignOut}
