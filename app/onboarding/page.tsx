@@ -36,6 +36,10 @@ type ClinicalFormState = {
   sleep_hours: number;
   stress_level: number;
   cooks_at_home: string;
+  tiempo_cocina: string;
+  presupuesto_semanal: string;
+  comidas_fuera: string;
+  batch_cooking: string;
   supplements: string[];
   food_relationship: string;
   emotional_eating: string;
@@ -77,6 +81,10 @@ const initialState: ClinicalFormState = {
   sleep_hours: 7,
   stress_level: 3,
   cooks_at_home: "",
+  tiempo_cocina: "",
+  presupuesto_semanal: "",
+  comidas_fuera: "",
+  batch_cooking: "",
   supplements: [],
   food_relationship: "",
   emotional_eating: "",
@@ -694,6 +702,38 @@ export default function OnboardingPage() {
 
               <div>
                 <p className="text-sm font-medium text-neutral-700">Cocinas en casa?</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-neutral-700">Tiempo disponible para cocinar al dia</p>
+                <SingleSelectButtons
+                  options={["Menos de 15 min", "15-30 min", "30-45 min", "45-60 min", "Mas de 1 hora"]}
+                  value={form.tiempo_cocina}
+                  onChange={(value) => updateField("tiempo_cocina", value)}
+                />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-neutral-700">Presupuesto semanal para alimentacion</p>
+                <SingleSelectButtons
+                  options={["Menos de 30 EUR", "30-50 EUR", "50-80 EUR", "80-120 EUR", "Mas de 120 EUR"]}
+                  value={form.presupuesto_semanal}
+                  onChange={(value) => updateField("presupuesto_semanal", value)}
+                />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-neutral-700">Cuantas veces comes fuera de casa a la semana</p>
+                <SingleSelectButtons
+                  options={["Nunca", "1-2 veces", "3-4 veces", "5 o mas veces"]}
+                  value={form.comidas_fuera}
+                  onChange={(value) => updateField("comidas_fuera", value)}
+                />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-neutral-700">Haces batch cooking (cocinar para varios dias)?</p>
+                <SingleSelectButtons
+                  options={["Si, habitualmente", "A veces", "No pero me gustaria", "No me interesa"]}
+                  value={form.batch_cooking}
+                  onChange={(value) => updateField("batch_cooking", value)}
+                />
                 <SingleSelectButtons
                   options={["Si", "A veces", "Casi nunca"]}
                   value={form.cooks_at_home}
