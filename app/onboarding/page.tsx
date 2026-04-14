@@ -16,6 +16,9 @@ type ClinicalFormState = {
   activity_level: string;
   main_goal: string;
   eating_type: string;
+  eating_subtype: string;
+  ayuno_horas: string;
+  eating_details: string;
   health_conditions: string[];
   intolerances: string[];
   bloating: string;
@@ -46,6 +49,9 @@ const initialState: ClinicalFormState = {
   activity_level: "",
   main_goal: "",
   eating_type: "",
+  eating_subtype: "",
+  ayuno_horas: "",
+  eating_details: "",
   health_conditions: [],
   intolerances: [],
   bloating: "",
@@ -382,10 +388,94 @@ export default function OnboardingPage() {
               <div>
                 <p className="text-sm font-medium text-neutral-700">Tipo de alimentacion</p>
                 <SingleSelectButtons
-                  options={["Omnivoro", "Vegetariano", "Vegano", "Sin gluten", "Sin lactosa", "Ayuno intermitente", "Personalizado"]}
+                  options={["Omnivoro", "Vegetariano", "Vegano", "Sin gluten", "Sin lactosa", "Keto", "Paleo", "OMAD (1 comida al dia)", "Ayuno intermitente", "Personalizado"]}
                   value={form.eating_type}
-                  onChange={(value) => updateField("eating_type", value)}
+                  onChange={(value) => {
+                    updateField("eating_type", value)
+                    updateField("eating_subtype", "")
+                    updateField("ayuno_horas", "")
+                  }}
                 />
+              
+                {form.eating_type === "Vegetariano" ? (
+                  <div className="mt-4">
+                    <p className="text-sm font-medium text-neutral-700">Tipo de vegetarianismo</p>
+                    <SingleSelectButtons
+                      options={["Ovolactovegetariano", "Ovovegetariano", "Lactovegetariano", "Pescetariano"]}
+                      value={form.eating_subtype}
+                      onChange={(value) => updateField("eating_subtype", value)}
+                    />
+                    {form.eating_subtype ? (
+                      <p className="mt-2 text-xs text-neutral-500">
+                        {form.eating_subtype === "Ovolactovegetariano" ? "Sin carne ni pescado. Si come huevos y lacteos." :
+                         form.eating_subtype === "Ovovegetariano"      ? "Sin carne, pescado ni lacteos. Si come huevos." :
+                         form.eating_subtype === "Lactovegetariano"    ? "Sin carne, pescado ni huevos. Si come lacteos." :
+                         form.eating_subtype === "Pescetariano"        ? "Sin carne. Si come pescado, huevos y lacteos." : ""}
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
+
+                {form.eating_type === "Vegano" ? (
+                  <div className="mt-4">
+                    <p className="text-sm font-medium text-neutral-700">Estilo vegano</p>
+                    <SingleSelectButtons
+                      options={["Vegano estandar", "Vegano raw (crudivegano)", "Vegano HCLF", "Vegano WFPB", "Vegano deportivo"]}
+                      value={form.eating_subtype}
+                      onChange={(value) => updateField("eating_subtype", value)}
+                    />
+                    {form.eating_subtype ? (
+                      <p className="mt-2 text-xs text-neutral-500">
+                        {form.eating_subtype === "Vegano estandar"        ? "Sin ningun producto animal." :
+                         form.eating_subtype === "Vegano raw (crudivegano)" ? "Solo alimentos crudos sin cocinar por encima de 42 grados." :
+                         form.eating_subtype === "Vegano HCLF"            ? "Alto en carbohidratos, bajo en grasa, sin aceites." :
+                         form.eating_subtype === "Vegano WFPB"            ? "Alimentos integrales sin procesados ni refinados." :
+                         form.eating_subtype === "Vegano deportivo"       ? "Mayor proteina vegetal orientado al rendimiento fisico." : ""}
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
+
+                {form.eating_type === "Ayuno intermitente" ? (
+                  <div className="mt-4">
+                    <p className="text-sm font-medium text-neutral-700">Ventana de alimentacion</p>
+                    <SingleSelectButtons
+                      options={["12:12", "14:10", "16:8", "18:6", "20:4"]}
+                      value={form.ayuno_horas}
+                      onChange={(value) => updateField("ayuno_horas", value)}
+                    />
+                    {form.ayuno_horas ? (
+                      <p className="mt-2 text-xs text-neutral-500">
+                        {form.ayuno_horas === "12:12" ? "Ayuno 12h, comes en una ventana de 12h" :
+                         form.ayuno_horas === "14:10" ? "Ayuno 14h, comes en una ventana de 10h" :
+                         form.ayuno_horas === "16:8"  ? "Ayuno 16h, comes en una ventana de 8h (el mas popular)" :
+                         form.ayuno_horas === "18:6"  ? "Ayuno 18h, comes en una ventana de 6h (avanzado)" :
+                         form.ayuno_horas === "20:4"  ? "Ayuno 20h, comes en una ventana de 4h (muy avanzado)" : ""}
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
+                {form.eating_type === "OMAD (1 comida al dia)" ? (
+                  <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3">
+                    <p className="text-xs text-amber-700">
+                      OMAD es una unica comida al dia. Nuria generara un menu con una comida principal muy completa y snacks opcionales si los necesitas.
+                    </p>
+                  </div>
+                ) : null}
+                {form.eating_type === "Keto" ? (
+                  <div className="mt-4 rounded-lg border border-emerald-100 bg-emerald-50 p-3">
+                    <p className="text-xs text-emerald-700">
+                      Dieta cetogenica: menos de 20-50g de carbohidratos al dia, alta en grasas saludables y proteinas moderadas.
+                    </p>
+                  </div>
+                ) : null}
+                {form.eating_type === "Paleo" ? (
+                  <div className="mt-4 rounded-lg border border-emerald-100 bg-emerald-50 p-3">
+                    <p className="text-xs text-emerald-700">
+                      Dieta paleo: alimentos naturales sin procesados, sin cereales, sin lacteos ni legumbres.
+                    </p>
+                  </div>
+                ) : null}
               </div>
             </>
           ) : null}
