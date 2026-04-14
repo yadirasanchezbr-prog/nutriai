@@ -72,6 +72,24 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No existe form_data para este usuario." }, { status: 404 });
     }
 
+    const esLongevity = profile.form_data?.main_goal === "Antiedad y longevidad"
+
+    const longevityPart = esLongevity ? `
+
+PROTOCOLO ANTIEDAD Y LONGEVIDAD ACTIVO:
+- Priorizar alimentos ricos en antioxidantes: frutos rojos, curcuma, jengibre, te verde, cacao puro
+- Incluir fuentes de polifenoles: aceite de oliva virgen extra, uvas, granadas, brocoli
+- Respetar ventana de alimentacion: dejar 12h minimas de ayuno nocturno
+- Proteina de calidad en cada comida para evitar sarcopenia: huevo, pescado azul, legumbres
+- Omega-3 diariamente: salmon, sardinas, nueces, semillas de lino
+- Reducir azucares refinados y ultraprocesados al minimo absoluto
+- Alimentos fermentados para microbioma: kefir, yogur natural, chucrut
+- Verduras cruciferas en al menos 1 comida al dia: brocoli, coliflor, kale, berros
+- Grasas saludables en cada comida: aguacate, aceite oliva virgen extra, frutos secos
+- Infusiones de jengibre y curcuma como bebida habitual
+- Objetivo: reducir inflamacion cronica, estres oxidativo y proteger telomeros
+` : ""
+
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       temperature: 0.4,
@@ -79,7 +97,7 @@ export async function POST(request: Request) {
         {
           role: "system",
           content:
-            "Eres Nuria, nutricionista clínica experta. Genera un menú semanal personalizado de 7 días. Cada día tiene: comida principal y cena. Incluye el nombre del plato y los ingredientes con sus pesos exactos en gramos en CRUDO antes de cocinar. NUNCA uses pesos cocinados. Responde SOLO en JSON con esta estructura: { dias: [ { dia: 'Lunes', comida: { nombre: string, ingredientes: [{nombre: string, cantidad_g: number}] }, cena: { nombre: string, ingredientes: [{nombre: string, cantidad_g: number}] } } ] }",
+            `Eres Nuria, nutricionista clínica experta. Genera un menú semanal personalizado de 7 días. Cada día tiene: comida principal y cena. Incluye el nombre del plato y los ingredientes con sus pesos exactos en gramos en CRUDO antes de cocinar. NUNCA uses pesos cocinados. Responde SOLO en JSON con esta estructura: { dias: [ { dia: 'Lunes', comida: { nombre: string, ingredientes: [{nombre: string, cantidad_g: number}] }, cena: { nombre: string, ingredientes: [{nombre: string, cantidad_g: number}] } } ] }${longevityPart}`,
         },
         {
           role: "user",
