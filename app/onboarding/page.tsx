@@ -487,13 +487,41 @@ export default function OnboardingPage() {
                 <p className="text-sm font-medium text-neutral-700">Condiciones de salud</p>
                 <MultiSelectButtons
                   options={[
+                    "Ninguna",
                     "Problemas digestivos",
+                    "Colon irritable (SII)",
+                    "Enfermedad de Crohn",
+                    "Colitis ulcerosa",
+                    "Reflujo gastroesofagico (ERGE)",
+                    "Gastritis",
+                    "SIBO",
+                    "Candidiasis intestinal",
                     "Alteracion hormonal",
-                    "Tiroides",
-                    "Diabetes",
+                    "Sindrome ovario poliquistico (SOP)",
+                    "Endometriosis",
+                    "Menopausia / perimenopausia",
+                    "Hipotiroidismo",
+                    "Hipertiroidismo",
+                    "Hashimoto",
+                    "Diabetes tipo 1",
+                    "Diabetes tipo 2",
+                    "Resistencia a la insulina",
                     "Hipertension",
                     "Colesterol alto",
-                    "Ninguna",
+                    "Trigliceridos altos",
+                    "Higado graso (NAFLD)",
+                    "Anemia ferropenica",
+                    "Anemia por deficit B12",
+                    "Osteoporosis",
+                    "Artritis",
+                    "Fibromialgia",
+                    "Lupus",
+                    "Psoriasis",
+                    "Acne hormonal",
+                    "Ansiedad / estres cronico",
+                    "Depresion",
+                    "Fatiga cronica",
+                    "Cancer (en tratamiento o remision)",
                   ]}
                   values={form.health_conditions}
                   onChange={(values) => updateField("health_conditions", values)}
@@ -503,7 +531,7 @@ export default function OnboardingPage() {
               <div>
                 <p className="text-sm font-medium text-neutral-700">Intolerancias</p>
                 <MultiSelectButtons
-                  options={["Gluten", "Lactosa", "Fructosa", "Huevo", "Frutos secos", "Ninguna"]}
+                  options={["Ninguna", "Gluten", "Lactosa", "Fructosa", "Sorbitol", "Huevo", "Frutos secos", "Cacahuete", "Soja", "Marisco", "Pescado", "Mostaza", "Sesamo", "Sulfitos", "Histamina", "Lectinas", "Oxalatos", "FODMAP"]}
                   values={form.intolerances}
                   onChange={(values) => updateField("intolerances", values)}
                 />
@@ -596,7 +624,7 @@ export default function OnboardingPage() {
               <div>
                 <p className="text-sm font-medium text-neutral-700">Suplementacion</p>
                 <MultiSelectButtons
-                  options={["Magnesio", "Vitamina D", "Omega-3", "Probioticos", "Proteina", "Ninguno"]}
+                  options={["Ninguna", "Magnesio", "Vitamina D", "Vitamina B12", "Omega-3", "Probioticos", "Proteina en polvo", "Hierro", "Zinc", "Colageno", "Curcuma", "Ashwagandha", "Melatonina", "Acido folico", "Yodo", "Creatina"]}
                   values={form.supplements}
                   onChange={(values) => updateField("supplements", values)}
                 />
