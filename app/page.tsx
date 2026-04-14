@@ -229,7 +229,7 @@ export default function Home() {
                 ["Élite", "39,99€", ["✓ Todo Pro", "✓ Seguimiento avanzado", "✓ Prioridad soporte"]],
               ].map(([name, price, items]) => (
                 <article
-                  key={name}
+                  key={Array.isArray(name) ? name.join('-') : name}
                   className={`rounded-2xl bg-white p-7 shadow-sm ${
                     name === "Pro" ? "border-2 border-[#0F6E56]" : "border border-neutral-200"
                   }`}

@@ -87,7 +87,7 @@ export function calcNutriScore(checkins: any[]): { score: number; breakdown: any
     adherencia * 0.30 +
     energia    * 0.25 +
     digestion  * 0.25 +
-    progresso   * 0.20
+    progreso   * 0.20
   )
 
   return { score, breakdown: { adherencia, energia, digestion, progreso } }

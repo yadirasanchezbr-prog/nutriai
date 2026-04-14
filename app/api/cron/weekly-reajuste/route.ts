@@ -1,21 +1,20 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { buildMetabolicTwin, calcNutriScore } from '@/lib/metabolic-twin'
 import { injectCicloEnPrompt } from '@/lib/ciclo-menstrual'
+import { supabase } from '@/lib/supabase'
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
-export async function POST() {
-  const supabase = createRouteHandlerClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+export async function POST(request: Request) {
+  const body = await request.json().catch(() => ({}))
+  const userId = body?.user_id as string | undefined
+  if (!userId) return NextResponse.json({ error: 'Falta user_id en el body.' }, { status: 400 })
 
   const { data: checkins } = await supabase
     .from('daily_checkins')
     .select('*')
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
     .order('date', { ascending: false })
     .limit(7)
 
@@ -26,13 +25,13 @@ export async function POST() {
   const { data: profile } = await supabase
     .from('clinical_forms')
     .select('*')
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
     .single()
 
   const { data: currentMenu } = await supabase
     .from('weekly_menus')
     .select('menu_json')
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
     .order('created_at', { ascending: false })
     .limit(1)
     .single()
@@ -52,7 +51,7 @@ export async function POST() {
   if (Number(avgDigestion) <= 4)  ajustes.push('PROTOCOLO DIGESTIVO: eliminar legumbres 3 días, priorizar alimentos cocidos, añadir jengibre y cúrcuma')
   if (Number(avgDigestion) >= 8 && Number(avgEnergia) >= 7) ajustes.push('MANTENER estructura actual, la usuaria responde muy bien')
 
-  const twin = await buildMetabolicTwin(user.id, supabase)
+  const twin = await buildMetabolicTwin(userId, supabase)
 
   if (twin.predicciones.semana_critica) {
     ajustes.push('SEMANA CRÍTICA: simplificar menú al máximo, recetas menos de 20 minutos, platos reconfortantes')
@@ -103,7 +102,7 @@ Responde SOLO con el JSON, sin texto adicional.`
   weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1)
 
   await supabase.from('weekly_menus').insert({
-    user_id: user.id,
+    user_id: userId,
     week_start: weekStart.toISOString().split('T')[0],
     menu_json: newMenu,
     reajuste: true,
@@ -112,7 +111,7 @@ Responde SOLO con el JSON, sin texto adicional.`
 
   const { score, breakdown } = calcNutriScore(checkins)
   await supabase.from('weekly_scores').upsert({
-    user_id: user.id,
+    user_id: userId,
     week_start: weekStart.toISOString().split('T')[0],
     score,
     adherencia: breakdown.adherencia,
