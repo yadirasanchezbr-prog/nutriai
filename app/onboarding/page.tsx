@@ -25,6 +25,14 @@ type ClinicalFormState = {
   heavy_digestions: string;
   constipation: string;
   bowel_movements_per_day: string;
+  diarrea: string;
+  gases: string;
+  nauseas: string;
+  acidez: string;
+  digestion_urgencia: string;
+  dolor_abdominal: string;
+  digestion_empeora_con: string[];
+  digestion_mejora_con: string[];
   sleep_hours: number;
   stress_level: number;
   cooks_at_home: string;
@@ -58,6 +66,14 @@ const initialState: ClinicalFormState = {
   heavy_digestions: "",
   constipation: "",
   bowel_movements_per_day: "",
+  diarrea: "",
+  gases: "",
+  nauseas: "",
+  acidez: "",
+  digestion_urgencia: "",
+  dolor_abdominal: "",
+  digestion_empeora_con: [],
+  digestion_mejora_con: [],
   sleep_hours: 7,
   stress_level: 3,
   cooks_at_home: "",
@@ -543,6 +559,54 @@ export default function OnboardingPage() {
             <>
               <h1 className="text-2xl font-semibold text-[#0F6E56]">Digestion</h1>
               <div>
+                <p className="text-sm font-medium text-neutral-700">Gases</p>
+                <SingleSelectButtons
+                  options={["Nunca", "A veces", "Frecuente", "Siempre"]}
+                  value={form.gases}
+                  onChange={(value) => updateField("gases", value)}
+                />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-neutral-700">Acidez o reflujo</p>
+                <SingleSelectButtons
+                  options={["Nunca", "A veces", "Frecuente", "Siempre"]}
+                  value={form.acidez}
+                  onChange={(value) => updateField("acidez", value)}
+                />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-neutral-700">Nauseas</p>
+                <SingleSelectButtons
+                  options={["Nunca", "A veces", "Frecuente", "Siempre"]}
+                  value={form.nauseas}
+                  onChange={(value) => updateField("nauseas", value)}
+                />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-neutral-700">Diarrea</p>
+                <SingleSelectButtons
+                  options={["Nunca", "A veces", "Frecuente", "Siempre"]}
+                  value={form.diarrea}
+                  onChange={(value) => updateField("diarrea", value)}
+                />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-neutral-700">Urgencia para ir al bano</p>
+                <SingleSelectButtons
+                  options={["Nunca", "A veces", "Frecuente", "Siempre"]}
+                  value={form.digestion_urgencia}
+                  onChange={(value) => updateField("digestion_urgencia", value)}
+                />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-neutral-700">Dolor abdominal</p>
+                <SingleSelectButtons
+                  options={["Nunca", "A veces", "Frecuente", "Siempre"]}
+                  value={form.dolor_abdominal}
+                  onChange={(value) => updateField("dolor_abdominal", value)}
+                />
+              </div>
+              <div>
                 <p className="text-sm font-medium text-neutral-700">Hinchazon</p>
                 <SingleSelectButtons
                   options={["Nunca", "A veces", "Frecuente", "Siempre"]}
@@ -568,6 +632,22 @@ export default function OnboardingPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-neutral-700">Deposiciones al dia</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-neutral-700">La digestion empeora con</p>
+                <MultiSelectButtons
+                  options={["Lacteos", "Gluten", "Legumbres", "Crudos", "Grasas", "Cafe", "Alcohol", "Estres", "Picante", "Azucar", "Frutas", "Verduras crudas", "No identificado"]}
+                  values={form.digestion_empeora_con}
+                  onChange={(values) => updateField("digestion_empeora_con", values)}
+                />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-neutral-700">La digestion mejora con</p>
+                <MultiSelectButtons
+                  options={["Ayuno", "Comidas pequenas", "Alimentos cocidos", "Sin lacteos", "Sin gluten", "Probioticos", "Jengibre", "Infusiones", "Ejercicio suave", "No identificado"]}
+                  values={form.digestion_mejora_con}
+                  onChange={(values) => updateField("digestion_mejora_con", values)}
+                />
                 <SingleSelectButtons
                   options={["0", "1", "2", "3+"]}
                   value={form.bowel_movements_per_day}
