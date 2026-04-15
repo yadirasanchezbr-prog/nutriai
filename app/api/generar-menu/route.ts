@@ -57,17 +57,25 @@ export async function POST(request: Request) {
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
     const openai = new OpenAI({ apiKey: openaiApiKey });
 
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("form_data")
-      .eq("id", userId)
-      .maybeSingle();
-
-    const { data: clinicalForm } = await supabase
-      .from("clinical_forms")
-      .select("longevity_data")
-      .eq("user_id", userId)
-      .maybeSingle();
+    const [
+      { data: profile, error: profileError },
+      { data: clinicalForm },
+      { data: bienestarSalud },
+      { data: bienestarDias },
+    ] = await Promise.all([
+      supabase
+        .from("profiles")
+        .select("form_data")
+        .eq("id", userId)
+        .maybeSingle(),
+      supabase
+        .from("clinical_forms")
+        .select("longevity_data")
+        .eq("user_id", userId)
+        .maybeSingle(),
+      supabase.from("bienestar_salud").select("alimentos_tolerados, marcadores_sangre").eq("user_id", userId).maybeSingle(),
+      supabase.from("bienestar_dia").select("*").eq("user_id", userId).order("fecha", { ascending: false }).limit(7),
+    ]);
 
     if (profileError) {
       console.error("Error leyendo perfil para generar menu:", profileError);
@@ -82,6 +90,26 @@ export async function POST(request: Request) {
       ? `\nConsidera tambien estos datos de longevidad del usuario al planificar el menu:\n${JSON.stringify(clinicalForm.longevity_data, null, 2)}`
       : "";
 
+    let bienestarMenuPart = ""
+    if (bienestarSalud) {
+      const malTolerados = (bienestarSalud.alimentos_tolerados ?? []).filter((a: any) => a.estado === "mal").map((a: any) => a.nombre)
+      const marcadores = bienestarSalud.marcadores_sangre ?? {}
+      if (malTolerados.length > 0) bienestarMenuPart += `\nALIMENTOS PROHIBIDOS (el usuario reporta que le sientan MAL - NUNCA incluir): ${malTolerados.join(", ")}`
+      if (marcadores.vitamina_d && Number(marcadores.vitamina_d) < 30) bienestarMenuPart += `\nVitamina D baja (${marcadores.vitamina_d} ng/mL): incluir salmon, sardinas o huevo cada dia`
+      if (marcadores.pcr && Number(marcadores.pcr) > 1) bienestarMenuPart += `\nPCR elevada (${marcadores.pcr}): maximizar antiinflamatorios naturales en todos los platos`
+      if (marcadores.ferritina && Number(marcadores.ferritina) < 15) bienestarMenuPart += `\nFerritina baja: aumentar hierro hemo y no hemo + vitamina C junto al hierro`
+      if (marcadores.b12 && Number(marcadores.b12) < 300) bienestarMenuPart += `\nB12 baja: reforzar con huevo, pescado, lacteos o alternativas enriquecidas`
+    }
+
+    if (bienestarDias && bienestarDias.length > 0) {
+      const avgEnergia = bienestarDias.map((d: any) => d.energia_manana ?? 5).reduce((a: number, b: number) => a + b, 0) / bienestarDias.length
+      const avgSueno = bienestarDias.map((d: any) => d.horas_sueno ?? 7).filter(Boolean).reduce((a: number, b: number) => a + b, 0) / bienestarDias.length
+      const triggers = bienestarDias.map((d: any) => d.alimento_trigger).filter(Boolean)
+      if (avgEnergia < 5) bienestarMenuPart += `\nENERGIA BAJA esta semana (media ${avgEnergia.toFixed(1)}/10): priorizar hierro, B12, carbohidratos complejos en desayuno`
+      if (avgSueno < 6) bienestarMenuPart += `\nSUENO INSUFICIENTE (media ${avgSueno.toFixed(1)}h): incluir triptofano, magnesio y melatonina natural (platano, nueces, cereza)`
+      if (triggers.length > 0) bienestarMenuPart += `\nALIMENTOS TRIGGER detectados por el usuario: ${[...new Set(triggers)].join(", ")} - evitar o reducir`
+    }
+
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       temperature: 0.4,
@@ -89,7 +117,7 @@ export async function POST(request: Request) {
         {
           role: "system",
           content:
-            `Eres Nuria, nutricionista clínica experta. Genera un menú semanal personalizado de 7 días. Cada día tiene: comida principal y cena. Incluye el nombre del plato y los ingredientes con sus pesos exactos en gramos en CRUDO antes de cocinar. NUNCA uses pesos cocinados. Responde SOLO en JSON con esta estructura: { dias: [ { dia: 'Lunes', comida: { nombre: string, ingredientes: [{nombre: string, cantidad_g: number}] }, cena: { nombre: string, ingredientes: [{nombre: string, cantidad_g: number}] } } ] }${longevityPart}`,
+            `Eres Nuria, nutricionista clínica experta. Genera un menú semanal personalizado de 7 días. Cada día tiene: comida principal y cena. Incluye el nombre del plato y los ingredientes con sus pesos exactos en gramos en CRUDO antes de cocinar. NUNCA uses pesos cocinados. Responde SOLO en JSON con esta estructura: { dias: [ { dia: 'Lunes', comida: { nombre: string, ingredientes: [{nombre: string, cantidad_g: number}] }, cena: { nombre: string, ingredientes: [{nombre: string, cantidad_g: number}] } } ] }${longevityPart}${bienestarMenuPart}`,
         },
         {
           role: "user",
