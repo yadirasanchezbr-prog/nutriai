@@ -15,16 +15,10 @@ type MenuDia = {
 type MenuData = { dias: MenuDia[] };
 
 const DIAS_SEMANA = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
-
-function getDiaHoy(): string {
-  return DIAS_SEMANA[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1];
-}
-
-function getSaludo(): string {
+function getDiaHoy() { return DIAS_SEMANA[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1]; }
+function getSaludo() {
   const h = new Date().getHours();
-  if (h < 12) return "Buenos días";
-  if (h < 20) return "Buenas tardes";
-  return "Buenas noches";
+  return h < 12 ? "Buenos días" : h < 20 ? "Buenas tardes" : "Buenas noches";
 }
 
 export default function DashboardPage() {
@@ -38,21 +32,24 @@ export default function DashboardPage() {
   const [showCheckin, setShowCheckin] = useState(false);
   const [diaSeleccionado, setDiaSeleccionado] = useState(getDiaHoy());
   const [expandido, setExpandido] = useState<string | null>(null);
+  const [nutriscore, setNutriscore] = useState<number | null>(null);
 
   useEffect(() => {
     async function load() {
       const { data, error } = await supabase.auth.getUser();
       if (error || !data.user) { router.replace("/login"); return; }
 
-      const [{ data: profileData }, { data: menuRows }, { data: checkin }] = await Promise.all([
+      const [{ data: profileData }, { data: menuRows }, { data: checkin }, { data: scoreData }] = await Promise.all([
         supabase.from("profiles").select("form_data").eq("id", data.user.id).single(),
         supabase.from("weekly_menus").select("menu_data").eq("user_id", data.user.id).order("created_at", { ascending: false }).limit(1),
         supabase.from("daily_checkins").select("id").eq("user_id", data.user.id).eq("date", new Date().toISOString().split("T")[0]).single(),
+        supabase.from("weekly_scores").select("score").eq("user_id", data.user.id).order("week_start", { ascending: false }).limit(1).single(),
       ]);
 
       setUser({ id: data.user.id, email: data.user.email ?? "", nombre: profileData?.form_data?.full_name });
       if (menuRows?.[0]?.menu_data?.dias?.length) setMenu(menuRows[0].menu_data as MenuData);
       if (checkin) setCheckinDone(true);
+      if (scoreData?.score) setNutriscore(Math.round(scoreData.score));
       setLoading(false);
     }
     load();
@@ -69,202 +66,224 @@ export default function DashboardPage() {
         body: JSON.stringify({ user_id: user.id }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data?.error ?? "No se pudo generar el menu."); setGenerating(false); return; }
+      if (!res.ok) { setError(data?.error ?? "Error al generar el menú."); setGenerating(false); return; }
       setMenu(data.menu as MenuData);
     } catch { setError("Error al generar tu plan."); }
     setGenerating(false);
   }
 
   if (loading) return (
-    <main className="flex min-h-screen items-center justify-center bg-white">
-      <p className="text-sm text-neutral-500">Cargando...</p>
+    <main className="flex min-h-screen items-center justify-center" style={{ background: "#F5F0E8" }}>
+      <p className="text-sm" style={{ color: "#888780" }}>Cargando...</p>
     </main>
   );
 
   const diaMenu = menu?.dias.find(d => d.dia === diaSeleccionado) ?? menu?.dias[0];
+  const scoreColor = nutriscore ? (nutriscore >= 70 ? "#1D9E75" : nutriscore >= 45 ? "#EF9F27" : "#E24B4A") : "#D3D1C7";
 
   return (
-    <main className="min-h-screen bg-[#F8F9FA] px-4 py-8">
-      <section className="mx-auto w-full max-w-5xl space-y-5">
+    <main style={{ minHeight: "100vh", background: "#F5F0E8", padding: "0" }}>
 
-        {/* Header */}
-        <div className="rounded-2xl bg-[#0F6E56] p-6 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-emerald-200 text-sm">{getSaludo()}</p>
-              <h1 className="text-2xl font-semibold mt-1">{user?.nombre ?? user?.email?.split("@")[0]}</h1>
-              <p className="text-emerald-200 text-sm mt-1">{new Date().toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" })}</p>
+      {/* Top nav */}
+      <nav style={{ background: "rgba(245,240,232,0.8)", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(0,0,0,0.06)", padding: "0 24px", height: 56, display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 40 }}>
+        <span style={{ fontWeight: 700, fontSize: 18, color: "#0F6E56", letterSpacing: "-0.5px" }}>NutriAI</span>
+        <div style={{ display: "flex", gap: 8 }}>
+          {[{ label: "Bienestar", href: "/bienestar" }, { label: "Progreso", href: "/progreso" }, { label: "Lista compra", href: "/lista-compra" }].map(item => (
+            <Link key={item.label} href={item.href} style={{ fontSize: 13, color: "#5F5E5A", padding: "6px 14px", borderRadius: 20, background: "white", border: "1px solid rgba(0,0,0,0.08)", textDecoration: "none", fontWeight: 500 }}>
+              {item.label}
+            </Link>
+          ))}
+          <button onClick={async () => { await supabase.auth.signOut(); router.push("/login"); }}
+            style={{ fontSize: 13, color: "#5F5E5A", padding: "6px 14px", borderRadius: 20, background: "transparent", border: "1px solid rgba(0,0,0,0.08)", cursor: "pointer" }}>
+            Salir
+          </button>
+        </div>
+      </nav>
+
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "32px 24px", display: "grid", gridTemplateColumns: "1fr 340px", gap: 20 }}>
+
+        {/* COLUMNA PRINCIPAL */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+
+          {/* Hero saludo */}
+          <div style={{ background: "linear-gradient(135deg, #0F6E56 0%, #1D9E75 100%)", borderRadius: 24, padding: "32px 36px", color: "white" }}>
+            <p style={{ fontSize: 14, opacity: 0.75, marginBottom: 4 }}>{getSaludo()}</p>
+            <h1 style={{ fontSize: 32, fontWeight: 700, letterSpacing: "-1px", margin: 0 }}>
+              {user?.nombre ?? user?.email?.split("@")[0]}
+            </h1>
+            <p style={{ fontSize: 14, opacity: 0.65, marginTop: 6 }}>
+              {new Date().toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" })}
+            </p>
+
+            {/* Stats row */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginTop: 24 }}>
+              {[
+                { label: "NutriScore", value: nutriscore ? `${nutriscore}` : "—", sub: nutriscore ? "/100" : "sin datos", color: "white" },
+                { label: "Check-in hoy", value: checkinDone ? "✓" : "—", sub: checkinDone ? "Completado" : "Pendiente", color: "white" },
+                { label: "Semana", value: menu ? `${menu.dias.length}` : "—", sub: "días planificados", color: "white" },
+              ].map(stat => (
+                <div key={stat.label} style={{ background: "rgba(255,255,255,0.12)", borderRadius: 16, padding: "16px 20px" }}>
+                  <p style={{ fontSize: 11, opacity: 0.7, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>{stat.label}</p>
+                  <p style={{ fontSize: 28, fontWeight: 700, margin: 0, lineHeight: 1 }}>{stat.value}<span style={{ fontSize: 14, opacity: 0.7, fontWeight: 400 }}>{stat.sub}</span></p>
+                </div>
+              ))}
             </div>
-            <div className="flex gap-2">
-              <Link href="/bienestar" className="rounded-xl bg-white/10 hover:bg-white/20 px-3 py-2 text-xs font-medium transition">
-                Mi Bienestar
-              </Link>
-              <button onClick={async () => { await supabase.auth.signOut(); router.push("/login"); }}
-                className="rounded-xl bg-white/10 hover:bg-white/20 px-3 py-2 text-xs font-medium transition">
-                Salir
-              </button>
+          </div>
+
+          {/* Check-in */}
+          <div style={{ background: "white", borderRadius: 24, padding: "24px 28px", border: "1px solid rgba(0,0,0,0.06)", boxShadow: "0 2px 20px rgba(0,0,0,0.04)" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div>
+                <h2 style={{ fontSize: 17, fontWeight: 600, color: "#2C2C2A", margin: 0 }}>Check-in de hoy</h2>
+                <p style={{ fontSize: 13, color: "#888780", marginTop: 4 }}>
+                  {checkinDone ? "Ya registraste tu check-in" : "Cuéntale a Nuria cómo estás hoy"}
+                </p>
+              </div>
+              {checkinDone ? (
+                <span style={{ background: "#E1F5EE", color: "#0F6E56", padding: "6px 16px", borderRadius: 20, fontSize: 13, fontWeight: 600 }}>✓ Completado</span>
+              ) : (
+                <button onClick={() => setShowCheckin(!showCheckin)}
+                  style={{ background: "#0F6E56", color: "white", border: "none", borderRadius: 20, padding: "10px 22px", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
+                  {showCheckin ? "Cerrar" : "Registrar"}
+                </button>
+              )}
             </div>
+            {showCheckin && !checkinDone && (
+              <div style={{ marginTop: 20, paddingTop: 20, borderTop: "1px solid #F1EFE8" }}>
+                <DailyCheckin onComplete={() => { setCheckinDone(true); setShowCheckin(false); }} />
+              </div>
+            )}
+          </div>
+
+          {/* Menú semanal */}
+          <div style={{ background: "white", borderRadius: 24, padding: "24px 28px", border: "1px solid rgba(0,0,0,0.06)", boxShadow: "0 2px 20px rgba(0,0,0,0.04)" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+              <h2 style={{ fontSize: 17, fontWeight: 600, color: "#2C2C2A", margin: 0 }}>Tu menú semanal</h2>
+              {menu && (
+                <button onClick={handleGeneratePlan} disabled={generating}
+                  style={{ background: "transparent", border: "1px solid #0F6E56", color: "#0F6E56", borderRadius: 20, padding: "7px 18px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+                  {generating ? "Generando..." : "Regenerar"}
+                </button>
+              )}
+            </div>
+
+            {!menu ? (
+              <div style={{ textAlign: "center", padding: "40px 20px", background: "#F5F0E8", borderRadius: 16 }}>
+                <p style={{ fontSize: 40, marginBottom: 12 }}>🥗</p>
+                <p style={{ fontSize: 15, color: "#5F5E5A", marginBottom: 20 }}>Aún no tienes un menú generado</p>
+                <button onClick={handleGeneratePlan} disabled={generating}
+                  style={{ background: "#0F6E56", color: "white", border: "none", borderRadius: 20, padding: "12px 28px", fontSize: 15, fontWeight: 600, cursor: "pointer" }}>
+                  {generating ? "Nuria está preparando tu plan..." : "Generar mi plan personalizado"}
+                </button>
+              </div>
+            ) : (
+              <>
+                {/* Selector días */}
+                <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 4, marginBottom: 20 }}>
+                  {menu.dias.map(d => (
+                    <button key={d.dia} onClick={() => setDiaSeleccionado(d.dia)}
+                      style={{
+                        flexShrink: 0, padding: "8px 16px", borderRadius: 20, fontSize: 13, fontWeight: 500, cursor: "pointer", border: "none",
+                        background: diaSeleccionado === d.dia ? "#0F6E56" : "#F1EFE8",
+                        color: diaSeleccionado === d.dia ? "white" : "#5F5E5A",
+                        transition: "all 0.15s",
+                      }}>
+                      {d.dia.slice(0, 3)}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Platos */}
+                {diaMenu && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                    {[{ tipo: "Comida", plato: diaMenu.comida, emoji: "☀️" }, { tipo: "Cena", plato: diaMenu.cena, emoji: "🌙" }].map(({ tipo, plato, emoji }) => (
+                      <div key={tipo} style={{ borderRadius: 16, overflow: "hidden", border: "1px solid #F1EFE8" }}>
+                        <button onClick={() => setExpandido(expandido === `${diaSeleccionado}-${tipo}` ? null : `${diaSeleccionado}-${tipo}`)}
+                          style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", background: "#FAFAF8", border: "none", cursor: "pointer", textAlign: "left" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                            <span style={{ fontSize: 20 }}>{emoji}</span>
+                            <div>
+                              <p style={{ fontSize: 11, color: "#888780", textTransform: "uppercase", letterSpacing: "0.05em", margin: 0 }}>{tipo}</p>
+                              <p style={{ fontSize: 16, fontWeight: 600, color: "#2C2C2A", margin: "2px 0 0" }}>{plato.nombre}</p>
+                            </div>
+                          </div>
+                          <span style={{ fontSize: 20, color: "#D3D1C7", fontWeight: 300 }}>{expandido === `${diaSeleccionado}-${tipo}` ? "−" : "+"}</span>
+                        </button>
+                        {expandido === `${diaSeleccionado}-${tipo}` && (
+                          <div style={{ padding: "0 20px 16px", borderTop: "1px solid #F1EFE8" }}>
+                            <div style={{ paddingTop: 12, display: "flex", flexDirection: "column", gap: 6 }}>
+                              {plato.ingredientes.map(ing => (
+                                <div key={ing.nombre} style={{ display: "flex", justifyContent: "space-between", fontSize: 14, color: "#5F5E5A" }}>
+                                  <span>{ing.nombre}</span>
+                                  <span style={{ color: "#B4B2A9", fontWeight: 500 }}>{ing.cantidad_g}g</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+            {error && <p style={{ marginTop: 12, fontSize: 13, color: "#E24B4A" }}>{error}</p>}
+          </div>
+
+        </div>
+
+        {/* COLUMNA DERECHA */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+
+          {/* NutriScore card */}
+          <div style={{ background: "white", borderRadius: 24, padding: "24px", border: "1px solid rgba(0,0,0,0.06)", boxShadow: "0 2px 20px rgba(0,0,0,0.04)" }}>
+            <h3 style={{ fontSize: 13, fontWeight: 600, color: "#888780", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 16 }}>NutriScore semanal</h3>
+            <NutriScoreCard />
           </div>
 
           {/* Accesos rápidos */}
-          <div className="grid grid-cols-4 gap-3 mt-5">
-            {[
-              { label: "Mi menú", href: "#menu", icon: "📋" },
-              { label: "Progreso", href: "/progreso", icon: "📊" },
-              { label: "Lista compra", href: "/lista-compra", icon: "🛒" },
-              { label: "Chat Nuria", href: "/chat", icon: "💬" },
-            ].map(item => (
-              <Link key={item.label} href={item.href}
-                className="flex flex-col items-center gap-1.5 rounded-xl bg-white/10 hover:bg-white/20 p-3 text-center transition">
-                <span style={{ fontSize: 20 }}>{item.icon}</span>
-                <span className="text-xs font-medium text-white">{item.label}</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-
-          {/* Columna izquierda */}
-          <div className="space-y-5 lg:col-span-2">
-
-            {/* Check-in */}
-            <div className="rounded-2xl bg-white border border-neutral-200 p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="font-semibold text-neutral-900">Check-in de hoy</h2>
-                  <p className="text-xs text-neutral-500 mt-0.5">
-                    {checkinDone ? "Ya registraste tu check-in" : "Cuéntale a Nuria cómo estás"}
-                  </p>
-                </div>
-                {checkinDone ? (
-                  <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">✓ Completado</span>
-                ) : (
-                  <button onClick={() => setShowCheckin(!showCheckin)}
-                    className="rounded-lg bg-[#0F6E56] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0d5f4a] transition">
-                    {showCheckin ? "Cerrar" : "Hacer check-in"}
-                  </button>
-                )}
-              </div>
-              {showCheckin && !checkinDone && (
-                <div className="mt-4">
-                  <DailyCheckin onComplete={() => { setCheckinDone(true); setShowCheckin(false); }} />
-                </div>
-              )}
-            </div>
-
-            {/* Menú semanal */}
-            <div id="menu" className="rounded-2xl bg-white border border-neutral-200 p-5">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="font-semibold text-neutral-900">Tu menú semanal</h2>
-                {menu && (
-                  <button onClick={handleGeneratePlan} disabled={generating}
-                    className="rounded-lg border border-[#0F6E56] px-3 py-1.5 text-xs font-semibold text-[#0F6E56] hover:bg-emerald-50 disabled:opacity-50 transition">
-                    {generating ? "Generando..." : "Regenerar"}
-                  </button>
-                )}
-              </div>
-
-              {!menu ? (
-                <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-6 text-center">
-                  <p className="text-2xl mb-3">🥗</p>
-                  <p className="text-sm text-neutral-700 mb-4">Aún no tienes un menú generado.</p>
-                  <button onClick={handleGeneratePlan} disabled={generating}
-                    className="rounded-lg bg-[#0F6E56] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#0d5f4a] disabled:opacity-60 transition">
-                    {generating ? "Nuria está preparando tu plan..." : "Generar mi plan con Nuria"}
-                  </button>
-                </div>
-              ) : (
-                <>
-                  {/* Selector de días */}
-                  <div className="flex gap-1.5 overflow-x-auto pb-2 mb-4">
-                    {menu.dias.map(d => (
-                      <button key={d.dia} onClick={() => setDiaSeleccionado(d.dia)}
-                        className={`flex-shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition ${
-                          diaSeleccionado === d.dia
-                            ? "bg-[#0F6E56] text-white"
-                            : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
-                        }`}>
-                        {d.dia.slice(0, 3)}
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Platos del día */}
-                  {diaMenu && (
-                    <div className="space-y-3">
-                      {[
-                        { tipo: "Comida", plato: diaMenu.comida },
-                        { tipo: "Cena", plato: diaMenu.cena },
-                      ].map(({ tipo, plato }) => (
-                        <div key={tipo} className="rounded-xl border border-neutral-100 bg-neutral-50 overflow-hidden">
-                          <button
-                            onClick={() => setExpandido(expandido === `${diaSeleccionado}-${tipo}` ? null : `${diaSeleccionado}-${tipo}`)}
-                            className="w-full flex items-center justify-between p-4 text-left">
-                            <div>
-                              <span className="text-xs font-medium text-neutral-400 uppercase tracking-wide">{tipo}</span>
-                              <p className="font-medium text-neutral-900 mt-0.5">{plato.nombre}</p>
-                            </div>
-                            <span className="text-neutral-400 text-lg">{expandido === `${diaSeleccionado}-${tipo}` ? "−" : "+"}</span>
-                          </button>
-                          {expandido === `${diaSeleccionado}-${tipo}` && (
-                            <div className="px-4 pb-4 border-t border-neutral-100">
-                              <ul className="mt-3 space-y-1">
-                                {plato.ingredientes.map(ing => (
-                                  <li key={ing.nombre} className="flex justify-between text-sm text-neutral-600">
-                                    <span>{ing.nombre}</span>
-                                    <span className="text-neutral-400">{ing.cantidad_g}g</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </>
-              )}
-              {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
-            </div>
-
-          </div>
-
-          {/* Columna derecha */}
-          <div className="space-y-5">
-
-            {/* NutriScore */}
-            <div className="rounded-2xl bg-white border border-neutral-200 p-5">
-              <h2 className="font-semibold text-neutral-900 mb-3">NutriScore semanal</h2>
-              <NutriScoreCard />
-            </div>
-
-            {/* Links rápidos */}
-            <div className="rounded-2xl bg-white border border-neutral-200 p-5">
-              <h2 className="font-semibold text-neutral-900 mb-3">Accesos</h2>
-              <div className="space-y-2">
-                {[
-                  { label: "Mi Bienestar", href: "/bienestar", desc: "Cuerpo, día, mente, ciclo" },
-                  { label: "Mi Progreso", href: "/progreso", desc: "Gráficas y evolución" },
-                  { label: "Lista de la compra", href: "/lista-compra", desc: "Del menú de esta semana" },
-                  { label: "Formulario clínico", href: "/onboarding", desc: "Actualizar mi perfil" },
-                ].map(item => (
-                  <Link key={item.label} href={item.href}
-                    className="flex items-center justify-between rounded-xl p-3 hover:bg-neutral-50 transition group">
+          <div style={{ background: "white", borderRadius: 24, padding: "24px", border: "1px solid rgba(0,0,0,0.06)", boxShadow: "0 2px 20px rgba(0,0,0,0.04)" }}>
+            <h3 style={{ fontSize: 13, fontWeight: 600, color: "#888780", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 16 }}>Accesos rápidos</h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              {[
+                { label: "Mi Bienestar", desc: "Cuerpo · Día · Mente · Ciclo", href: "/bienestar", emoji: "✦" },
+                { label: "Mi Progreso", desc: "Gráficas y evolución", href: "/progreso", emoji: "↗" },
+                { label: "Lista de la compra", desc: "Del menú de esta semana", href: "/lista-compra", emoji: "◎" },
+                { label: "Chat con Nuria", desc: "Tu nutricionista IA", href: "/chat", emoji: "◈" },
+                { label: "Actualizar perfil", desc: "Formulario clínico", href: "/onboarding", emoji: "◉" },
+              ].map(item => (
+                <Link key={item.label} href={item.href}
+                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 14px", borderRadius: 14, textDecoration: "none", transition: "background 0.15s" }}
+                  onMouseEnter={e => (e.currentTarget.style.background = "#F5F0E8")}
+                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <span style={{ width: 32, height: 32, borderRadius: 10, background: "#F1EFE8", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: "#0F6E56", fontWeight: 700 }}>
+                      {item.emoji}
+                    </span>
                     <div>
-                      <p className="text-sm font-medium text-neutral-800 group-hover:text-[#0F6E56]">{item.label}</p>
-                      <p className="text-xs text-neutral-400">{item.desc}</p>
+                      <p style={{ fontSize: 14, fontWeight: 600, color: "#2C2C2A", margin: 0 }}>{item.label}</p>
+                      <p style={{ fontSize: 12, color: "#B4B2A9", margin: "2px 0 0" }}>{item.desc}</p>
                     </div>
-                    <span className="text-neutral-300 group-hover:text-[#0F6E56]">→</span>
-                  </Link>
-                ))}
-              </div>
+                  </div>
+                  <span style={{ color: "#D3D1C7", fontSize: 16 }}>›</span>
+                </Link>
+              ))}
             </div>
-
           </div>
-        </div>
 
-      </section>
+          {/* Tip del día */}
+          <div style={{ background: "linear-gradient(135deg, #E1F5EE, #F5F0E8)", borderRadius: 24, padding: "24px", border: "1px solid rgba(29,158,117,0.15)" }}>
+            <p style={{ fontSize: 11, fontWeight: 600, color: "#1D9E75", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>Tip de Nuria</p>
+            <p style={{ fontSize: 14, color: "#2C2C2A", lineHeight: 1.6, margin: 0 }}>
+              Completa tu check-in diario para que Nuria pueda ajustar tu plan semana a semana y mejorar tus resultados.
+            </p>
+            <Link href="/chat" style={{ display: "inline-block", marginTop: 14, fontSize: 13, fontWeight: 600, color: "#0F6E56", textDecoration: "none" }}>
+              Hablar con Nuria →
+            </Link>
+          </div>
+
+        </div>
+      </div>
     </main>
   );
 }
