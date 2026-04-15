@@ -402,7 +402,7 @@ export default function OnboardingPage() {
               <div>
                 <p className="text-sm font-medium text-neutral-700">Objetivo principal</p>
                 <SingleSelectButtons
-                  options={["Perdida de grasa", "Recomposicion corporal", "Salud digestiva", "Antiinflamatorio", "Antiedad y longevidad", "Mejorar energia", "Mantenimiento", "Tratamiento de patologias"]}
+                  options={["Perdida de grasa", "Recomposicion corporal", "Salud digestiva", "Antiinflamatorio", "Mejorar energia", "Mantenimiento", "Tratamiento de patologias"]}
                   value={form.main_goal}
                   onChange={(value) => updateField("main_goal", value)}
                 />
