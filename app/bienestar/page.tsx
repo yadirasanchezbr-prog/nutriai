@@ -126,11 +126,11 @@ export default function BienestarPage() {
 
         <div className="flex items-center justify-between">
           <Link href="/dashboard" className="text-sm font-medium text-[#0F6E56] hover:underline">← Dashboard</Link>
-          <div className="flex gap-2">
-            {["Cuerpo", "Día", "Mente", "Ciclo", "Salud"].map((tab, i) => (
-              <span key={tab} className={`rounded-full px-3 py-1 text-xs font-medium ${i === 0 ? "bg-[#0F6E56] text-white" : "bg-neutral-100 text-neutral-500"}`}>
+          <div className="flex gap-2 flex-wrap">
+            {[["Cuerpo", "/bienestar"], ["Día", "/bienestar/dia"], ["Mente", "/bienestar/mente"], ["Ciclo", "/bienestar/ciclo"], ["Salud", "/bienestar/salud"]].map(([tab, href], i) => (
+              <Link key={tab} href={href} className={`rounded-full px-3 py-1 text-xs font-medium ${i === 0 ? "bg-[#0F6E56] text-white" : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200"}`}>
                 {tab}
-              </span>
+              </Link>
             ))}
           </div>
         </div>
