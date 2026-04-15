@@ -28,12 +28,16 @@ export async function POST(request: Request) {
       { data: checkins },
       { data: clinicalForm },
       { data: historyRows, error: historyError },
+      { data: bienestarDia },
+      { data: bienestarSalud },
     ] = await Promise.all([
       supabase.from("profiles").select("form_data").eq("id", userId).maybeSingle(),
       supabase.from("weekly_menus").select("menu_data").eq("user_id", userId).order("created_at", { ascending: false }).limit(1).maybeSingle(),
       supabase.from("daily_checkins").select("*").eq("user_id", userId).order("date", { ascending: false }).limit(7),
       supabase.from("clinical_forms").select("*").eq("user_id", userId).maybeSingle(),
       supabase.from("chat_history").select("role, content, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(10),
+      supabase.from("bienestar_dia").select("*").eq("user_id", userId).order("fecha", { ascending: false }).limit(3),
+      supabase.from("bienestar_salud").select("alimentos_tolerados, despensa, marcadores_sangre").eq("user_id", userId).maybeSingle(),
     ]);
 
     if (historyError) {
@@ -95,6 +99,32 @@ El usuario va a comer o cenar fuera. Tu respuesta debe:
 Adapta las opciones a: objetivo=${profile?.form_data?.main_goal ?? "general"}, tipo alimentacion=${profile?.form_data?.eating_type ?? "omnivoro"}, intolerancias=${profile?.form_data?.intolerances?.join(", ") ?? "ninguna"}
 ` : "";
 
+    let bienestarPart = ""
+    if (bienestarDia && bienestarDia.length > 0) {
+      const hoy = bienestarDia[0]
+      bienestarPart = `
+DATOS DE BIENESTAR RECIENTES:
+- Pasos hoy: ${hoy.pasos ?? "no registrado"}
+- Agua hoy: ${hoy.vasos_agua ?? 0} vasos
+- Energia (manana/tarde/noche): ${hoy.energia_manana ?? "-"}/${hoy.energia_tarde ?? "-"}/${hoy.energia_noche ?? "-"}/10
+- Calidad sueno: ${hoy.calidad_sueno ?? "-"}/10 (${hoy.horas_sueno ?? "-"}h)
+- Estado animo: ${hoy.estado_animo?.replace("_", " ") ?? "desconocido"}
+${hoy.sintomas_post_comida ? `- Sintomas post-comida: ${hoy.sintomas_post_comida}` : ""}
+${hoy.alimento_trigger ? `- Alimento trigger detectado: ${hoy.alimento_trigger}` : ""}
+`
+    }
+
+    let saludPart = ""
+    if (bienestarSalud) {
+      const malTolerados = (bienestarSalud.alimentos_tolerados ?? []).filter((a: any) => a.estado === "mal").map((a: any) => a.nombre)
+      const despensa = bienestarSalud.despensa ?? []
+      const marcadores = bienestarSalud.marcadores_sangre ?? {}
+      if (malTolerados.length > 0) saludPart += `\nALIMENTOS QUE LE SIENTAN MAL (NUNCA incluir): ${malTolerados.join(", ")}`
+      if (despensa.length > 0) saludPart += `\nDESPENSA ACTUAL: ${despensa.join(", ")}`
+      if (marcadores.vitamina_d && Number(marcadores.vitamina_d) < 30) saludPart += `\nALERTA: Vitamina D baja - reforzar con salmon, sardinas, huevo`
+      if (marcadores.pcr && Number(marcadores.pcr) > 1) saludPart += `\nALERTA: PCR elevada - priorizar antiinflamatorios naturales`
+    }
+
     const systemPrompt = `Eres Nuria, nutricionista clínica española con 15 años de experiencia.
 Tono: cercana, directa, empática, nunca condescendiente.
 Máximo 3 párrafos cortos. Una sola pregunta al final si es necesario.
@@ -107,7 +137,9 @@ ${menuPart}
 ${checkinPart}
 ${cicloPart}
 ${twinPart}
-${restaurantePart}`;
+${restaurantePart}
+${bienestarPart}
+${saludPart}`;
 
     const historialMensajes: Array<{ role: "user" | "assistant"; content: string }> = [
       ...((historyRows ?? []).reverse().map((row) => ({
