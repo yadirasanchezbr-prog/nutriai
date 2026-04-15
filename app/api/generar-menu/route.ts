@@ -78,6 +78,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No existe form_data para este usuario." }, { status: 404 });
     }
 
+    const longevityPart = clinicalForm?.longevity_data
+      ? `\nConsidera tambien estos datos de longevidad del usuario al planificar el menu:\n${JSON.stringify(clinicalForm.longevity_data, null, 2)}`
+      : "";
+
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       temperature: 0.4,

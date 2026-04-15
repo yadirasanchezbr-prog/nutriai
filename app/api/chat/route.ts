@@ -82,6 +82,19 @@ ${checkins[0]?.nota ? `- Última nota: "${checkins[0].nota}"` : ""}`;
 ${twin.predicciones?.semana_critica ? "- ALERTA: semana crítica detectada, usar tono especialmente motivador" : ""}`;
     }
 
+    // Detectar modo restaurante
+    const esRestaurante = /restaurante|cenar fuera|comer fuera|italiano|chino|japones|sushi|pizza|hamburgues|mexicano|indio|thai|tapas|bar|terraza|buffet|kebab|fast food|comida rapida/i.test(mensaje);
+
+    const restaurantePart = esRestaurante ? `
+MODO RESTAURANTE ACTIVO:
+El usuario va a comer o cenar fuera. Tu respuesta debe:
+1. Dar exactamente 3 opciones concretas del tipo de restaurante mencionado
+2. Para cada opcion: nombre del plato, por que encaja con su plan, que pedir de acompañamiento y que evitar
+3. Dar 1 consejo rapido sobre como pedir (sin salsas, al horno en vez de frito, etc)
+4. Ser breve y practica - el usuario necesita decidir rapido
+Adapta las opciones a: objetivo=${profile?.form_data?.main_goal ?? "general"}, tipo alimentacion=${profile?.form_data?.eating_type ?? "omnivoro"}, intolerancias=${profile?.form_data?.intolerances?.join(", ") ?? "ninguna"}
+` : "";
+
     const systemPrompt = `Eres Nuria, nutricionista clínica española con 15 años de experiencia.
 Tono: cercana, directa, empática, nunca condescendiente.
 Máximo 3 párrafos cortos. Una sola pregunta al final si es necesario.
@@ -93,7 +106,8 @@ ${JSON.stringify(profile?.form_data ?? {}, null, 2)}
 ${menuPart}
 ${checkinPart}
 ${cicloPart}
-${twinPart}`;
+${twinPart}
+${restaurantePart}`;
 
     const historialMensajes: Array<{ role: "user" | "assistant"; content: string }> = [
       ...((historyRows ?? []).reverse().map((row) => ({
