@@ -2,308 +2,371 @@
 import Link from "next/link";
 
 const features = [
-  {
-    title: "Menú semanal personalizado",
-    description: "7 días de platos adaptados a tu objetivo, intolerancias y tipo de dieta. Con ingredientes en gramos en crudo, como hacen los nutricionistas de verdad.",
-    icon: <path d="M7 3v3M17 3v3M4 8h16M6 5h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zm3 6h6m-6 4h4" strokeLinecap="round" strokeLinejoin="round"/>,
-  },
-  {
-    title: "Nuria, tu nutricionista IA 24h",
-    description: "Resuelve dudas, gestiona síntomas, te ayuda en restaurantes y te apoya emocionalmente. Nuria recuerda cada conversación y aprende de ti.",
-    icon: <path d="M8 10h8m-8 4h5M21 12a8.5 8.5 0 0 1-8.5 8.5A8.5 8.5 0 0 1 8 19l-5 2 2-5A8.5 8.5 0 1 1 21 12Z" strokeLinecap="round" strokeLinejoin="round"/>,
-  },
-  {
-    title: "NutriScore semanal",
-    description: "Un único número del 0-100 que resume tu semana: adherencia, energía, digestión y progreso. Cada semana mejor que la anterior.",
-    icon: <path d="M9 19v-6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2zm0 0V9a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v10m-6 0a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2m0 0V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2z" strokeLinecap="round" strokeLinejoin="round"/>,
-  },
-  {
-    title: "Ajuste automático semanal",
-    description: "Nuria analiza tus check-ins diarios y reajusta el menú automáticamente. Si tienes hambre, añade calorías. Si hay hinchazón, activa el protocolo digestivo.",
-    icon: <path d="M20 6v5h-5M4 18v-5h5M6.5 10A6 6 0 0 1 17 7l3 4M17.5 14A6 6 0 0 1 7 17l-3-4" strokeLinecap="round" strokeLinejoin="round"/>,
-  },
-  {
-    title: "Lista de la compra automática",
-    description: "Del menú semanal se genera automáticamente una lista de la compra agrupada por sección del supermercado. Con checkboxes para ir tachando.",
-    icon: <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2m-6 9l2 2 4-4" strokeLinecap="round" strokeLinejoin="round"/>,
-  },
-  {
-    title: "Modo restaurante",
-    description: "Dile a Nuria dónde vas a cenar y te da las 3 mejores opciones del menú adaptadas a tu plan. Adherencia real, también fuera de casa.",
-    icon: <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-8 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4z" strokeLinecap="round" strokeLinejoin="round"/>,
-  },
+  { title: "Menú semanal personalizado", desc: "7 días de platos adaptados a tu objetivo, intolerancias y tipo de dieta. Con ingredientes en gramos en crudo.", emoji: "🥗" },
+  { title: "Nuria, tu nutricionista IA 24h", desc: "Resuelve dudas, gestiona síntomas y te apoya emocionalmente. Aprende de ti cada semana.", emoji: "💬" },
+  { title: "NutriScore semanal", desc: "Un número del 0-100 que resume tu semana: adherencia, energía y digestión.", emoji: "📊" },
+  { title: "Ajuste automático", desc: "Nuria analiza tus check-ins y reajusta el menú cada semana. Tu plan mejora solo.", emoji: "🔄" },
+  { title: "Lista de la compra", desc: "Del menú semanal se genera una lista agrupada por sección del supermercado.", emoji: "🛒" },
+  { title: "Modo restaurante", desc: "Dile a Nuria dónde vas a cenar y te da las 3 mejores opciones adaptadas a tu plan.", emoji: "🍽️" },
+];
+
+const testimonios = [
+  { inicial: "L", nombre: "Laura M.", resultado: "−6 kg en 4 meses", texto: "Tengo SOP y ninguna dieta me funcionaba. Nuria adapta el menú a mi ciclo automáticamente.", color: "#5E8842" },
+  { inicial: "J", nombre: "Javier R.", resultado: "Digestión mejorada", texto: "Llevo 3 meses con el plan antiinflamatorio. Mi digestión ha mejorado un 80%.", color: "#4A7A9A" },
+  { inicial: "A", nombre: "Ana C.", resultado: "Sin hinchazón", texto: "Tenía SIBO y no sabía qué comer. Nuria identificó mis alimentos trigger.", color: "#7A6040" },
 ];
 
 const faqs = [
-  {
-    q: "¿Cuánto tarda en generarse mi primer menú?",
-    a: "Menos de 2 minutos. Rellenas tu perfil clínico, eliges tu objetivo y Nuria genera tu menú personalizado al instante.",
-  },
-  {
-    q: "¿Qué pasa si no me gusta un plato del menú?",
-    a: "Puedes pedirle a Nuria directamente en el chat que lo sustituya por otro que se adapte a tus preferencias. El menú es tuyo y se puede ajustar.",
-  },
-  {
-    q: "¿Funciona para veganos, celíacos o con intolerancias?",
-    a: "Sí. El formulario clínico recoge más de 18 intolerancias y alergias, y todos los tipos de alimentación incluyendo vegano, keto, paleo, ayuno intermitente y más.",
-  },
-  {
-    q: "¿Cada cuánto se actualiza el menú?",
-    a: "Cada semana automáticamente. Nuria analiza tus check-ins diarios y reajusta el menú según cómo te has sentido: hambre, energía, digestión y estado emocional.",
-  },
-  {
-    q: "¿Es seguro para personas con patologías?",
-    a: "NutriAI es una herramienta de apoyo nutricional, no reemplaza a un médico. El formulario recoge más de 34 condiciones de salud para personalizar el plan, pero siempre recomendamos consultar con tu médico ante patologías graves.",
-  },
-  {
-    q: "¿Puedo cancelar cuando quiera?",
-    a: "Sí, sin permanencia ni penalizaciones. Cancelas cuando quieras desde tu perfil.",
-  },
+  { q: "¿Cuánto tarda en generarse mi primer menú?", a: "Menos de 2 minutos. Rellenas tu perfil clínico y Nuria genera tu menú al instante." },
+  { q: "¿Funciona para veganos, celíacos o con intolerancias?", a: "Sí. El formulario recoge más de 18 intolerancias y todos los tipos de alimentación." },
+  { q: "¿Cada cuánto se actualiza el menú?", a: "Cada semana automáticamente. Nuria analiza tus check-ins y reajusta según cómo te has sentido." },
+  { q: "¿Es seguro para personas con patologías?", a: "NutriAI es una herramienta de apoyo nutricional. El formulario recoge más de 34 condiciones de salud." },
+  { q: "¿Puedo cancelar cuando quiera?", a: "Sí, sin permanencia ni penalizaciones. Cancelas cuando quieras desde tu perfil." },
 ];
+
+const G = {
+  card: {
+    background: "rgba(255,255,255,0.58)",
+    backdropFilter: "blur(40px) saturate(180%)",
+    WebkitBackdropFilter: "blur(40px) saturate(180%)",
+    borderTop: "1px solid rgba(255,255,255,0.98)",
+    borderLeft: "1px solid rgba(255,255,255,0.9)",
+    borderRight: "1px solid rgba(255,255,255,0.7)",
+    borderBottom: "1px solid rgba(255,255,255,0.55)",
+    boxShadow: "0 8px 28px rgba(30,60,15,0.09),inset 0 1px 0 rgba(255,255,255,1)",
+  },
+  matcha: {
+    background: "linear-gradient(155deg,#5E8842,#3C6020 50%,#2C4A14)",
+    borderTop: "1px solid rgba(180,240,140,0.2)",
+    borderLeft: "1px solid rgba(180,240,140,0.12)",
+    borderRight: "1px solid rgba(0,0,0,0.15)",
+    borderBottom: "1px solid rgba(0,0,0,0.18)",
+    boxShadow: "0 14px 36px rgba(44,74,20,0.45),inset 0 1px 0 rgba(255,255,255,0.14)",
+  },
+  dark: {
+    background: "linear-gradient(155deg,rgba(38,58,24,0.94),rgba(24,40,12,0.97))",
+    borderTop: "1px solid rgba(255,255,255,0.1)",
+    borderLeft: "1px solid rgba(255,255,255,0.07)",
+    borderRight: "1px solid rgba(0,0,0,0.2)",
+    borderBottom: "1px solid rgba(0,0,0,0.25)",
+    boxShadow: "0 20px 48px rgba(20,40,8,0.5),inset 0 1px 0 rgba(255,255,255,0.12)",
+  },
+};
+
+const shine = { position: "absolute" as const, top: 0, left: 0, right: 0, height: 1, background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.95) 20%,white 50%,rgba(255,255,255,0.95) 80%,transparent)", pointerEvents: "none" as const };
 
 export default function Home() {
   return (
-    <div className="scroll-smooth bg-white text-neutral-900">
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-neutral-200 bg-white/95 backdrop-blur">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <a href="#" className="flex items-center gap-2 text-xl font-bold text-[#0F6E56]">
-            NutriAI
-            <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
-          </a>
-          <div className="hidden items-center gap-6 text-sm font-medium text-neutral-700 md:flex">
-            <a href="#como-funciona" className="transition hover:text-[#0F6E56]">Cómo funciona</a>
-            <a href="#funcionalidades" className="transition hover:text-[#0F6E56]">Funcionalidades</a>
-            <a href="#precios" className="transition hover:text-[#0F6E56]">Precios</a>
-            <a href="#faq" className="transition hover:text-[#0F6E56]">FAQ</a>
-            <Link href="/login" className="transition hover:text-[#0F6E56]">Entrar</Link>
+    <div style={{ fontFamily: "var(--font-instrument,sans-serif)", background: "radial-gradient(ellipse 80% 60% at 70% 10%,rgba(180,220,150,0.5) 0%,transparent 60%),radial-gradient(ellipse 60% 80% at 10% 80%,rgba(120,170,90,0.3) 0%,transparent 60%),linear-gradient(160deg,#B2CC9C 0%,#A4BF90 30%,#B8CFA6 60%,#9EBA8A 100%)", minHeight: "100vh" }}>
+
+      {/* Orbs */}
+      <div style={{ position: "fixed", width: 600, height: 600, borderRadius: "50%", background: "radial-gradient(circle,rgba(255,255,255,0.22),transparent 65%)", top: -200, right: -150, pointerEvents: "none", zIndex: 0 }} />
+      <div style={{ position: "fixed", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle,rgba(60,100,40,0.15),transparent 65%)", bottom: -100, left: -80, pointerEvents: "none", zIndex: 0 }} />
+
+      {/* NAV */}
+      <nav style={{ ...G.card, position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, borderRadius: 0, borderLeft: "none", borderRight: "none", borderTop: "none", padding: "0 40px", height: 56, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={shine} />
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ width: 32, height: 32, borderRadius: 10, ...G.matcha, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px rgba(44,74,20,0.45),inset 0 1px 0 rgba(255,255,255,0.18)" }}>
+            <span style={{ fontFamily: "var(--font-playfair,serif)", color: "white", fontSize: 15, fontWeight: 600, fontStyle: "italic" }}>N</span>
           </div>
-          <Link href="/registro" className="rounded-full bg-[#0F6E56] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0d604b]">
+          <span style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 18, fontWeight: 600, color: "#1A2E0A", letterSpacing: "-0.4px" }}>NutriAI</span>
+        </div>
+        <div style={{ display: "flex", gap: 24, alignItems: "center" }}>
+          {[["Funcionalidades", "#features"], ["Precios", "#precios"], ["FAQ", "#faq"]].map(([l, h]) => (
+            <a key={l} href={h} style={{ fontSize: 13, color: "rgba(26,46,10,0.45)", fontWeight: 400, textDecoration: "none", letterSpacing: "0.01em" }}>{l}</a>
+          ))}
+          <Link href="/login" style={{ fontSize: 13, color: "rgba(26,46,10,0.45)", fontWeight: 400, textDecoration: "none" }}>Entrar</Link>
+          <Link href="/registro" style={{ ...G.matcha, padding: "8px 20px", borderRadius: 14, fontSize: 13, fontWeight: 500, color: "white", textDecoration: "none", letterSpacing: "0.02em" }}>
             Empezar gratis
           </Link>
-        </nav>
-      </header>
+        </div>
+      </nav>
 
-      <main className="pt-24">
+      {/* HERO */}
+      <section style={{ paddingTop: 120, paddingBottom: 80, paddingLeft: 40, paddingRight: 40, maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 1 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 60, alignItems: "center" }}>
 
-        {/* HERO */}
-        <section className="reveal px-4 py-16 sm:py-24">
-          <div className="mx-auto max-w-5xl text-center">
-            <p className="mx-auto inline-flex rounded-full bg-[#E8F5F0] px-4 py-1.5 text-sm font-medium text-[#0F6E56]">
-              ✦ Nutrición clínica personalizada con IA
-            </p>
-            <h1 className="mt-6 text-balance text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">
-              Tu nutricionista personal.<br className="hidden sm:block" /> Disponible 24 horas al día.
+          {/* Left - texto */}
+          <div>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.6)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.9)", borderRadius: 50, padding: "5px 14px", marginBottom: 24, boxShadow: "0 4px 14px rgba(30,60,15,0.08)" }}>
+              <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#5E8842", boxShadow: "0 0 6px rgba(94,136,66,0.6)" }} />
+              <span style={{ fontSize: 11, fontWeight: 600, color: "#3C6020", letterSpacing: "0.06em" }}>Nutrición clínica con IA</span>
+            </div>
+            <h1 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 52, fontWeight: 700, color: "#1A2E0A", letterSpacing: "-2px", lineHeight: 1.05, marginBottom: 20 }}>
+              Tu nutricionista<br />
+              <em style={{ fontStyle: "italic", color: "#3C6020" }}>personal</em> siempre<br />
+              contigo
             </h1>
-            <p className="mx-auto mt-6 max-w-3xl text-lg text-neutral-600">
+            <p style={{ fontSize: 16, color: "rgba(26,46,10,0.55)", lineHeight: 1.75, fontWeight: 300, marginBottom: 32, maxWidth: 440 }}>
               Nuria aprende de ti cada semana y adapta tu menú según cómo te sientes. Más de 34 patologías, 18 intolerancias y todos los tipos de alimentación.
             </p>
-            <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Link href="/registro" className="rounded-full bg-[#0F6E56] px-7 py-3 text-sm font-semibold text-white transition hover:bg-[#0d604b]">
+            <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 32 }}>
+              <Link href="/registro" style={{ ...G.matcha, padding: "12px 28px", borderRadius: 16, fontSize: 14, fontWeight: 500, color: "white", textDecoration: "none", letterSpacing: "0.02em", boxShadow: "0 8px 22px rgba(58,92,30,0.42)" }}>
                 Crear mi plan gratis →
               </Link>
-              <a href="#como-funciona" className="rounded-full border border-[#0F6E56]/30 px-7 py-3 text-sm font-semibold text-[#0F6E56] transition hover:border-[#0F6E56]">
-                Ver cómo funciona
+              <a href="#features" style={{ fontSize: 13, color: "#3C6020", fontWeight: 500, textDecoration: "none", letterSpacing: "0.01em" }}>
+                Ver cómo funciona ↓
               </a>
             </div>
-            <p className="mt-5 text-sm text-neutral-500">Sin tarjeta · Cancela cuando quieras · Primer menú en 2 minutos</p>
-            <div className="mt-12 grid gap-4 sm:grid-cols-4">
-              {[
-                "Menú listo en 2 min",
-                "+34 patologías",
-                "Ajuste automático",
-                "NutriScore semanal",
-              ].map((item) => (
-                <div key={item} className="rounded-2xl bg-[#F8F9FA] px-5 py-4 text-sm font-semibold text-[#0F6E56]">
-                  {item}
+            <p style={{ fontSize: 11, color: "rgba(26,46,10,0.35)", fontWeight: 300, letterSpacing: "0.02em" }}>
+              Sin tarjeta · Cancela cuando quieras · Primer menú en 2 minutos
+            </p>
+            {/* Stats */}
+            <div style={{ display: "flex", gap: 24, marginTop: 32, paddingTop: 28, borderTop: "0.5px solid rgba(94,136,66,0.15)" }}>
+              {[["2 min", "Primer menú"], ["+34", "Patologías"], ["24h", "Nuria disponible"], ["7", "Días planificados"]].map(([n, l]) => (
+                <div key={l}>
+                  <p style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 22, fontWeight: 700, color: "#1A2E0A", letterSpacing: "-1px", lineHeight: 1 }}>{n}</p>
+                  <p style={{ fontSize: 10, color: "rgba(26,46,10,0.4)", marginTop: 4, fontWeight: 400, letterSpacing: "0.04em" }}>{l}</p>
                 </div>
               ))}
             </div>
           </div>
-        </section>
 
-        {/* COMO FUNCIONA */}
-        <section id="como-funciona" className="reveal bg-[#F8F9FA] px-4 py-16 sm:py-24">
-          <div className="mx-auto max-w-6xl">
-            <h2 className="text-center text-3xl font-bold sm:text-4xl">Tres pasos. Un plan que funciona.</h2>
-            <p className="mt-4 text-center text-neutral-600">Sin complicaciones, sin contar calorías manualmente, sin dietas genéricas.</p>
-            <div className="mt-12 grid gap-6 md:grid-cols-3">
-              {[
-                ["01", "Cuéntale a Nuria cómo eres", "Formulario clínico avanzado: patologías, intolerancias, síntomas digestivos, tipo de alimentación y mucho más."],
-                ["02", "Recibe tu menú personalizado", "GPT-4o genera tu menú de 7 días con recetas, ingredientes en gramos en crudo y macros calculados."],
-                ["03", "Nuria se adapta cada semana", "Check-in diario, NutriScore semanal y reajuste automático. Tu plan mejora solo."],
-              ].map(([number, title, desc]) => (
-                <article key={number} className="rounded-2xl bg-white p-6 shadow-sm">
-                  <p className="text-4xl font-bold text-[#0F6E56]">{number}</p>
-                  <h3 className="mt-4 text-xl font-semibold">{title}</h3>
-                  <p className="mt-3 text-neutral-600">{desc}</p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* FUNCIONALIDADES */}
-        <section id="funcionalidades" className="reveal px-4 py-16 sm:py-24">
-          <div className="mx-auto max-w-6xl">
-            <h2 className="text-center text-3xl font-bold sm:text-4xl">Todo lo que necesitas para comer bien de verdad</h2>
-            <p className="mt-4 text-center text-neutral-600">No es una app de conteo de calorías. Es una nutricionista clínica en tu bolsillo.</p>
-            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {features.map((feature) => (
-                <article key={feature.title} className="rounded-2xl bg-[#E8F5F0] p-6">
-                  <svg className="h-8 w-8 text-[#0F6E56]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                    {feature.icon}
-                  </svg>
-                  <h3 className="mt-4 text-lg font-semibold text-[#0F6E56]">{feature.title}</h3>
-                  <p className="mt-2 text-sm text-neutral-700">{feature.description}</p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* TESTIMONIOS */}
-        <section className="reveal bg-[#E8F5F0] px-4 py-16 sm:py-24">
-          <div className="mx-auto max-w-6xl">
-            <h2 className="text-center text-3xl font-bold sm:text-4xl">Personas reales, resultados reales</h2>
-            <p className="mt-4 text-center text-neutral-600">Sin dietas milagro. Sin pasar hambre. Con resultados que se mantienen.</p>
-            <div className="mt-12 grid gap-6 md:grid-cols-3">
-              {[
-                ["LM", "Laura M.", "−6 kg en 4 meses", "Tengo SOP y ninguna dieta me funcionaba. Nuria adapta el menú a mi ciclo automáticamente. Por fin algo que de verdad encaja conmigo."],
-                ["JR", "Javier R.", "Más energía y mejor digestión", "Llevo 3 meses con el plan antiinflamatorio. Mi digestión ha mejorado un 80% y mantengo la constancia porque Nuria me recuerda y me motiva."],
-                ["AC", "Ana C.", "Sin hinchazón por primera vez", "Tenía SIBO y no sabía qué comer. Nuria identificó los alimentos que me sentaban mal y los eliminó del menú. Llevo semanas sin episodios."],
-              ].map(([initials, name, result, text]) => (
-                <article key={name} className="rounded-2xl bg-white p-6 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0F6E56] text-sm font-bold text-white">
-                      {initials}
-                    </div>
-                    <div>
-                      <p className="font-semibold">{name}</p>
-                      <p className="text-sm font-semibold text-[#0F6E56]">{result}</p>
-                    </div>
+          {/* Right - dashboard preview */}
+          <div style={{ position: "relative" }}>
+            <div style={{ position: "absolute", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle,rgba(255,255,255,0.3),transparent 65%)", top: -80, right: -80, pointerEvents: "none" }} />
+            {/* Panel flotante simulado */}
+            <div style={{ ...G.card, borderRadius: 28, overflow: "hidden", position: "relative", transform: "perspective(1200px) rotateY(-4deg) rotateX(2deg)", boxShadow: "0 40px 80px rgba(30,60,15,0.2),0 20px 40px rgba(30,60,15,0.12),0 1px 0 rgba(255,255,255,1) inset" }}>
+              <div style={shine} />
+              {/* App nav */}
+              <div style={{ padding: "12px 18px", borderBottom: "0.5px solid rgba(80,120,50,0.08)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{ width: 24, height: 24, borderRadius: 7, ...G.matcha, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <span style={{ fontFamily: "var(--font-playfair,serif)", color: "white", fontSize: 11, fontWeight: 600, fontStyle: "italic" }}>N</span>
                   </div>
-                  <div className="mt-3 flex gap-0.5">
-                    {[...Array(5)].map((_, i) => (
-                      <svg key={i} className="h-4 w-4 text-amber-400 fill-amber-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                  <span style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 14, fontWeight: 600, color: "#1A2E0A" }}>NutriAI</span>
+                </div>
+                <div style={{ display: "flex", gap: 4 }}>
+                  {["#E24B4A", "#EF9F27", "#5E8842"].map(c => <div key={c} style={{ width: 8, height: 8, borderRadius: "50%", background: c }} />)}
+                </div>
+              </div>
+              {/* App content preview */}
+              <div style={{ padding: "16px 18px", display: "grid", gridTemplateColumns: "100px 1fr", gap: 12 }}>
+                {/* sidebar mini */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(145deg,#7AAA52,#3C6020)", margin: "0 auto 8px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <span style={{ fontFamily: "var(--font-playfair,serif)", color: "white", fontSize: 14, fontWeight: 600, fontStyle: "italic" }}>Y</span>
+                  </div>
+                  {["Dashboard", "Menú", "Bienestar", "Progreso", "Nuria"].map((item, i) => (
+                    <div key={item} style={{ padding: "5px 8px", borderRadius: 8, background: i === 0 ? "rgba(94,136,66,0.12)" : "transparent", fontSize: 10, color: i === 0 ? "#3C6020" : "rgba(26,46,10,0.4)", fontWeight: i === 0 ? 600 : 400 }}>{item}</div>
+                  ))}
+                </div>
+                {/* main content mini */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  <p style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 16, fontWeight: 600, color: "#1A2E0A", letterSpacing: "-0.5px" }}>Tu plan de hoy</p>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+                    {[["~800", "kcal"], ["~56g", "prot"], ["2", "comidas"], ["4/7", "días"]].map(([v, l]) => (
+                      <div key={l} style={{ ...G.card, borderRadius: 10, padding: "8px 10px", position: "relative", overflow: "hidden" }}>
+                        <div style={{ ...shine }} />
+                        <p style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 14, fontWeight: 600, color: "#1A2E0A", letterSpacing: "-0.5px" }}>{v}</p>
+                        <p style={{ fontSize: 9, color: "rgba(26,46,10,0.4)", marginTop: 2 }}>{l}</p>
+                      </div>
                     ))}
                   </div>
-                  <p className="mt-3 text-sm text-neutral-600">{text}</p>
-                </article>
-              ))}
+                  {[["☀️", "Comida", "Ensalada de atún"], ["🌙", "Cena", "Tortilla de espinacas"]].map(([e, t, n]) => (
+                    <div key={t} style={{ ...G.card, borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 10, position: "relative", overflow: "hidden" }}>
+                      <div style={shine} />
+                      <div style={{ width: 32, height: 32, borderRadius: 9, background: "rgba(94,136,66,0.08)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>{e}</div>
+                      <div>
+                        <p style={{ fontSize: 8, color: "rgba(26,46,10,0.35)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 2 }}>{t}</p>
+                        <p style={{ fontSize: 11, fontWeight: 600, color: "#1A2E0A" }}>{n}</p>
+                      </div>
+                    </div>
+                  ))}
+                  {/* Nuria card mini */}
+                  <div style={{ ...G.matcha, borderRadius: 12, padding: "10px 12px", position: "relative", overflow: "hidden" }}>
+                    <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "40%", background: "linear-gradient(180deg,rgba(255,255,255,0.1),transparent)", pointerEvents: "none", borderRadius: "inherit" }} />
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 5, position: "relative", zIndex: 1 }}>
+                      <div style={{ width: 18, height: 18, borderRadius: "50%", background: "linear-gradient(145deg,#B8D870,#5E8842)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <span style={{ fontFamily: "var(--font-playfair,serif)", color: "white", fontSize: 9, fontWeight: 600, fontStyle: "italic" }}>N</span>
+                      </div>
+                      <p style={{ fontSize: 8, fontWeight: 600, color: "rgba(200,248,160,0.5)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Nuria</p>
+                    </div>
+                    <p style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 10, color: "rgba(215,248,185,0.55)", lineHeight: 1.55, fontStyle: "italic", position: "relative", zIndex: 1 }}>"Tu digestión mejora esta semana."</p>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        </section>
-
-        {/* PRECIOS */}
-        <section id="precios" className="reveal px-4 py-16 sm:py-24">
-          <div className="mx-auto max-w-6xl">
-            <h2 className="text-center text-3xl font-bold sm:text-4xl">Elige tu plan</h2>
-            <p className="mt-4 text-center text-neutral-600">Sin permanencia. Cancela cuando quieras.</p>
-            <div className="mt-12 grid gap-6 lg:grid-cols-4">
-              {[
-                ["Básico", "9,99€", "", ["✓ Menú semanal", "✓ Chat con Nuria", "✓ Lista de la compra", "— Ajuste semanal", "— NutriScore"]],
-                ["Pro", "19,99€", "", ["✓ Todo Básico", "✓ Ajuste semanal automático", "✓ NutriScore semanal", "✓ Protocolo digestivo", "✓ Modo restaurante"]],
-                ["Élite", "39,99€", "", ["✓ Todo Pro", "✓ Protocolo pre-menstrual", "✓ Gemelo metabólico", "✓ Seguimiento avanzado", "✓ Prioridad soporte"]],
-                ["Longevity", "59,99€", "NUEVO", ["✓ Todo Élite", "✓ Plan antiedad con IA", "✓ Protocolo antioxidante", "✓ Análisis longevidad", "✓ Suplementación antiedad"]],
-              ].map(([name, price, badge, items]) => (
-                <article
-                  key={Array.isArray(name) ? name.join('-') : name}
-                  className={`rounded-2xl bg-white p-7 shadow-sm relative flex flex-col ${
-                    name === "Longevity" ? "border-2 border-amber-400" :
-                    name === "Pro" ? "border-2 border-[#0F6E56]" : "border border-neutral-200"
-                  }`}
-                >
-                  {badge ? (
-                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-amber-400 px-3 py-1 text-xs font-semibold text-amber-900">
-                      {badge}
-                    </span>
-                  ) : null}
-                  {name === "Pro" ? (
-                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#0F6E56] px-3 py-1 text-xs font-semibold text-white">
-                      Más popular
-                    </span>
-                  ) : null}
-                  <h3 className="text-xl font-semibold">{name}</h3>
-                  {name === "Longevity" ? (
-                    <p className="mt-1 text-xs font-medium text-amber-600">Nutricion antiedad y longevidad</p>
-                  ) : null}
-                  <p className="mt-4 text-4xl font-bold text-[#0F6E56]">{price}</p>
-                  <p className="text-xs text-neutral-400">al mes</p>
-                  <ul className="mt-6 space-y-2 text-sm flex-1">
-                    {(items as string[]).map((item) => (
-                      <li key={item} className={item.startsWith("—") ? "text-neutral-400" : "text-neutral-700"}>
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                  <Link
-                    href="/registro"
-                    className={`mt-6 block rounded-full px-4 py-2.5 text-center text-sm font-semibold transition ${
-                      name === "Longevity" ? "bg-amber-400 text-amber-900 hover:bg-amber-500" :
-                      name === "Pro" ? "bg-[#0F6E56] text-white hover:bg-[#0d604b]" :
-                      "border border-[#0F6E56] text-[#0F6E56] hover:bg-emerald-50"
-                    }`}
-                  >
-                    {name === "Longevity" ? "Quiero vivir más" : name === "Pro" ? "Empezar con Pro" : "Empezar"}
-                  </Link>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* FAQ */}
-        <section id="faq" className="reveal bg-[#F8F9FA] px-4 py-16 sm:py-24">
-          <div className="mx-auto max-w-3xl">
-            <h2 className="text-center text-3xl font-bold sm:text-4xl">Preguntas frecuentes</h2>
-            <div className="mt-12 space-y-4">
-              {faqs.map((faq) => (
-                <article key={faq.q} className="rounded-2xl bg-white p-6 shadow-sm">
-                  <h3 className="font-semibold text-neutral-900">{faq.q}</h3>
-                  <p className="mt-2 text-sm text-neutral-600">{faq.a}</p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* CTA FINAL */}
-        <section className="reveal bg-[#0F6E56] px-4 py-16 text-center text-white sm:py-20">
-          <div className="mx-auto max-w-3xl">
-            <h2 className="text-4xl font-bold sm:text-5xl">¿Lista para empezar?</h2>
-            <p className="mt-4 text-white/85">Tu primer menú personalizado en menos de 2 minutos. Sin tarjeta de crédito.</p>
-            <Link href="/registro" className="mt-8 inline-flex rounded-full bg-white px-7 py-3 text-sm font-semibold text-[#0F6E56] transition hover:bg-neutral-100">
-              Crear mi cuenta gratis →
-            </Link>
-            <p className="mt-4 text-sm text-white/60">Más de 500 personas ya tienen su plan personalizado</p>
-          </div>
-        </section>
-
-      </main>
-
-      <footer className="bg-[#0F6E56] px-4 py-10 text-white">
-        <div className="mx-auto flex max-w-6xl flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xl font-bold">NutriAI</p>
-          <div className="flex gap-5 text-sm text-white/85">
-            <a href="#" className="hover:text-white">Privacidad</a>
-            <a href="#" className="hover:text-white">Términos</a>
-            <a href="#" className="hover:text-white">Cookies</a>
+            {/* Shadow under card */}
+            <div style={{ position: "absolute", width: "80%", height: 30, background: "rgba(30,60,15,0.18)", borderRadius: "50%", bottom: -18, left: "10%", filter: "blur(18px)", pointerEvents: "none" }} />
           </div>
         </div>
-        <p className="mx-auto mt-6 max-w-6xl text-sm text-white/70">© {new Date().getFullYear()} NutriAI. Todos los derechos reservados.</p>
+      </section>
+
+      {/* COMO FUNCIONA */}
+      <section style={{ padding: "80px 40px", maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 1 }}>
+        <div style={{ textAlign: "center", marginBottom: 56 }}>
+          <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(26,46,10,0.4)", textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 12 }}>Cómo funciona</p>
+          <h2 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 38, fontWeight: 700, color: "#1A2E0A", letterSpacing: "-1.5px", lineHeight: 1.1 }}>
+            Tres pasos. Un plan<br /><em style={{ fontStyle: "italic", color: "#3C6020" }}>que funciona.</em>
+          </h2>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
+          {[
+            ["01", "Cuéntale a Nuria cómo eres", "Formulario clínico avanzado: patologías, intolerancias, síntomas digestivos y tipo de alimentación.", "📋"],
+            ["02", "Recibe tu menú personalizado", "GPT-4o genera tu menú de 7 días con recetas, ingredientes en gramos en crudo y macros calculados.", "🌿"],
+            ["03", "Nuria se adapta cada semana", "Check-in diario, NutriScore semanal y reajuste automático. Tu plan mejora solo.", "✨"],
+          ].map(([num, title, desc, emoji]) => (
+            <div key={num} style={{ ...G.card, borderRadius: 24, padding: "28px 24px", position: "relative", overflow: "hidden" }}>
+              <div style={shine} />
+              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg,#5E8842,transparent)", opacity: 0.5 }} />
+              <p style={{ fontSize: 11, fontWeight: 600, color: "rgba(26,46,10,0.3)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 16 }}>Paso {num}</p>
+              <p style={{ fontSize: 32, marginBottom: 14 }}>{emoji}</p>
+              <h3 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 20, fontWeight: 600, color: "#1A2E0A", letterSpacing: "-0.5px", marginBottom: 10 }}>{title}</h3>
+              <p style={{ fontSize: 13, color: "rgba(26,46,10,0.5)", lineHeight: 1.7, fontWeight: 300 }}>{desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* FEATURES */}
+      <section id="features" style={{ padding: "80px 40px", maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 1 }}>
+        <div style={{ textAlign: "center", marginBottom: 56 }}>
+          <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(26,46,10,0.4)", textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 12 }}>Funcionalidades</p>
+          <h2 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 38, fontWeight: 700, color: "#1A2E0A", letterSpacing: "-1.5px", lineHeight: 1.1 }}>
+            Todo lo que necesitas<br /><em style={{ fontStyle: "italic", color: "#3C6020" }}>para comer bien de verdad</em>
+          </h2>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
+          {features.map(({ title, desc, emoji }) => (
+            <div key={title} style={{ ...G.card, borderRadius: 22, padding: "22px 20px", position: "relative", overflow: "hidden" }}>
+              <div style={shine} />
+              <p style={{ fontSize: 28, marginBottom: 14 }}>{emoji}</p>
+              <h3 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 17, fontWeight: 600, color: "#1A2E0A", letterSpacing: "-0.4px", marginBottom: 8 }}>{title}</h3>
+              <p style={{ fontSize: 12, color: "rgba(26,46,10,0.5)", lineHeight: 1.7, fontWeight: 300 }}>{desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* TESTIMONIOS */}
+      <section style={{ padding: "80px 40px", maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 1 }}>
+        <div style={{ textAlign: "center", marginBottom: 56 }}>
+          <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(26,46,10,0.4)", textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 12 }}>Testimonios</p>
+          <h2 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 38, fontWeight: 700, color: "#1A2E0A", letterSpacing: "-1.5px" }}>
+            Personas reales,<br /><em style={{ fontStyle: "italic", color: "#3C6020" }}>resultados reales</em>
+          </h2>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
+          {testimonios.map(({ inicial, nombre, resultado, texto, color }) => (
+            <div key={nombre} style={{ ...G.card, borderRadius: 22, padding: "22px 20px", position: "relative", overflow: "hidden" }}>
+              <div style={shine} />
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+                <div style={{ width: 44, height: 44, borderRadius: "50%", background: `linear-gradient(145deg,${color}99,${color})`, display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid rgba(255,255,255,0.9)", flexShrink: 0 }}>
+                  <span style={{ fontFamily: "var(--font-playfair,serif)", color: "white", fontSize: 18, fontWeight: 600, fontStyle: "italic" }}>{inicial}</span>
+                </div>
+                <div>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: "#1A2E0A" }}>{nombre}</p>
+                  <p style={{ fontSize: 11, color, fontWeight: 600, marginTop: 2 }}>{resultado}</p>
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 2, marginBottom: 10 }}>
+                {[...Array(5)].map((_, i) => <span key={i} style={{ color: "#5E8842", fontSize: 12 }}>★</span>)}
+              </div>
+              <p style={{ fontSize: 13, color: "rgba(26,46,10,0.55)", lineHeight: 1.7, fontWeight: 300 }}>{texto}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* PRECIOS */}
+      <section id="precios" style={{ padding: "80px 40px", maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 1 }}>
+        <div style={{ textAlign: "center", marginBottom: 56 }}>
+          <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(26,46,10,0.4)", textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 12 }}>Precios</p>
+          <h2 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 38, fontWeight: 700, color: "#1A2E0A", letterSpacing: "-1.5px" }}>
+            Elige tu plan.<br /><em style={{ fontStyle: "italic", color: "#3C6020" }}>Sin permanencia.</em>
+          </h2>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 14 }}>
+          {[
+            { nombre: "Básico", precio: "9,99€", badge: "", items: ["✓ Menú semanal", "✓ Chat con Nuria", "✓ Lista de la compra", "— Ajuste semanal", "— NutriScore"], cta: "Empezar", destacado: false, longevity: false },
+            { nombre: "Pro", precio: "19,99€", badge: "Más popular", items: ["✓ Todo Básico", "✓ Ajuste semanal", "✓ NutriScore", "✓ Protocolo digestivo", "✓ Modo restaurante"], cta: "Empezar con Pro", destacado: true, longevity: false },
+            { nombre: "Élite", precio: "39,99€", badge: "", items: ["✓ Todo Pro", "✓ Protocolo hormonal", "✓ Gemelo metabólico", "✓ Seguimiento avanzado", "✓ Prioridad soporte"], cta: "Empezar", destacado: false, longevity: false },
+            { nombre: "Longevity", precio: "59,99€", badge: "NUEVO", items: ["✓ Todo Élite", "✓ Plan antiedad", "✓ Protocolo antioxidante", "✓ Análisis longevidad", "✓ Suplementación antiedad"], cta: "Quiero vivir más", destacado: false, longevity: true },
+          ].map(({ nombre, precio, badge, items, cta, destacado, longevity }) => (
+            <div key={nombre} style={{ ...G.card, borderRadius: 24, padding: "24px 20px", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", ...(destacado ? { borderRight: "1px solid rgba(94,136,66,0.3)", borderBottom: "1px solid rgba(94,136,66,0.3)" } : {}), ...(longevity ? { borderRight: "1px solid rgba(186,120,20,0.3)", borderBottom: "1px solid rgba(186,120,20,0.3)" } : {}) }}>
+              <div style={shine} />
+              {badge && (
+                <div style={{ position: "absolute", top: -1, left: "50%", transform: "translateX(-50%)", background: destacado ? "linear-gradient(155deg,#5E8842,#3C6020)" : "linear-gradient(155deg,#C8A020,#A07818)", borderRadius: "0 0 12px 12px", padding: "4px 14px" }}>
+                  <span style={{ fontSize: 9, fontWeight: 700, color: "white", letterSpacing: "0.06em" }}>{badge}</span>
+                </div>
+              )}
+              <p style={{ fontSize: 15, fontWeight: 600, color: "#1A2E0A", marginTop: badge ? 12 : 0, marginBottom: 4 }}>{nombre}</p>
+              <p style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 28, fontWeight: 700, color: "#1A2E0A", letterSpacing: "-1px", marginBottom: 4 }}>{precio}</p>
+              <p style={{ fontSize: 10, color: "rgba(26,46,10,0.35)", fontWeight: 300, marginBottom: 16 }}>al mes</p>
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, flex: 1, marginBottom: 20 }}>
+                {items.map(item => (
+                  <li key={item} style={{ fontSize: 12, color: item.startsWith("—") ? "rgba(26,46,10,0.3)" : "rgba(26,46,10,0.65)", fontWeight: item.startsWith("—") ? 300 : 400, marginBottom: 7, lineHeight: 1.4 }}>{item}</li>
+                ))}
+              </ul>
+              <Link href="/registro" style={{ display: "block", textAlign: "center", padding: "10px 16px", borderRadius: 14, fontSize: 12, fontWeight: 500, textDecoration: "none", letterSpacing: "0.02em", ...(destacado ? { ...G.matcha, color: "white" } : longevity ? { background: "linear-gradient(155deg,#C8A020,#A07818)", color: "white", border: "none", boxShadow: "0 8px 22px rgba(160,120,24,0.35)" } : { background: "rgba(255,255,255,0.7)", color: "#2A3E16", border: "1px solid rgba(94,136,66,0.2)", boxShadow: "0 4px 14px rgba(30,60,15,0.08)" }) }}>
+                {cta}
+              </Link>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" style={{ padding: "80px 40px", maxWidth: 700, margin: "0 auto", position: "relative", zIndex: 1 }}>
+        <div style={{ textAlign: "center", marginBottom: 56 }}>
+          <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(26,46,10,0.4)", textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 12 }}>FAQ</p>
+          <h2 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 38, fontWeight: 700, color: "#1A2E0A", letterSpacing: "-1.5px" }}>
+            Preguntas<br /><em style={{ fontStyle: "italic", color: "#3C6020" }}>frecuentes</em>
+          </h2>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {faqs.map(({ q, a }) => (
+            <div key={q} style={{ ...G.card, borderRadius: 20, padding: "18px 22px", position: "relative", overflow: "hidden" }}>
+              <div style={shine} />
+              <p style={{ fontSize: 14, fontWeight: 600, color: "#1A2E0A", letterSpacing: "-0.3px", marginBottom: 8 }}>{q}</p>
+              <p style={{ fontSize: 13, color: "rgba(26,46,10,0.5)", lineHeight: 1.7, fontWeight: 300 }}>{a}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA FINAL */}
+      <section style={{ padding: "80px 40px", maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 1, paddingBottom: 120 }}>
+        <div style={{ ...G.dark, borderRadius: 32, padding: "60px 40px", textAlign: "center", position: "relative", overflow: "hidden" }}>
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "40%", background: "linear-gradient(180deg,rgba(255,255,255,0.07),transparent)", pointerEvents: "none", borderRadius: "inherit" }} />
+          <div style={{ position: "absolute", top: -80, right: -80, width: 250, height: 250, borderRadius: "50%", background: "radial-gradient(circle,rgba(200,240,160,0.12),transparent 70%)", pointerEvents: "none" }} />
+          <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(180,240,140,0.38)", textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 16, position: "relative", zIndex: 1 }}>Empieza hoy</p>
+          <h2 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 42, fontWeight: 700, color: "rgba(240,255,230,0.9)", letterSpacing: "-1.5px", lineHeight: 1.1, marginBottom: 16, position: "relative", zIndex: 1 }}>
+            ¿Lista para empezar?
+          </h2>
+          <p style={{ fontSize: 15, color: "rgba(210,248,180,0.45)", fontWeight: 300, lineHeight: 1.7, marginBottom: 32, position: "relative", zIndex: 1 }}>
+            Tu primer menú personalizado en menos de 2 minutos. Sin tarjeta de crédito.
+          </p>
+          <Link href="/registro" style={{ ...G.card, display: "inline-block", padding: "14px 32px", borderRadius: 16, fontSize: 14, fontWeight: 600, color: "#1A2E0A", textDecoration: "none", position: "relative", zIndex: 1, letterSpacing: "0.02em" }}>
+            Crear mi cuenta gratis →
+          </Link>
+          <p style={{ fontSize: 11, color: "rgba(180,240,140,0.25)", marginTop: 16, fontWeight: 300, position: "relative", zIndex: 1 }}>
+            Más de 500 personas ya tienen su plan personalizado
+          </p>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer style={{ ...G.card, borderRadius: 0, borderLeft: "none", borderRight: "none", borderBottom: "none", padding: "24px 40px", position: "relative", zIndex: 1 }}>
+        <div style={shine} />
+        <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ width: 24, height: 24, borderRadius: 7, ...G.matcha, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ fontFamily: "var(--font-playfair,serif)", color: "white", fontSize: 11, fontWeight: 600, fontStyle: "italic" }}>N</span>
+            </div>
+            <span style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 15, fontWeight: 600, color: "#1A2E0A" }}>NutriAI</span>
+          </div>
+          <div style={{ display: "flex", gap: 20 }}>
+            {["Privacidad", "Términos", "Cookies"].map(l => (
+              <a key={l} href="#" style={{ fontSize: 12, color: "rgba(26,46,10,0.4)", textDecoration: "none", fontWeight: 300 }}>{l}</a>
+            ))}
+          </div>
+          <p style={{ fontSize: 11, color: "rgba(26,46,10,0.3)", fontWeight: 300 }}>© {new Date().getFullYear()} NutriAI</p>
+        </div>
       </footer>
 
-      <style jsx global>{`
-        .reveal {
-          animation: fadeInUp linear both;
-          animation-timeline: view();
-          animation-range: entry 10% cover 30%;
-        }
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(18px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
     </div>
   );
 }
