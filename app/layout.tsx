@@ -1,18 +1,7 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import { Playfair_Display, Instrument_Sans } from "next/font/google";
 import "./globals.css";
-import NuriaFAB from '@/components/NuriaFAB'
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import { ThemeProvider } from "@/lib/theme";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -37,11 +26,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${instrument.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}<NuriaFAB /></body>
+    <html lang="es" className={`${playfair.variable} ${instrument.variable}`}>
+      <body>
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
