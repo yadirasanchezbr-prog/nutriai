@@ -74,10 +74,10 @@ export default function Home() {
         </div>
         <div style={{ display: "flex", gap: 24, alignItems: "center" }}>
           {[["Funcionalidades", "#features"], ["Precios", "#precios"], ["FAQ", "#faq"]].map(([l, h]) => (
-            <a key={l} href={h} style={{ fontSize: 13, color: "rgba(26,46,10,0.45)", fontWeight: 400, textDecoration: "none", letterSpacing: "0.01em" }}>{l}</a>
+            <a className="link-hover" key={l} href={h} style={{ fontSize: 13, color: "rgba(26,46,10,0.45)", fontWeight: 400, textDecoration: "none", letterSpacing: "0.01em" }}>{l}</a>
           ))}
-          <Link href="/login" style={{ fontSize: 13, color: "rgba(26,46,10,0.45)", fontWeight: 400, textDecoration: "none" }}>Entrar</Link>
-          <Link href="/registro" style={{ ...G.matcha, padding: "8px 20px", borderRadius: 14, fontSize: 13, fontWeight: 500, color: "white", textDecoration: "none", letterSpacing: "0.02em" }}>
+          <Link className="link-hover" href="/login" style={{ fontSize: 13, color: "rgba(26,46,10,0.45)", fontWeight: 400, textDecoration: "none" }}>Entrar</Link>
+          <Link className="btn-hover" href="/registro" style={{ ...G.matcha, padding: "8px 20px", borderRadius: 14, fontSize: 13, fontWeight: 500, color: "white", textDecoration: "none", letterSpacing: "0.02em" }}>
             Empezar gratis
           </Link>
         </div>
@@ -88,7 +88,7 @@ export default function Home() {
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 60, alignItems: "center" }}>
 
           {/* Left - texto */}
-          <div>
+          <div className="reveal">
             <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.6)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.9)", borderRadius: 50, padding: "5px 14px", marginBottom: 24, boxShadow: "0 4px 14px rgba(30,60,15,0.08)" }}>
               <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#5E8842", boxShadow: "0 0 6px rgba(94,136,66,0.6)" }} />
               <span style={{ fontSize: 11, fontWeight: 600, color: "#3C6020", letterSpacing: "0.06em" }}>Nutrición clínica con IA</span>
@@ -102,7 +102,7 @@ export default function Home() {
               Nuria aprende de ti cada semana y adapta tu menú según cómo te sientes. Más de 34 patologías, 18 intolerancias y todos los tipos de alimentación.
             </p>
             <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 32 }}>
-              <Link href="/registro" style={{ ...G.matcha, padding: "12px 28px", borderRadius: 16, fontSize: 14, fontWeight: 500, color: "white", textDecoration: "none", letterSpacing: "0.02em", boxShadow: "0 8px 22px rgba(58,92,30,0.42)" }}>
+              <Link className="btn-hover" href="/registro" style={{ ...G.matcha, padding: "12px 28px", borderRadius: 16, fontSize: 14, fontWeight: 500, color: "white", textDecoration: "none", letterSpacing: "0.02em", boxShadow: "0 8px 22px rgba(58,92,30,0.42)" }}>
                 Crear mi plan gratis →
               </Link>
               <a href="#features" style={{ fontSize: 13, color: "#3C6020", fontWeight: 500, textDecoration: "none", letterSpacing: "0.01em" }}>
@@ -124,7 +124,7 @@ export default function Home() {
           </div>
 
           {/* Right - dashboard preview */}
-          <div style={{ position: "relative" }}>
+          <div className="reveal reveal-delay-2" style={{ position: "relative" }}>
             <div style={{ position: "absolute", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle,rgba(255,255,255,0.3),transparent 65%)", top: -80, right: -80, pointerEvents: "none" }} />
             {/* Panel flotante simulado */}
             <div style={{ ...G.card, borderRadius: 28, overflow: "hidden", position: "relative", transform: "perspective(1200px) rotateY(-4deg) rotateX(2deg)", boxShadow: "0 40px 80px rgba(30,60,15,0.2),0 20px 40px rgba(30,60,15,0.12),0 1px 0 rgba(255,255,255,1) inset" }}>
@@ -196,7 +196,7 @@ export default function Home() {
 
       {/* COMO FUNCIONA */}
       <section style={{ padding: "80px 40px", maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 1 }}>
-        <div style={{ textAlign: "center", marginBottom: 56 }}>
+        <div className="reveal" style={{ textAlign: "center", marginBottom: 56 }}>
           <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(26,46,10,0.4)", textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 12 }}>Cómo funciona</p>
           <h2 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 38, fontWeight: 700, color: "#1A2E0A", letterSpacing: "-1.5px", lineHeight: 1.1 }}>
             Tres pasos. Un plan<br /><em style={{ fontStyle: "italic", color: "#3C6020" }}>que funciona.</em>
@@ -207,8 +207,8 @@ export default function Home() {
             ["01", "Cuéntale a Nuria cómo eres", "Formulario clínico avanzado: patologías, intolerancias, síntomas digestivos y tipo de alimentación.", "📋"],
             ["02", "Recibe tu menú personalizado", "GPT-4o genera tu menú de 7 días con recetas, ingredientes en gramos en crudo y macros calculados.", "🌿"],
             ["03", "Nuria se adapta cada semana", "Check-in diario, NutriScore semanal y reajuste automático. Tu plan mejora solo.", "✨"],
-          ].map(([num, title, desc, emoji]) => (
-            <div key={num} style={{ ...G.card, borderRadius: 24, padding: "28px 24px", position: "relative", overflow: "hidden" }}>
+          ].map(([num, title, desc, emoji], i) => (
+            <div className={`reveal card-hover stagger-${i + 1}`} key={num} style={{ ...G.card, borderRadius: 24, padding: "28px 24px", position: "relative", overflow: "hidden" }}>
               <div style={shine} />
               <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg,#5E8842,transparent)", opacity: 0.5 }} />
               <p style={{ fontSize: 11, fontWeight: 600, color: "rgba(26,46,10,0.3)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 16 }}>Paso {num}</p>
@@ -222,15 +222,15 @@ export default function Home() {
 
       {/* FEATURES */}
       <section id="features" style={{ padding: "80px 40px", maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 1 }}>
-        <div style={{ textAlign: "center", marginBottom: 56 }}>
+        <div className="reveal" style={{ textAlign: "center", marginBottom: 56 }}>
           <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(26,46,10,0.4)", textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 12 }}>Funcionalidades</p>
           <h2 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 38, fontWeight: 700, color: "#1A2E0A", letterSpacing: "-1.5px", lineHeight: 1.1 }}>
             Todo lo que necesitas<br /><em style={{ fontStyle: "italic", color: "#3C6020" }}>para comer bien de verdad</em>
           </h2>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
-          {features.map(({ title, desc, emoji }) => (
-            <div key={title} style={{ ...G.card, borderRadius: 22, padding: "22px 20px", position: "relative", overflow: "hidden" }}>
+          {features.map(({ title, desc, emoji }, i) => (
+            <div className={`reveal card-hover stagger-${i + 1}`} key={title} style={{ ...G.card, borderRadius: 22, padding: "22px 20px", position: "relative", overflow: "hidden" }}>
               <div style={shine} />
               <p style={{ fontSize: 28, marginBottom: 14 }}>{emoji}</p>
               <h3 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 17, fontWeight: 600, color: "#1A2E0A", letterSpacing: "-0.4px", marginBottom: 8 }}>{title}</h3>
@@ -242,15 +242,15 @@ export default function Home() {
 
       {/* TESTIMONIOS */}
       <section style={{ padding: "80px 40px", maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 1 }}>
-        <div style={{ textAlign: "center", marginBottom: 56 }}>
+        <div className="reveal" style={{ textAlign: "center", marginBottom: 56 }}>
           <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(26,46,10,0.4)", textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 12 }}>Testimonios</p>
           <h2 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 38, fontWeight: 700, color: "#1A2E0A", letterSpacing: "-1.5px" }}>
             Personas reales,<br /><em style={{ fontStyle: "italic", color: "#3C6020" }}>resultados reales</em>
           </h2>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
-          {testimonios.map(({ inicial, nombre, resultado, texto, color }) => (
-            <div key={nombre} style={{ ...G.card, borderRadius: 22, padding: "22px 20px", position: "relative", overflow: "hidden" }}>
+          {testimonios.map(({ inicial, nombre, resultado, texto, color }, i) => (
+            <div className={`reveal card-hover stagger-${i + 1}`} key={nombre} style={{ ...G.card, borderRadius: 22, padding: "22px 20px", position: "relative", overflow: "hidden" }}>
               <div style={shine} />
               <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
                 <div style={{ width: 44, height: 44, borderRadius: "50%", background: `linear-gradient(145deg,${color}99,${color})`, display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid rgba(255,255,255,0.9)", flexShrink: 0 }}>
@@ -272,7 +272,7 @@ export default function Home() {
 
       {/* PRECIOS */}
       <section id="precios" style={{ padding: "80px 40px", maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 1 }}>
-        <div style={{ textAlign: "center", marginBottom: 56 }}>
+        <div className="reveal" style={{ textAlign: "center", marginBottom: 56 }}>
           <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(26,46,10,0.4)", textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 12 }}>Precios</p>
           <h2 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 38, fontWeight: 700, color: "#1A2E0A", letterSpacing: "-1.5px" }}>
             Elige tu plan.<br /><em style={{ fontStyle: "italic", color: "#3C6020" }}>Sin permanencia.</em>
@@ -284,8 +284,8 @@ export default function Home() {
             { nombre: "Pro", precio: "19,99€", badge: "Más popular", items: ["✓ Todo Básico", "✓ Ajuste semanal", "✓ NutriScore", "✓ Protocolo digestivo", "✓ Modo restaurante"], cta: "Empezar con Pro", destacado: true, longevity: false },
             { nombre: "Élite", precio: "39,99€", badge: "", items: ["✓ Todo Pro", "✓ Protocolo hormonal", "✓ Gemelo metabólico", "✓ Seguimiento avanzado", "✓ Prioridad soporte"], cta: "Empezar", destacado: false, longevity: false },
             { nombre: "Longevity", precio: "59,99€", badge: "NUEVO", items: ["✓ Todo Élite", "✓ Plan antiedad", "✓ Protocolo antioxidante", "✓ Análisis longevidad", "✓ Suplementación antiedad"], cta: "Quiero vivir más", destacado: false, longevity: true },
-          ].map(({ nombre, precio, badge, items, cta, destacado, longevity }) => (
-            <div key={nombre} style={{ ...G.card, borderRadius: 24, padding: "24px 20px", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", ...(destacado ? { borderRight: "1px solid rgba(94,136,66,0.3)", borderBottom: "1px solid rgba(94,136,66,0.3)" } : {}), ...(longevity ? { borderRight: "1px solid rgba(186,120,20,0.3)", borderBottom: "1px solid rgba(186,120,20,0.3)" } : {}) }}>
+          ].map(({ nombre, precio, badge, items, cta, destacado, longevity }, i) => (
+            <div className={`reveal card-hover stagger-${i + 1}`} key={nombre} style={{ ...G.card, borderRadius: 24, padding: "24px 20px", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", ...(destacado ? { borderRight: "1px solid rgba(94,136,66,0.3)", borderBottom: "1px solid rgba(94,136,66,0.3)" } : {}), ...(longevity ? { borderRight: "1px solid rgba(186,120,20,0.3)", borderBottom: "1px solid rgba(186,120,20,0.3)" } : {}) }}>
               <div style={shine} />
               {badge && (
                 <div style={{ position: "absolute", top: -1, left: "50%", transform: "translateX(-50%)", background: destacado ? "linear-gradient(155deg,#5E8842,#3C6020)" : "linear-gradient(155deg,#C8A020,#A07818)", borderRadius: "0 0 12px 12px", padding: "4px 14px" }}>
@@ -318,7 +318,7 @@ export default function Home() {
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {faqs.map(({ q, a }) => (
-            <div key={q} style={{ ...G.card, borderRadius: 20, padding: "18px 22px", position: "relative", overflow: "hidden" }}>
+            <div className="reveal card-hover" key={q} style={{ ...G.card, borderRadius: 20, padding: "18px 22px", position: "relative", overflow: "hidden" }}>
               <div style={shine} />
               <p style={{ fontSize: 14, fontWeight: 600, color: "#1A2E0A", letterSpacing: "-0.3px", marginBottom: 8 }}>{q}</p>
               <p style={{ fontSize: 13, color: "rgba(26,46,10,0.5)", lineHeight: 1.7, fontWeight: 300 }}>{a}</p>
