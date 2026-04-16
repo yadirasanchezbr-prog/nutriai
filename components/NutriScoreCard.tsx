@@ -11,49 +11,9 @@ type Score = {
   checkins_count: number
 }
 
-function ScoreRing({ score }: { score: number }) {
-  const r = 44
-  const circ = 2 * Math.PI * r
-  const pct = Math.max(0, Math.min(100, score))
-  const dash = (pct / 100) * circ
-  const color = pct >= 70 ? '#1D9E75' : pct >= 45 ? '#EF9F27' : '#E24B4A'
-
-  return (
-    <svg width="120" height="120" viewBox="0 0 120 120">
-      <circle cx="60" cy="60" r={r} fill="none" stroke="#E8E6E0" strokeWidth="8"/>
-      <circle cx="60" cy="60" r={r} fill="none" stroke={color} strokeWidth="8"
-        strokeLinecap="round"
-        strokeDasharray={`${dash} ${circ}`}
-        transform="rotate(-90 60 60)"
-        style={{ transition: 'stroke-dasharray 1s ease' }}
-      />
-      <text x="60" y="55" textAnchor="middle" fontSize="24" fontWeight="500" fill={color}>{Math.round(pct)}</text>
-      <text x="60" y="72" textAnchor="middle" fontSize="11" fill="#888780">/ 100</text>
-    </svg>
-  )
-}
-
-function MiniBar({ label, value, color }: { label: string; value: number; color: string }) {
-  return (
-    <div style={{ marginBottom: 8 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 3 }}>
-        <span style={{ color: '#5F5E5A' }}>{label}</span>
-        <span style={{ color, fontWeight: 500 }}>{Math.round(value)}%</span>
-      </div>
-      <div style={{ height: 4, background: '#E8E6E0', borderRadius: 2 }}>
-        <div style={{
-          height: '100%', borderRadius: 2, background: color,
-          width: `${Math.min(100, value)}%`,
-          transition: 'width 0.8s ease',
-        }} />
-      </div>
-    </div>
-  )
-}
-
 export default function NutriScoreCard() {
   const [current, setCurrent] = useState<Score | null>(null)
-  const [prev, setPrev]       = useState<Score | null>(null)
+  const [prev, setPrev] = useState<Score | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -73,46 +33,73 @@ export default function NutriScoreCard() {
     load()
   }, [])
 
-  if (loading) return <div style={{ padding: 20, color: '#888780', fontSize: 13 }}>Cargando NutriScore...</div>
+  if (loading) return (
+    <p style={{ fontSize: 12, color: 'rgba(26,46,10,0.35)', fontWeight: 300, padding: '8px 0' }}>Cargando...</p>
+  )
 
-  if (!current) {
-    return (
-      <div style={{ padding: 16, background: '#F5F5F3', borderRadius: 12, textAlign: 'center' }}>
-        <p style={{ fontSize: 13, color: '#888780' }}>
-          Completa al menos 3 check-ins esta semana para ver tu NutriScore
-        </p>
-      </div>
-    )
-  }
+  if (!current) return (
+    <p style={{ fontSize: 12, color: 'rgba(26,46,10,0.35)', fontWeight: 300, lineHeight: 1.6 }}>
+      Completa 3 check-ins esta semana para ver tu NutriScore
+    </p>
+  )
 
   const diff = prev ? Math.round(current.score - prev.score) : null
-  const scoreColor = current.score >= 70 ? '#1D9E75' : current.score >= 45 ? '#EF9F27' : '#E24B4A'
-  const label = current.score >= 80 ? 'Excelente' : current.score >= 65 ? 'Muy bien' :
-    current.score >= 50 ? 'En progreso' : 'Necesita ajustes'
+  const scoreColor = current.score >= 70 ? '#5E8842' : current.score >= 45 ? '#A07830' : '#8B3020'
+  const label = current.score >= 80 ? 'Excelente' : current.score >= 65 ? 'Muy bien' : current.score >= 50 ? 'En progreso' : 'Necesita ajustes'
+  const r = 32
+  const circ = 2 * Math.PI * r
+  const dash = (Math.min(100, current.score) / 100) * circ
 
   return (
-    <div style={{ background: 'var(--color-background-primary)', border: '0.5px solid var(--color-border-tertiary)', borderRadius: 16, padding: 20 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
-        <ScoreRing score={current.score} />
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}>
+        <svg width="80" height="80" viewBox="0 0 80 80" style={{ flexShrink: 0, filter: 'drop-shadow(0 4px 10px rgba(44,74,20,0.2))' }}>
+          <defs>
+            <linearGradient id="sg3" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#6B9248" />
+              <stop offset="100%" stopColor="#A8CA70" />
+            </linearGradient>
+          </defs>
+          <circle cx="40" cy="40" r={r} fill="none" stroke="rgba(94,136,66,0.1)" strokeWidth="6" />
+          <circle cx="40" cy="40" r={r} fill="none" stroke="url(#sg3)" strokeWidth="6"
+            strokeLinecap="round"
+            strokeDasharray={`${dash} ${circ}`}
+            transform="rotate(-90 40 40)"
+            style={{ transition: 'stroke-dasharray 1s ease' }}
+          />
+          <text x="40" y="36" textAnchor="middle" fontSize="16" fontWeight="700" fill="#1A2E0A" fontFamily="var(--font-playfair, serif)">{Math.round(current.score)}</text>
+          <text x="40" y="49" textAnchor="middle" fontSize="8" fill="rgba(26,46,10,0.35)" fontWeight="300">/100</text>
+        </svg>
         <div>
-          <p style={{ fontSize: 12, color: '#888780', marginBottom: 4 }}>NutriScore semanal</p>
-          <p style={{ fontSize: 18, fontWeight: 500, color: scoreColor }}>{label}</p>
+          <p style={{ fontFamily: 'var(--font-playfair, serif)', fontSize: 17, fontWeight: 600, color: scoreColor, fontStyle: 'italic', letterSpacing: '-0.3px' }}>{label}</p>
           {diff !== null && (
-            <p style={{ fontSize: 12, marginTop: 4, color: diff >= 0 ? '#1D9E75' : '#E24B4A' }}>
-              {diff >= 0 ? '+' : ''}{diff} vs semana anterior
+            <p style={{ fontSize: 10, marginTop: 4, color: diff >= 0 ? '#5E8842' : '#8B3020', fontWeight: 500 }}>
+              {diff >= 0 ? '↑' : '↓'} {Math.abs(diff)} vs semana anterior
             </p>
           )}
-          <p style={{ fontSize: 11, color: '#888780', marginTop: 4 }}>
-            {current.checkins_count}/7 check-ins completados
+          <p style={{ fontSize: 10, color: 'rgba(26,46,10,0.35)', marginTop: 4, fontWeight: 300 }}>
+            {current.checkins_count}/7 check-ins
           </p>
         </div>
       </div>
 
-      <MiniBar label="Adherencia al plan" value={current.adherencia} color="#1D9E75" />
-      <MiniBar label="Energía media" value={current.energia_media} color="#378ADD" />
-      <MiniBar label="Digestión media" value={current.digestion_media} color="#534AB7" />
+      {[
+        { label: 'Adherencia', value: current.adherencia, color: '#5E8842' },
+        { label: 'Energía', value: current.energia_media, color: '#7AAA52' },
+        { label: 'Digestión', value: current.digestion_media, color: '#9AC872' },
+      ].map(({ label, value, color }) => (
+        <div key={label} style={{ marginBottom: 10 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, marginBottom: 4 }}>
+            <span style={{ color: 'rgba(26,46,10,0.38)', fontWeight: 400 }}>{label}</span>
+            <span style={{ color, fontWeight: 600 }}>{Math.round(value)}%</span>
+          </div>
+          <div style={{ height: 3, background: 'rgba(94,136,66,0.08)', borderRadius: 3, overflow: 'hidden' }}>
+            <div style={{ height: '100%', borderRadius: 3, background: color, width: `${Math.min(100, value)}%`, transition: 'width 0.8s ease', boxShadow: `0 1px 4px ${color}70` }} />
+          </div>
+        </div>
+      ))}
 
-      <p style={{ fontSize: 11, color: '#B4B2A9', marginTop: 12 }}>
+      <p style={{ fontSize: 9, color: 'rgba(26,46,10,0.28)', marginTop: 10, fontWeight: 300, letterSpacing: '0.04em' }}>
         Semana del {new Date(current.week_start).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
       </p>
     </div>
