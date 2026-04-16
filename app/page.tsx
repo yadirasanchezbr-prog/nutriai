@@ -1,377 +1,388 @@
 "use client";
 import Link from "next/link";
-import { useTheme, LIGHT, DARK } from "@/lib/theme";
+import { useEffect, useRef, useState } from "react";
 
-const features = [
-  { title: "Menú semanal personalizado", desc: "7 días de platos adaptados a tu objetivo, intolerancias y tipo de dieta. Con ingredientes en gramos en crudo.", emoji: "🥗" },
-  { title: "Nuria, tu nutricionista IA 24h", desc: "Resuelve dudas, gestiona síntomas y te apoya emocionalmente. Aprende de ti cada semana.", emoji: "💬" },
-  { title: "NutriScore semanal", desc: "Un número del 0-100 que resume tu semana: adherencia, energía y digestión.", emoji: "📊" },
-  { title: "Ajuste automático", desc: "Nuria analiza tus check-ins y reajusta el menú cada semana. Tu plan mejora solo.", emoji: "🔄" },
-  { title: "Lista de la compra", desc: "Del menú semanal se genera una lista agrupada por sección del supermercado.", emoji: "🛒" },
-  { title: "Modo restaurante", desc: "Dile a Nuria dónde vas a cenar y te da las 3 mejores opciones adaptadas a tu plan.", emoji: "🍽️" },
+const PROBLEMAS = [
+  { icon: "◈", titulo: "Inflamación constante", desc: "Tu cuerpo lleva meses enviando señales que nadie ha sabido leer. La inflamación crónica no es normal, es un mensaje." },
+  { icon: "◉", titulo: "Digestión comprometida", desc: "Hinchazón, pesadez, síntomas que van y vienen. No es estrés. Es un sistema digestivo que necesita un protocolo real." },
+  { icon: "◎", titulo: "Estancamiento físico", desc: "Haces todo bien y no avanzas. Porque sin un mapa metabólico personalizado, el esfuerzo se desperdicia." },
+  { icon: "✦", titulo: "Fatiga y descontrol hormonal", desc: "La energía baja, el humor fluctúa, el cuerpo no responde. La nutrición de precisión puede cambiar todo esto." },
 ];
 
-const testimonios = [
-  { inicial: "L", nombre: "Laura M.", resultado: "−6 kg en 4 meses", texto: "Tengo SOP y ninguna dieta me funcionaba. Nuria adapta el menú a mi ciclo automáticamente.", color: "#5E8842" },
-  { inicial: "J", nombre: "Javier R.", resultado: "Digestión mejorada", texto: "Llevo 3 meses con el plan antiinflamatorio. Mi digestión ha mejorado un 80%.", color: "#4A7A9A" },
-  { inicial: "A", nombre: "Ana C.", resultado: "Sin hinchazón", texto: "Tenía SIBO y no sabía qué comer. Nuria identificó mis alimentos trigger.", color: "#7A6040" },
+const FASES = [
+  { num: "01", titulo: "Evaluación biológica profunda", desc: "Análisis de biomarcadores, historial clínico completo, patrones metabólicos y respuesta hormonal. Tu biología como punto de partida." },
+  { num: "02", titulo: "Estrategia nutricional personalizada", desc: "Un protocolo diseñado exclusivamente para ti. Ningún plan estándar. Cada macro, cada timing, cada alimento — justificado." },
+  { num: "03", titulo: "Ajuste dinámico semanal", desc: "Nuria analiza tu respuesta cada semana y reajusta el protocolo. El plan evoluciona contigo, no al revés." },
+  { num: "04", titulo: "Optimización metabólica continua", desc: "Monitorización de marcadores, adaptación a ciclos hormonales y refinamiento progresivo hasta alcanzar tu potencial máximo." },
 ];
 
-const faqs = [
-  { q: "¿Cuánto tarda en generarse mi primer menú?", a: "Menos de 2 minutos. Rellenas tu perfil clínico y Nuria genera tu menú al instante." },
-  { q: "¿Funciona para veganos, celíacos o con intolerancias?", a: "Sí. El formulario recoge más de 18 intolerancias y todos los tipos de alimentación." },
-  { q: "¿Cada cuánto se actualiza el menú?", a: "Cada semana automáticamente. Nuria analiza tus check-ins y reajusta según cómo te has sentido." },
-  { q: "¿Es seguro para personas con patologías?", a: "NutriAI es una herramienta de apoyo nutricional. El formulario recoge más de 34 condiciones de salud." },
-  { q: "¿Puedo cancelar cuando quiera?", a: "Sí, sin permanencia ni penalizaciones. Cancelas cuando quieras desde tu perfil." },
+const TESTIMONIOS = [
+  { inicial: "C", nombre: "Carmen R.", resultado: "Inflamación reducida en 3 semanas", texto: "Llevo 8 años con problemas digestivos. En 3 semanas de protocolo entendí más sobre mi cuerpo que en toda mi vida anterior.", cargo: "Directiva · 38 años" },
+  { inicial: "M", nombre: "Marta L.", resultado: "SOP bajo control", texto: "Nadie me había explicado la conexión entre mi alimentación y mi ciclo hormonal. El método es diferente a todo lo que había probado.", cargo: "Médica · 34 años" },
+  { inicial: "S", nombre: "Sofía T.", resultado: "−8 kg en 4 meses", texto: "No fue una dieta. Fue entender cómo funciona mi metabolismo y darle lo que necesita. Los resultados llegaron solos.", cargo: "Arquitecta · 41 años" },
 ];
-
-const G = {
-  card: {
-    background: "rgba(255,255,255,0.58)",
-    backdropFilter: "blur(40px) saturate(180%)",
-    WebkitBackdropFilter: "blur(40px) saturate(180%)",
-    borderTop: "1px solid rgba(255,255,255,0.98)",
-    borderLeft: "1px solid rgba(255,255,255,0.9)",
-    borderRight: "1px solid rgba(255,255,255,0.7)",
-    borderBottom: "1px solid rgba(255,255,255,0.55)",
-    boxShadow: "0 8px 28px rgba(30,60,15,0.09),inset 0 1px 0 rgba(255,255,255,1)",
-  },
-  matcha: {
-    background: "linear-gradient(155deg,#5E8842,#3C6020 50%,#2C4A14)",
-    borderTop: "1px solid rgba(180,240,140,0.2)",
-    borderLeft: "1px solid rgba(180,240,140,0.12)",
-    borderRight: "1px solid rgba(0,0,0,0.15)",
-    borderBottom: "1px solid rgba(0,0,0,0.18)",
-    boxShadow: "0 14px 36px rgba(44,74,20,0.45),inset 0 1px 0 rgba(255,255,255,0.14)",
-  },
-  dark: {
-    background: "linear-gradient(155deg,rgba(38,58,24,0.94),rgba(24,40,12,0.97))",
-    borderTop: "1px solid rgba(255,255,255,0.1)",
-    borderLeft: "1px solid rgba(255,255,255,0.07)",
-    borderRight: "1px solid rgba(0,0,0,0.2)",
-    borderBottom: "1px solid rgba(0,0,0,0.25)",
-    boxShadow: "0 20px 48px rgba(20,40,8,0.5),inset 0 1px 0 rgba(255,255,255,0.12)",
-  },
-};
-
-const shine = { position: "absolute" as const, top: 0, left: 0, right: 0, height: 1, background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.95) 20%,white 50%,rgba(255,255,255,0.95) 80%,transparent)", pointerEvents: "none" as const };
 
 export default function Home() {
-  const { theme, toggle } = useTheme();
-  const T = theme === "dark" ? DARK : LIGHT;
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add("vis"); }),
+      { threshold: 0.08, rootMargin: "0px 0px -40px 0px" }
+    );
+    document.querySelectorAll(".rev").forEach(el => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <div style={{ fontFamily: "var(--font-instrument,sans-serif)", background: T.bg, minHeight: "100vh" }}>
+    <div style={{ fontFamily: "var(--font-instrument, sans-serif)", background: "#0B0B0B", color: "#EDEDED", minHeight: "100vh", overflowX: "hidden" }}>
 
-      {/* Orbs */}
-      <div style={{ position: "fixed", width: 600, height: 600, borderRadius: "50%", background: "radial-gradient(circle,rgba(255,255,255,0.22),transparent 65%)", top: -200, right: -150, pointerEvents: "none", zIndex: 0 }} />
-      <div style={{ position: "fixed", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle,rgba(60,100,40,0.15),transparent 65%)", bottom: -100, left: -80, pointerEvents: "none", zIndex: 0 }} />
+      <style>{`
+        .rev { opacity:0; transform:translateY(32px); transition:opacity 0.8s cubic-bezier(0.16,1,0.3,1),transform 0.8s cubic-bezier(0.16,1,0.3,1); }
+        .rev.vis { opacity:1; transform:translateY(0); }
+        .d1{transition-delay:0.1s}.d2{transition-delay:0.2s}.d3{transition-delay:0.3s}.d4{transition-delay:0.4s}
+        .card-e { transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), border-color 0.3s ease; }
+        .card-e:hover { transform: translateY(-6px); border-color: rgba(198,169,107,0.4) !important; }
+        .btn-e { transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s ease, filter 0.2s ease; }
+        .btn-e:hover { transform: translateY(-2px) scale(1.02); filter: brightness(1.08); }
+        .btn-e:active { transform: scale(0.97); }
+        .link-e { transition: color 0.2s ease; position: relative; }
+        .link-e:hover { color: #C6A96B !important; }
+        .gold-line { position:absolute; bottom:-2px; left:0; width:0; height:1px; background:#C6A96B; transition:width 0.3s cubic-bezier(0.16,1,0.3,1); }
+        .link-e:hover .gold-line { width:100%; }
+        @keyframes pulse-gold { 0%,100%{opacity:0.6;transform:scale(1)} 50%{opacity:1;transform:scale(1.15)} }
+        .pulse { animation: pulse-gold 2.5s ease-in-out infinite; }
+        @keyframes float-slow { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+        .float { animation: float-slow 6s ease-in-out infinite; }
+        .noise { background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); }
+      `}</style>
 
       {/* NAV */}
-      <nav style={{ ...T.card, position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, borderRadius: 0, borderLeft: "none", borderRight: "none", borderTop: "none", padding: "0 40px", height: 56, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={shine} />
+      <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, borderBottom: "1px solid rgba(198,169,107,0.1)", background: "rgba(11,11,11,0.88)", backdropFilter: "blur(40px) saturate(180%)", WebkitBackdropFilter: "blur(40px) saturate(180%)", padding: "0 48px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 10, ...T.matcha, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px rgba(44,74,20,0.45),inset 0 1px 0 rgba(255,255,255,0.18)" }}>
-            <span style={{ fontFamily: "var(--font-playfair,serif)", color: "white", fontSize: 15, fontWeight: 600, fontStyle: "italic" }}>N</span>
+          <div style={{ width: 32, height: 32, borderRadius: 9, background: "linear-gradient(145deg,#C6A96B,#8A7240)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 14px rgba(198,169,107,0.3)" }}>
+            <span style={{ fontFamily: "var(--font-playfair, serif)", color: "white", fontSize: 14, fontWeight: 700, fontStyle: "italic" }}>N</span>
           </div>
-          <span style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 18, fontWeight: 600, color: T.text.primary, letterSpacing: "-0.4px" }}>NutriAI</span>
+          <span style={{ fontFamily: "var(--font-playfair, serif)", fontSize: 18, fontWeight: 600, color: "#EDEDED", letterSpacing: "-0.4px" }}>NutriAI</span>
         </div>
-        <div style={{ display: "flex", gap: 24, alignItems: "center" }}>
-          {[["Funcionalidades", "#features"], ["Precios", "#precios"], ["FAQ", "#faq"]].map(([l, h]) => (
-            <a className="link-hover" key={l} href={h} style={{ fontSize: 13, color: T.text.secondary, fontWeight: 400, textDecoration: "none", letterSpacing: "0.01em" }}>{l}</a>
+        <div style={{ display: "flex", gap: 28, alignItems: "center" }}>
+          {[["El método", "#metodo"], ["Resultados", "#resultados"], ["Servicios", "#servicios"]].map(([l, h]) => (
+            <a key={l} href={h} className="link-e" style={{ fontSize: 13, color: "rgba(237,237,237,0.45)", fontWeight: 400, textDecoration: "none", letterSpacing: "0.01em", position: "relative" }}>
+              {l}<span className="gold-line" />
+            </a>
           ))}
-          <Link className="link-hover" href="/login" style={{ fontSize: 13, color: T.text.secondary, fontWeight: 400, textDecoration: "none" }}>Entrar</Link>
-          <button onClick={toggle}
-            style={{...T.btnW, padding:"7px 12px", fontSize:13, borderRadius:12, marginRight:4}}>
-            {theme === "dark" ? "☀️" : "🌙"}
-          </button>
-          <Link className="btn-hover" href="/registro" style={{ ...T.matcha, padding: "8px 20px", borderRadius: 14, fontSize: 13, fontWeight: 500, color: "white", textDecoration: "none", letterSpacing: "0.02em" }}>
-            Empezar gratis
+          <Link href="/login" className="link-e" style={{ fontSize: 13, color: "rgba(237,237,237,0.45)", textDecoration: "none", position: "relative" }}>
+            Acceder<span className="gold-line" />
+          </Link>
+          <Link href="/registro" className="btn-e" style={{ background: "linear-gradient(145deg,#C6A96B,#8A7240)", border: "none", borderRadius: 13, padding: "9px 22px", fontSize: 13, fontWeight: 600, color: "white", textDecoration: "none", letterSpacing: "0.02em", boxShadow: "0 6px 20px rgba(198,169,107,0.3)", display: "inline-block" }}>
+            Solicitar evaluación
           </Link>
         </div>
       </nav>
 
       {/* HERO */}
-      <section style={{ paddingTop: 120, paddingBottom: 80, paddingLeft: 40, paddingRight: 40, maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 1 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 60, alignItems: "center" }}>
+      <section style={{ minHeight: "100vh", display: "flex", alignItems: "center", position: "relative", overflow: "hidden", paddingTop: 60 }}>
+        {/* Background elements */}
+        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 60% 60% at 70% 50%, rgba(198,169,107,0.06) 0%, transparent 70%)", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", top: "10%", right: "5%", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(198,169,107,0.04), transparent 70%)", pointerEvents: "none" }} className="float" />
+        <div style={{ position: "absolute", bottom: "10%", left: "5%", width: 300, height: 300, borderRadius: "50%", background: "radial-gradient(circle, rgba(198,169,107,0.03), transparent 70%)", pointerEvents: "none" }} />
 
-          {/* Left - texto */}
-          <div className="reveal">
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.6)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.9)", borderRadius: 50, padding: "5px 14px", marginBottom: 24, boxShadow: "0 4px 14px rgba(30,60,15,0.08)" }}>
-              <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#5E8842", boxShadow: "0 0 6px rgba(94,136,66,0.6)" }} />
-              <span style={{ fontSize: 11, fontWeight: 600, color: "#3C6020", letterSpacing: "0.06em" }}>Nutrición clínica con IA</span>
+        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "center", width: "100%" }}>
+
+          {/* Left */}
+          <div className="rev">
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, border: "1px solid rgba(198,169,107,0.25)", borderRadius: 50, padding: "5px 14px", marginBottom: 32 }}>
+              <div className="pulse" style={{ width: 6, height: 6, borderRadius: "50%", background: "#C6A96B" }} />
+              <span style={{ fontSize: 11, fontWeight: 500, color: "rgba(198,169,107,0.8)", letterSpacing: "0.1em", textTransform: "uppercase" }}>Nutrición de élite · IA clínica</span>
             </div>
-            <h1 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 52, fontWeight: 700, color: T.text.primary, letterSpacing: "-2px", lineHeight: 1.05, marginBottom: 20 }}>
-              Tu nutricionista<br />
-              <em style={{ fontStyle: "italic", color: "#3C6020" }}>personal</em> siempre<br />
-              contigo
+            <h1 style={{ fontFamily: "var(--font-playfair, serif)", fontSize: 58, fontWeight: 700, color: "#EDEDED", letterSpacing: "-2px", lineHeight: 1.02, marginBottom: 24 }}>
+              Nutrición de<br />
+              <em style={{ fontStyle: "italic", color: "#C6A96B" }}>precisión</em><br />
+              para transformar<br />
+              tu cuerpo desde dentro
             </h1>
-            <p style={{ fontSize: 16, color: T.text.secondary, lineHeight: 1.75, fontWeight: 300, marginBottom: 32, maxWidth: 440 }}>
-              Nuria aprende de ti cada semana y adapta tu menú según cómo te sientes. Más de 34 patologías, 18 intolerancias y todos los tipos de alimentación.
+            <p style={{ fontSize: 16, color: "rgba(237,237,237,0.45)", lineHeight: 1.8, fontWeight: 300, marginBottom: 40, maxWidth: 420 }}>
+              Planes diseñados con base científica, adaptados a tu biología y estilo de vida. No es una dieta. Es un protocolo.
             </p>
-            <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 32 }}>
-              <Link className="btn-hover" href="/registro" style={{ ...T.matcha, padding: "12px 28px", borderRadius: 16, fontSize: 14, fontWeight: 500, color: "white", textDecoration: "none", letterSpacing: "0.02em", boxShadow: "0 8px 22px rgba(58,92,30,0.42)" }}>
-                Crear mi plan gratis →
+            <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
+              <Link href="/registro" className="btn-e" style={{ background: "linear-gradient(145deg,#C6A96B,#8A7240)", border: "none", borderRadius: 14, padding: "14px 32px", fontSize: 14, fontWeight: 600, color: "white", textDecoration: "none", letterSpacing: "0.03em", boxShadow: "0 8px 28px rgba(198,169,107,0.35)", display: "inline-block" }}>
+                Aplicar al programa →
               </Link>
-              <a href="#features" style={{ fontSize: 13, color: "#3C6020", fontWeight: 500, textDecoration: "none", letterSpacing: "0.01em" }}>
-                Ver cómo funciona ↓
+              <a href="#metodo" style={{ fontSize: 13, color: "rgba(198,169,107,0.6)", fontWeight: 400, textDecoration: "none", letterSpacing: "0.02em" }}>
+                Ver el método ↓
               </a>
             </div>
-            <p style={{ fontSize: 11, color: T.text.muted, fontWeight: 300, letterSpacing: "0.02em" }}>
-              Sin tarjeta · Cancela cuando quieras · Primer menú en 2 minutos
-            </p>
-            {/* Stats */}
-            <div style={{ display: "flex", gap: 24, marginTop: 32, paddingTop: 28, borderTop: "0.5px solid rgba(94,136,66,0.15)" }}>
-              {[["2 min", "Primer menú"], ["+34", "Patologías"], ["24h", "Nuria disponible"], ["7", "Días planificados"]].map(([n, l]) => (
+            <div style={{ display: "flex", gap: 32, marginTop: 48, paddingTop: 32, borderTop: "1px solid rgba(198,169,107,0.1)" }}>
+              {[["500+", "Protocolos activos"], ["34+", "Condiciones clínicas"], ["24h", "Nuria disponible"], ["98%", "Tasa de adherencia"]].map(([n, l]) => (
                 <div key={l}>
-                  <p style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 22, fontWeight: 700, color: T.text.primary, letterSpacing: "-1px", lineHeight: 1 }}>{n}</p>
-                  <p style={{ fontSize: 10, color: T.text.muted, marginTop: 4, fontWeight: 400, letterSpacing: "0.04em" }}>{l}</p>
+                  <p style={{ fontFamily: "var(--font-playfair, serif)", fontSize: 24, fontWeight: 700, color: "#C6A96B", letterSpacing: "-0.5px", lineHeight: 1 }}>{n}</p>
+                  <p style={{ fontSize: 10, color: "rgba(237,237,237,0.3)", marginTop: 6, fontWeight: 300, letterSpacing: "0.04em", lineHeight: 1.4 }}>{l}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Right - dashboard preview */}
-          <div className="reveal reveal-delay-2" style={{ position: "relative" }}>
-            <div style={{ position: "absolute", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle,rgba(255,255,255,0.3),transparent 65%)", top: -80, right: -80, pointerEvents: "none" }} />
-            {/* Panel flotante simulado */}
-            <div style={{ ...T.card, borderRadius: 28, overflow: "hidden", position: "relative", transform: "perspective(1200px) rotateY(-4deg) rotateX(2deg)", boxShadow: "0 40px 80px rgba(30,60,15,0.2),0 20px 40px rgba(30,60,15,0.12),0 1px 0 rgba(255,255,255,1) inset" }}>
-              <div style={shine} />
-              {/* App nav */}
-              <div style={{ padding: "12px 18px", borderBottom: "0.5px solid rgba(80,120,50,0.08)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          {/* Right - panel preview */}
+          <div className="rev d2" style={{ position: "relative" }}>
+            <div style={{ position: "absolute", inset: -40, background: "radial-gradient(circle, rgba(198,169,107,0.06), transparent 70%)", pointerEvents: "none" }} />
+            <div style={{ background: "linear-gradient(145deg,rgba(26,26,26,0.95),rgba(18,18,18,0.98))", border: "1px solid rgba(198,169,107,0.15)", borderRadius: 28, overflow: "hidden", boxShadow: "0 40px 80px rgba(0,0,0,0.6), 0 20px 40px rgba(0,0,0,0.4), 0 1px 0 rgba(198,169,107,0.1) inset", transform: "perspective(1200px) rotateY(-4deg) rotateX(2deg)", position: "relative" }}>
+              {/* top bar */}
+              <div style={{ padding: "14px 20px", borderBottom: "1px solid rgba(198,169,107,0.08)", display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(0,0,0,0.2)" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <div style={{ width: 24, height: 24, borderRadius: 7, ...T.matcha, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <span style={{ fontFamily: "var(--font-playfair,serif)", color: "white", fontSize: 11, fontWeight: 600, fontStyle: "italic" }}>N</span>
+                  <div style={{ width: 26, height: 26, borderRadius: 7, background: "linear-gradient(145deg,#C6A96B,#8A7240)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <span style={{ fontFamily: "var(--font-playfair, serif)", color: "white", fontSize: 12, fontWeight: 700, fontStyle: "italic" }}>N</span>
                   </div>
-                  <span style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 14, fontWeight: 600, color: T.text.primary }}>NutriAI</span>
+                  <span style={{ fontFamily: "var(--font-playfair, serif)", fontSize: 14, fontWeight: 600, color: "#EDEDED" }}>NutriAI</span>
                 </div>
-                <div style={{ display: "flex", gap: 4 }}>
-                  {["#E24B4A", "#EF9F27", "#5E8842"].map(c => <div key={c} style={{ width: 8, height: 8, borderRadius: "50%", background: c }} />)}
+                <div style={{ display: "flex", gap: 5 }}>
+                  {["#E24B4A", "#EF9F27", "#5E8842"].map(c => <div key={c} style={{ width: 8, height: 8, borderRadius: "50%", background: c, opacity: 0.7 }} />)}
                 </div>
               </div>
-              {/* App content preview */}
-              <div style={{ padding: "16px 18px", display: "grid", gridTemplateColumns: "100px 1fr", gap: 12 }}>
-                {/* sidebar mini */}
-                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(145deg,#7AAA52,#3C6020)", margin: "0 auto 8px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <span style={{ fontFamily: "var(--font-playfair,serif)", color: "white", fontSize: 14, fontWeight: 600, fontStyle: "italic" }}>Y</span>
+              {/* content */}
+              <div style={{ padding: "18px 20px", display: "grid", gridTemplateColumns: "90px 1fr", gap: 14 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(145deg,#C6A96B,#8A7240)", margin: "0 auto 10px", display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid rgba(198,169,107,0.3)" }}>
+                    <span style={{ fontFamily: "var(--font-playfair, serif)", color: "white", fontSize: 14, fontWeight: 700, fontStyle: "italic" }}>Y</span>
                   </div>
-                  {["Dashboard", "Menú", "Bienestar", "Progreso", "Nuria"].map((item, i) => (
-                    <div key={item} style={{ padding: "5px 8px", borderRadius: 8, background: i === 0 ? "rgba(94,136,66,0.12)" : "transparent", fontSize: 10, color: i === 0 ? "#3C6020" : "rgba(26,46,10,0.4)", fontWeight: i === 0 ? 600 : 400 }}>{item}</div>
+                  {["Dashboard", "Protocolo", "Bienestar", "Progreso", "Nuria"].map((item, i) => (
+                    <div key={item} style={{ padding: "5px 8px", borderRadius: 8, background: i === 0 ? "rgba(198,169,107,0.12)" : "transparent", border: `1px solid ${i === 0 ? "rgba(198,169,107,0.2)" : "transparent"}`, fontSize: 10, color: i === 0 ? "#C6A96B" : "rgba(237,237,237,0.3)", fontWeight: i === 0 ? 600 : 400 }}>{item}</div>
                   ))}
                 </div>
-                {/* main content mini */}
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  <p style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 16, fontWeight: 600, color: T.text.primary, letterSpacing: "-0.5px" }}>Tu plan de hoy</p>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
-                    {[["~800", "kcal"], ["~56g", "prot"], ["2", "comidas"], ["4/7", "días"]].map(([v, l]) => (
-                      <div key={l} style={{ ...T.card, borderRadius: 10, padding: "8px 10px", position: "relative", overflow: "hidden" }}>
-                        <div style={{ ...shine }} />
-                        <p style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 14, fontWeight: 600, color: T.text.primary, letterSpacing: "-0.5px" }}>{v}</p>
-                        <p style={{ fontSize: 9, color: T.text.muted, marginTop: 2 }}>{l}</p>
+                  <p style={{ fontFamily: "var(--font-playfair, serif)", fontSize: 16, fontWeight: 600, color: "#EDEDED", letterSpacing: "-0.5px" }}>Tu protocolo de hoy</p>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 7 }}>
+                    {[["~820", "kcal"], ["~58g", "prot"], ["2", "tomas"], ["4/7", "días"]].map(([v, l]) => (
+                      <div key={l} style={{ background: "rgba(198,169,107,0.06)", border: "1px solid rgba(198,169,107,0.12)", borderRadius: 11, padding: "9px 11px" }}>
+                        <p style={{ fontFamily: "var(--font-playfair, serif)", fontSize: 15, fontWeight: 700, color: "#EDEDED", letterSpacing: "-0.5px" }}>{v}</p>
+                        <p style={{ fontSize: 9, color: "rgba(237,237,237,0.3)", marginTop: 2 }}>{l}</p>
                       </div>
                     ))}
                   </div>
-                  {[["☀️", "Comida", "Ensalada de atún"], ["🌙", "Cena", "Tortilla de espinacas"]].map(([e, t, n]) => (
-                    <div key={t} style={{ ...T.card, borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 10, position: "relative", overflow: "hidden" }}>
-                      <div style={shine} />
-                      <div style={{ width: 32, height: 32, borderRadius: 9, background: "rgba(94,136,66,0.08)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>{e}</div>
+                  {[["☀️", "Comida", "Quinoa con verduras"], ["🌙", "Cena", "Salmón antiinflamatorio"]].map(([e, t, n]) => (
+                    <div key={t} style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(198,169,107,0.1)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 10 }}>
+                      <div style={{ width: 32, height: 32, borderRadius: 9, background: "rgba(198,169,107,0.08)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>{e}</div>
                       <div>
-                        <p style={{ fontSize: 8, color: T.text.muted, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 2 }}>{t}</p>
-                        <p style={{ fontSize: 11, fontWeight: 600, color: T.text.primary }}>{n}</p>
+                        <p style={{ fontSize: 8, color: "rgba(198,169,107,0.5)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 2 }}>{t}</p>
+                        <p style={{ fontSize: 11, fontWeight: 500, color: "#EDEDED" }}>{n}</p>
                       </div>
                     </div>
                   ))}
-                  {/* Nuria card mini */}
-                  <div style={{ ...T.matcha, borderRadius: 12, padding: "10px 12px", position: "relative", overflow: "hidden" }}>
-                    <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "40%", background: "linear-gradient(180deg,rgba(255,255,255,0.1),transparent)", pointerEvents: "none", borderRadius: "inherit" }} />
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 5, position: "relative", zIndex: 1 }}>
-                      <div style={{ width: 18, height: 18, borderRadius: "50%", background: "linear-gradient(145deg,#B8D870,#5E8842)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <span style={{ fontFamily: "var(--font-playfair,serif)", color: "white", fontSize: 9, fontWeight: 600, fontStyle: "italic" }}>N</span>
+                  <div style={{ background: "linear-gradient(155deg,rgba(198,169,107,0.12),rgba(138,114,64,0.08))", border: "1px solid rgba(198,169,107,0.15)", borderRadius: 12, padding: "10px 12px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 5 }}>
+                      <div style={{ width: 18, height: 18, borderRadius: "50%", background: "linear-gradient(145deg,#C6A96B,#8A7240)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <span style={{ fontFamily: "var(--font-playfair, serif)", color: "white", fontSize: 9, fontWeight: 700, fontStyle: "italic" }}>N</span>
                       </div>
-                      <p style={{ fontSize: 8, fontWeight: 600, color: "rgba(200,248,160,0.5)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Nuria</p>
+                      <p style={{ fontSize: 8, fontWeight: 700, color: "rgba(198,169,107,0.6)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Nuria</p>
                     </div>
-                    <p style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 10, color: "rgba(215,248,185,0.55)", lineHeight: 1.55, fontStyle: "italic", position: "relative", zIndex: 1 }}>"Tu digestión mejora esta semana."</p>
+                    <p style={{ fontFamily: "var(--font-playfair, serif)", fontSize: 10, color: "rgba(198,169,107,0.55)", lineHeight: 1.55, fontStyle: "italic" }}>"Tu protocolo antiinflamatorio está funcionando."</p>
                   </div>
                 </div>
               </div>
             </div>
-            {/* Shadow under card */}
-            <div style={{ position: "absolute", width: "80%", height: 30, background: "rgba(30,60,15,0.18)", borderRadius: "50%", bottom: -18, left: "10%", filter: "blur(18px)", pointerEvents: "none" }} />
+            <div style={{ position: "absolute", width: "80%", height: 30, background: "rgba(198,169,107,0.1)", borderRadius: "50%", bottom: -18, left: "10%", filter: "blur(20px)", pointerEvents: "none" }} />
           </div>
         </div>
       </section>
 
-      {/* COMO FUNCIONA */}
-      <section style={{ padding: "80px 40px", maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 1 }}>
-        <div className="reveal" style={{ textAlign: "center", marginBottom: 56 }}>
-          <p style={{ fontSize: 10, fontWeight: 600, color: T.text.muted, textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 12 }}>Cómo funciona</p>
-          <h2 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 38, fontWeight: 700, color: T.text.primary, letterSpacing: "-1.5px", lineHeight: 1.1 }}>
-            Tres pasos. Un plan<br /><em style={{ fontStyle: "italic", color: "#3C6020" }}>que funciona.</em>
-          </h2>
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
-          {[
-            ["01", "Cuéntale a Nuria cómo eres", "Formulario clínico avanzado: patologías, intolerancias, síntomas digestivos y tipo de alimentación.", "📋"],
-            ["02", "Recibe tu menú personalizado", "GPT-4o genera tu menú de 7 días con recetas, ingredientes en gramos en crudo y macros calculados.", "🌿"],
-            ["03", "Nuria se adapta cada semana", "Check-in diario, NutriScore semanal y reajuste automático. Tu plan mejora solo.", "✨"],
-          ].map(([num, title, desc, emoji], i) => (
-            <div className={`reveal card-hover stagger-${i + 1}`} key={num} style={{ ...T.card, borderRadius: 24, padding: "28px 24px", position: "relative", overflow: "hidden" }}>
-              <div style={shine} />
-              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg,#5E8842,transparent)", opacity: 0.5 }} />
-              <p style={{ fontSize: 11, fontWeight: 600, color: T.text.label, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 16 }}>Paso {num}</p>
-              <p style={{ fontSize: 32, marginBottom: 14 }}>{emoji}</p>
-              <h3 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 20, fontWeight: 600, color: T.text.primary, letterSpacing: "-0.5px", marginBottom: 10 }}>{title}</h3>
-              <p style={{ fontSize: 13, color: T.text.secondary, lineHeight: 1.7, fontWeight: 300 }}>{desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* FEATURES */}
-      <section id="features" style={{ padding: "80px 40px", maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 1 }}>
-        <div className="reveal" style={{ textAlign: "center", marginBottom: 56 }}>
-          <p style={{ fontSize: 10, fontWeight: 600, color: T.text.muted, textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 12 }}>Funcionalidades</p>
-          <h2 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 38, fontWeight: 700, color: T.text.primary, letterSpacing: "-1.5px", lineHeight: 1.1 }}>
-            Todo lo que necesitas<br /><em style={{ fontStyle: "italic", color: "#3C6020" }}>para comer bien de verdad</em>
-          </h2>
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
-          {features.map(({ title, desc, emoji }, i) => (
-            <div className={`reveal card-hover stagger-${i + 1}`} key={title} style={{ ...T.card, borderRadius: 22, padding: "22px 20px", position: "relative", overflow: "hidden" }}>
-              <div style={shine} />
-              <p style={{ fontSize: 28, marginBottom: 14 }}>{emoji}</p>
-              <h3 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 17, fontWeight: 600, color: T.text.primary, letterSpacing: "-0.4px", marginBottom: 8 }}>{title}</h3>
-              <p style={{ fontSize: 12, color: T.text.secondary, lineHeight: 1.7, fontWeight: 300 }}>{desc}</p>
-            </div>
-          ))}
+      {/* AUTORIDAD */}
+      <section style={{ padding: "100px 48px", borderTop: "1px solid rgba(198,169,107,0.08)", position: "relative" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <div className="rev" style={{ maxWidth: 720, marginBottom: 64 }}>
+            <p style={{ fontSize: 11, fontWeight: 600, color: "rgba(198,169,107,0.6)", textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 20 }}>El estándar</p>
+            <p style={{ fontFamily: "var(--font-playfair, serif)", fontSize: 32, fontWeight: 600, color: "#EDEDED", letterSpacing: "-1px", lineHeight: 1.3 }}>
+              No trabajamos con dietas estándar. Cada protocolo se diseña en base a biomarcadores, historial clínico y respuesta metabólica.
+            </p>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 1, background: "rgba(198,169,107,0.08)" }}>
+            {[
+              ["500+", "Protocolos activos", "Transformaciones fisiológicas documentadas y medidas."],
+              ["34+", "Condiciones clínicas", "Desde digestivo y hormonal hasta autoinmune y metabólico."],
+              ["IA clínica", "Método propio", "El sistema Nuria: ajuste continuo basado en tu respuesta real."],
+            ].map(([n, t, d], i) => (
+              <div key={t} className={`rev d${i + 1}`} style={{ background: "#0B0B0B", padding: "40px 36px", borderRight: i < 2 ? "1px solid rgba(198,169,107,0.08)" : "none" }}>
+                <p style={{ fontFamily: "var(--font-playfair, serif)", fontSize: 36, fontWeight: 700, color: "#C6A96B", letterSpacing: "-1px", marginBottom: 10 }}>{n}</p>
+                <p style={{ fontSize: 14, fontWeight: 600, color: "#EDEDED", marginBottom: 10, letterSpacing: "-0.2px" }}>{t}</p>
+                <p style={{ fontSize: 13, color: "rgba(237,237,237,0.35)", lineHeight: 1.7, fontWeight: 300 }}>{d}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* TESTIMONIOS */}
-      <section style={{ padding: "80px 40px", maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 1 }}>
-        <div className="reveal" style={{ textAlign: "center", marginBottom: 56 }}>
-          <p style={{ fontSize: 10, fontWeight: 600, color: T.text.muted, textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 12 }}>Testimonios</p>
-          <h2 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 38, fontWeight: 700, color: T.text.primary, letterSpacing: "-1.5px" }}>
-            Personas reales,<br /><em style={{ fontStyle: "italic", color: "#3C6020" }}>resultados reales</em>
-          </h2>
+      {/* PROBLEMA */}
+      <section style={{ padding: "100px 48px", borderTop: "1px solid rgba(198,169,107,0.08)" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <div className="rev" style={{ textAlign: "center", marginBottom: 64 }}>
+            <p style={{ fontSize: 11, fontWeight: 600, color: "rgba(198,169,107,0.6)", textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 16 }}>Lo que nadie ha resuelto</p>
+            <h2 style={{ fontFamily: "var(--font-playfair, serif)", fontSize: 42, fontWeight: 700, color: "#EDEDED", letterSpacing: "-1.5px", lineHeight: 1.1 }}>
+              Llevas tiempo<br /><em style={{ fontStyle: "italic", color: "#C6A96B" }}>buscando respuestas</em>
+            </h2>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+            {PROBLEMAS.map(({ icon, titulo, desc }, i) => (
+              <div key={titulo} className={`rev card-e d${i + 1}`} style={{ background: "linear-gradient(145deg,rgba(26,26,26,0.8),rgba(18,18,18,0.9))", border: "1px solid rgba(198,169,107,0.08)", borderRadius: 20, padding: "32px 28px" }}>
+                <p style={{ fontSize: 20, color: "#C6A96B", marginBottom: 16, opacity: 0.6 }}>{icon}</p>
+                <h3 style={{ fontFamily: "var(--font-playfair, serif)", fontSize: 20, fontWeight: 600, color: "#EDEDED", letterSpacing: "-0.5px", marginBottom: 12 }}>{titulo}</h3>
+                <p style={{ fontSize: 14, color: "rgba(237,237,237,0.4)", lineHeight: 1.75, fontWeight: 300 }}>{desc}</p>
+              </div>
+            ))}
+          </div>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
-          {testimonios.map(({ inicial, nombre, resultado, texto, color }, i) => (
-            <div className={`reveal card-hover stagger-${i + 1}`} key={nombre} style={{ ...T.card, borderRadius: 22, padding: "22px 20px", position: "relative", overflow: "hidden" }}>
-              <div style={shine} />
-              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-                <div style={{ width: 44, height: 44, borderRadius: "50%", background: `linear-gradient(145deg,${color}99,${color})`, display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid rgba(255,255,255,0.9)", flexShrink: 0 }}>
-                  <span style={{ fontFamily: "var(--font-playfair,serif)", color: "white", fontSize: 18, fontWeight: 600, fontStyle: "italic" }}>{inicial}</span>
-                </div>
+      </section>
+
+      {/* MÉTODO */}
+      <section id="metodo" style={{ padding: "100px 48px", borderTop: "1px solid rgba(198,169,107,0.08)", background: "linear-gradient(180deg,#0B0B0B 0%,#0F0F0A 100%)" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <div className="rev" style={{ marginBottom: 72 }}>
+            <p style={{ fontSize: 11, fontWeight: 600, color: "rgba(198,169,107,0.6)", textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 16 }}>El sistema</p>
+            <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", flexWrap: "wrap", gap: 20 }}>
+              <h2 style={{ fontFamily: "var(--font-playfair, serif)", fontSize: 42, fontWeight: 700, color: "#EDEDED", letterSpacing: "-1.5px", lineHeight: 1.1 }}>
+                Método<br /><em style={{ fontStyle: "italic", color: "#C6A96B" }}>Horizonte Metabólico</em>
+              </h2>
+              <p style={{ fontSize: 14, color: "rgba(237,237,237,0.35)", maxWidth: 320, lineHeight: 1.7, fontWeight: 300 }}>
+                Un proceso de 4 fases que convierte tu biología en datos accionables y tu alimentación en una herramienta de transformación real.
+              </p>
+            </div>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 1, background: "rgba(198,169,107,0.06)" }}>
+            {FASES.map(({ num, titulo, desc }, i) => (
+              <div key={num} className={`rev card-e d${i + 1}`} style={{ background: "#0B0B0B", padding: "36px 40px", display: "flex", alignItems: "flex-start", gap: 40, borderBottom: i < 3 ? "1px solid rgba(198,169,107,0.06)" : "none" }}>
+                <p style={{ fontFamily: "var(--font-playfair, serif)", fontSize: 48, fontWeight: 700, color: "rgba(198,169,107,0.15)", letterSpacing: "-2px", lineHeight: 1, flexShrink: 0, width: 80 }}>{num}</p>
                 <div>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: T.text.primary }}>{nombre}</p>
-                  <p style={{ fontSize: 11, color, fontWeight: 600, marginTop: 2 }}>{resultado}</p>
+                  <h3 style={{ fontFamily: "var(--font-playfair, serif)", fontSize: 22, fontWeight: 600, color: "#EDEDED", letterSpacing: "-0.5px", marginBottom: 10 }}>{titulo}</h3>
+                  <p style={{ fontSize: 14, color: "rgba(237,237,237,0.4)", lineHeight: 1.75, fontWeight: 300, maxWidth: 600 }}>{desc}</p>
+                </div>
+                <div style={{ marginLeft: "auto", flexShrink: 0, width: 24, height: 24, borderRadius: "50%", border: "1px solid rgba(198,169,107,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <span style={{ color: "#C6A96B", fontSize: 12 }}>→</span>
                 </div>
               </div>
-              <div style={{ display: "flex", gap: 2, marginBottom: 10 }}>
-                {[...Array(5)].map((_, i) => <span key={i} style={{ color: "#5E8842", fontSize: 12 }}>★</span>)}
-              </div>
-              <p style={{ fontSize: 13, color: T.text.secondary, lineHeight: 1.7, fontWeight: 300 }}>{texto}</p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* PRECIOS */}
-      <section id="precios" style={{ padding: "80px 40px", maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 1 }}>
-        <div className="reveal" style={{ textAlign: "center", marginBottom: 56 }}>
-          <p style={{ fontSize: 10, fontWeight: 600, color: T.text.muted, textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 12 }}>Precios</p>
-          <h2 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 38, fontWeight: 700, color: T.text.primary, letterSpacing: "-1.5px" }}>
-            Elige tu plan.<br /><em style={{ fontStyle: "italic", color: "#3C6020" }}>Sin permanencia.</em>
-          </h2>
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 14 }}>
-          {[
-            { nombre: "Básico", precio: "9,99€", badge: "", items: ["✓ Menú semanal", "✓ Chat con Nuria", "✓ Lista de la compra", "— Ajuste semanal", "— NutriScore"], cta: "Empezar", destacado: false, longevity: false },
-            { nombre: "Pro", precio: "19,99€", badge: "Más popular", items: ["✓ Todo Básico", "✓ Ajuste semanal", "✓ NutriScore", "✓ Protocolo digestivo", "✓ Modo restaurante"], cta: "Empezar con Pro", destacado: true, longevity: false },
-            { nombre: "Élite", precio: "39,99€", badge: "", items: ["✓ Todo Pro", "✓ Protocolo hormonal", "✓ Gemelo metabólico", "✓ Seguimiento avanzado", "✓ Prioridad soporte"], cta: "Empezar", destacado: false, longevity: false },
-            { nombre: "Longevity", precio: "59,99€", badge: "NUEVO", items: ["✓ Todo Élite", "✓ Plan antiedad", "✓ Protocolo antioxidante", "✓ Análisis longevidad", "✓ Suplementación antiedad"], cta: "Quiero vivir más", destacado: false, longevity: true },
-          ].map(({ nombre, precio, badge, items, cta, destacado, longevity }, i) => (
-            <div className={`reveal card-hover stagger-${i + 1}`} key={nombre} style={{ ...T.card, borderRadius: 24, padding: "24px 20px", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", ...(destacado ? { borderRight: "1px solid rgba(94,136,66,0.3)", borderBottom: "1px solid rgba(94,136,66,0.3)" } : {}), ...(longevity ? { borderRight: "1px solid rgba(186,120,20,0.3)", borderBottom: "1px solid rgba(186,120,20,0.3)" } : {}) }}>
-              <div style={shine} />
-              {badge && (
-                <div style={{ position: "absolute", top: -1, left: "50%", transform: "translateX(-50%)", background: destacado ? "linear-gradient(155deg,#5E8842,#3C6020)" : "linear-gradient(155deg,#C8A020,#A07818)", borderRadius: "0 0 12px 12px", padding: "4px 14px" }}>
-                  <span style={{ fontSize: 9, fontWeight: 700, color: "white", letterSpacing: "0.06em" }}>{badge}</span>
-                </div>
-              )}
-              <p style={{ fontSize: 15, fontWeight: 600, color: T.text.primary, marginTop: badge ? 12 : 0, marginBottom: 4 }}>{nombre}</p>
-              <p style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 28, fontWeight: 700, color: T.text.primary, letterSpacing: "-1px", marginBottom: 4 }}>{precio}</p>
-              <p style={{ fontSize: 10, color: T.text.muted, fontWeight: 300, marginBottom: 16 }}>al mes</p>
-              <ul style={{ listStyle: "none", padding: 0, margin: 0, flex: 1, marginBottom: 20 }}>
-                {items.map(item => (
-                  <li key={item} style={{ fontSize: 12, color: item.startsWith("—") ? T.text.label : T.text.secondary, fontWeight: item.startsWith("—") ? 300 : 400, marginBottom: 7, lineHeight: 1.4 }}>{item}</li>
-                ))}
-              </ul>
-              <Link href="/registro" style={{ display: "block", textAlign: "center", padding: "10px 16px", borderRadius: 14, fontSize: 12, fontWeight: 500, textDecoration: "none", letterSpacing: "0.02em", ...(destacado ? { ...T.matcha, color: "white" } : longevity ? { background: "linear-gradient(155deg,#C8A020,#A07818)", color: "white", border: "none", boxShadow: "0 8px 22px rgba(160,120,24,0.35)" } : { background: "rgba(255,255,255,0.7)", color: "#2A3E16", border: "1px solid rgba(94,136,66,0.2)", boxShadow: "0 4px 14px rgba(30,60,15,0.08)" }) }}>
-                {cta}
-              </Link>
-            </div>
-          ))}
+      {/* SERVICIOS */}
+      <section id="servicios" style={{ padding: "100px 48px", borderTop: "1px solid rgba(198,169,107,0.08)" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <div className="rev" style={{ textAlign: "center", marginBottom: 72 }}>
+            <p style={{ fontSize: 11, fontWeight: 600, color: "rgba(198,169,107,0.6)", textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 16 }}>Programas</p>
+            <h2 style={{ fontFamily: "var(--font-playfair, serif)", fontSize: 42, fontWeight: 700, color: "#EDEDED", letterSpacing: "-1.5px", lineHeight: 1.1 }}>
+              Elige tu nivel<br /><em style={{ fontStyle: "italic", color: "#C6A96B" }}>de transformación</em>
+            </h2>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+            {[
+              {
+                nombre: "Protocolo Élite",
+                sub: "Transformación guiada 1:1",
+                desc: "El nivel más alto de personalización. Nuria analiza tu biología, diseña tu protocolo y lo ajusta cada semana según tu respuesta real.",
+                items: ["Evaluación biológica completa", "Protocolo nutricional personalizado", "Ajuste semanal dinámico con Nuria", "Seguimiento de biomarcadores", "Soporte continuo 24h", "Protocolo hormonal y digestivo"],
+                cta: "Solicitar evaluación",
+                destacado: true,
+              },
+              {
+                nombre: "Plan Estratégico",
+                sub: "Diseño completo sin seguimiento",
+                desc: "Tu protocolo nutricional completo, diseñado en base a tu historial clínico y objetivos. Para quienes prefieren ejecutar de forma autónoma.",
+                items: ["Evaluación clínica detallada", "Protocolo nutricional completo", "Menú semanal personalizado", "Lista de la compra automática", "Guía de implementación"],
+                cta: "Conocer más",
+                destacado: false,
+              },
+            ].map(({ nombre, sub, desc, items, cta, destacado }) => (
+              <div key={nombre} className={`rev card-e`} style={{ background: destacado ? "linear-gradient(145deg,rgba(198,169,107,0.08),rgba(138,114,64,0.04))" : "linear-gradient(145deg,rgba(26,26,26,0.8),rgba(18,18,18,0.9))", border: `1px solid ${destacado ? "rgba(198,169,107,0.25)" : "rgba(198,169,107,0.08)"}`, borderRadius: 24, padding: "40px 36px", display: "flex", flexDirection: "column" }}>
+                {destacado && (
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: 6, border: "1px solid rgba(198,169,107,0.3)", borderRadius: 50, padding: "3px 12px", marginBottom: 20, alignSelf: "flex-start" }}>
+                    <span style={{ fontSize: 9, fontWeight: 600, color: "#C6A96B", letterSpacing: "0.08em", textTransform: "uppercase" }}>Recomendado</span>
+                  </div>
+                )}
+                <h3 style={{ fontFamily: "var(--font-playfair, serif)", fontSize: 26, fontWeight: 700, color: "#EDEDED", letterSpacing: "-0.8px", marginBottom: 6 }}>{nombre}</h3>
+                <p style={{ fontSize: 12, color: "#C6A96B", fontWeight: 500, marginBottom: 16, letterSpacing: "0.02em" }}>{sub}</p>
+                <p style={{ fontSize: 14, color: "rgba(237,237,237,0.4)", lineHeight: 1.7, fontWeight: 300, marginBottom: 28 }}>{desc}</p>
+                <ul style={{ listStyle: "none", padding: 0, margin: "0 0 32px", flex: 1 }}>
+                  {items.map(item => (
+                    <li key={item} style={{ fontSize: 13, color: "rgba(237,237,237,0.55)", fontWeight: 300, marginBottom: 10, display: "flex", alignItems: "center", gap: 10 }}>
+                      <span style={{ color: "#C6A96B", fontSize: 10 }}>◆</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/registro" className="btn-e" style={{ display: "block", textAlign: "center", padding: "13px 20px", borderRadius: 14, fontSize: 13, fontWeight: 600, textDecoration: "none", letterSpacing: "0.03em", background: destacado ? "linear-gradient(145deg,#C6A96B,#8A7240)" : "transparent", color: destacado ? "white" : "#C6A96B", border: destacado ? "none" : "1px solid rgba(198,169,107,0.3)", boxShadow: destacado ? "0 8px 24px rgba(198,169,107,0.3)" : "none" }}>
+                  {cta}
+                </Link>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* FAQ */}
-      <section id="faq" style={{ padding: "80px 40px", maxWidth: 700, margin: "0 auto", position: "relative", zIndex: 1 }}>
-        <div style={{ textAlign: "center", marginBottom: 56 }}>
-          <p style={{ fontSize: 10, fontWeight: 600, color: T.text.muted, textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 12 }}>FAQ</p>
-          <h2 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 38, fontWeight: 700, color: T.text.primary, letterSpacing: "-1.5px" }}>
-            Preguntas<br /><em style={{ fontStyle: "italic", color: "#3C6020" }}>frecuentes</em>
-          </h2>
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {faqs.map(({ q, a }) => (
-            <div className="reveal card-hover" key={q} style={{ ...T.card, borderRadius: 20, padding: "18px 22px", position: "relative", overflow: "hidden" }}>
-              <div style={shine} />
-              <p style={{ fontSize: 14, fontWeight: 600, color: T.text.primary, letterSpacing: "-0.3px", marginBottom: 8 }}>{q}</p>
-              <p style={{ fontSize: 13, color: T.text.secondary, lineHeight: 1.7, fontWeight: 300 }}>{a}</p>
-            </div>
-          ))}
+      {/* RESULTADOS */}
+      <section id="resultados" style={{ padding: "100px 48px", borderTop: "1px solid rgba(198,169,107,0.08)" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <div className="rev" style={{ textAlign: "center", marginBottom: 72 }}>
+            <p style={{ fontSize: 11, fontWeight: 600, color: "rgba(198,169,107,0.6)", textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 16 }}>Resultados</p>
+            <h2 style={{ fontFamily: "var(--font-playfair, serif)", fontSize: 42, fontWeight: 700, color: "#EDEDED", letterSpacing: "-1.5px", lineHeight: 1.1 }}>
+              Resultados que<br /><em style={{ fontStyle: "italic", color: "#C6A96B" }}>se sostienen</em>
+            </h2>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
+            {TESTIMONIOS.map(({ inicial, nombre, resultado, texto, cargo }, i) => (
+              <div key={nombre} className={`rev card-e d${i + 1}`} style={{ background: "linear-gradient(145deg,rgba(26,26,26,0.8),rgba(18,18,18,0.9))", border: "1px solid rgba(198,169,107,0.08)", borderRadius: 22, padding: "32px 28px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
+                  <div style={{ width: 44, height: 44, borderRadius: "50%", background: "linear-gradient(145deg,rgba(198,169,107,0.3),rgba(138,114,64,0.2))", border: "1px solid rgba(198,169,107,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <span style={{ fontFamily: "var(--font-playfair, serif)", color: "#C6A96B", fontSize: 18, fontWeight: 700, fontStyle: "italic" }}>{inicial}</span>
+                  </div>
+                  <div>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: "#EDEDED", letterSpacing: "-0.2px" }}>{nombre}</p>
+                    <p style={{ fontSize: 11, color: "#C6A96B", fontWeight: 500, marginTop: 2 }}>{resultado}</p>
+                    <p style={{ fontSize: 10, color: "rgba(237,237,237,0.25)", fontWeight: 300, marginTop: 2 }}>{cargo}</p>
+                  </div>
+                </div>
+                <p style={{ fontFamily: "var(--font-playfair, serif)", fontSize: 15, color: "rgba(237,237,237,0.55)", lineHeight: 1.75, fontStyle: "italic", fontWeight: 400 }}>"{texto}"</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* CTA FINAL */}
-      <section style={{ padding: "80px 40px", maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 1, paddingBottom: 120 }}>
-        <div style={{ ...T.dark, borderRadius: 32, padding: "60px 40px", textAlign: "center", position: "relative", overflow: "hidden" }}>
-          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "40%", background: "linear-gradient(180deg,rgba(255,255,255,0.07),transparent)", pointerEvents: "none", borderRadius: "inherit" }} />
-          <div style={{ position: "absolute", top: -80, right: -80, width: 250, height: 250, borderRadius: "50%", background: "radial-gradient(circle,rgba(200,240,160,0.12),transparent 70%)", pointerEvents: "none" }} />
-          <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(180,240,140,0.38)", textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 16, position: "relative", zIndex: 1 }}>Empieza hoy</p>
-          <h2 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 42, fontWeight: 700, color: "rgba(240,255,230,0.9)", letterSpacing: "-1.5px", lineHeight: 1.1, marginBottom: 16, position: "relative", zIndex: 1 }}>
-            ¿Lista para empezar?
+      <section style={{ padding: "100px 48px 120px", borderTop: "1px solid rgba(198,169,107,0.08)" }}>
+        <div style={{ maxWidth: 800, margin: "0 auto", textAlign: "center" }} className="rev">
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, border: "1px solid rgba(198,169,107,0.2)", borderRadius: 50, padding: "5px 16px", marginBottom: 32 }}>
+            <div className="pulse" style={{ width: 6, height: 6, borderRadius: "50%", background: "#C6A96B" }} />
+            <span style={{ fontSize: 11, fontWeight: 500, color: "rgba(198,169,107,0.7)", letterSpacing: "0.1em", textTransform: "uppercase" }}>Plazas limitadas</span>
+          </div>
+          <h2 style={{ fontFamily: "var(--font-playfair, serif)", fontSize: 52, fontWeight: 700, color: "#EDEDED", letterSpacing: "-2px", lineHeight: 1.05, marginBottom: 20 }}>
+            ¿Lista para empezar<br /><em style={{ fontStyle: "italic", color: "#C6A96B" }}>tu transformación?</em>
           </h2>
-          <p style={{ fontSize: 15, color: "rgba(210,248,180,0.45)", fontWeight: 300, lineHeight: 1.7, marginBottom: 32, position: "relative", zIndex: 1 }}>
-            Tu primer menú personalizado en menos de 2 minutos. Sin tarjeta de crédito.
+          <p style={{ fontSize: 16, color: "rgba(237,237,237,0.35)", lineHeight: 1.8, fontWeight: 300, marginBottom: 40, maxWidth: 480, margin: "0 auto 40px" }}>
+            Tu protocolo personalizado comienza con una evaluación. Sin compromisos, sin dietas genéricas.
           </p>
-          <Link href="/registro" style={{ ...T.card, display: "inline-block", padding: "14px 32px", borderRadius: 16, fontSize: 14, fontWeight: 600, color: T.text.primary, textDecoration: "none", position: "relative", zIndex: 1, letterSpacing: "0.02em" }}>
-            Crear mi cuenta gratis →
-          </Link>
-          <p style={{ fontSize: 11, color: "rgba(180,240,140,0.25)", marginTop: 16, fontWeight: 300, position: "relative", zIndex: 1 }}>
-            Más de 500 personas ya tienen su plan personalizado
-          </p>
+          <div style={{ display: "flex", gap: 14, justifyContent: "center", alignItems: "center" }}>
+            <Link href="/registro" className="btn-e" style={{ background: "linear-gradient(145deg,#C6A96B,#8A7240)", border: "none", borderRadius: 14, padding: "16px 36px", fontSize: 15, fontWeight: 600, color: "white", textDecoration: "none", letterSpacing: "0.03em", boxShadow: "0 10px 32px rgba(198,169,107,0.35)", display: "inline-block" }}>
+              Solicitar mi evaluación →
+            </Link>
+            <Link href="/login" style={{ fontSize: 13, color: "rgba(198,169,107,0.5)", textDecoration: "none", fontWeight: 300 }}>
+              Ya tengo cuenta
+            </Link>
+          </div>
         </div>
       </section>
 
       {/* FOOTER */}
-      <footer style={{ ...T.card, borderRadius: 0, borderLeft: "none", borderRight: "none", borderBottom: "none", padding: "24px 40px", position: "relative", zIndex: 1 }}>
-        <div style={shine} />
+      <footer style={{ borderTop: "1px solid rgba(198,169,107,0.08)", padding: "28px 48px", background: "#0B0B0B" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{ width: 24, height: 24, borderRadius: 7, ...T.matcha, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <span style={{ fontFamily: "var(--font-playfair,serif)", color: "white", fontSize: 11, fontWeight: 600, fontStyle: "italic" }}>N</span>
+            <div style={{ width: 26, height: 26, borderRadius: 7, background: "linear-gradient(145deg,#C6A96B,#8A7240)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ fontFamily: "var(--font-playfair, serif)", color: "white", fontSize: 12, fontWeight: 700, fontStyle: "italic" }}>N</span>
             </div>
-            <span style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 15, fontWeight: 600, color: T.text.primary }}>NutriAI</span>
+            <span style={{ fontFamily: "var(--font-playfair, serif)", fontSize: 15, fontWeight: 600, color: "#EDEDED" }}>NutriAI</span>
           </div>
-          <div style={{ display: "flex", gap: 20 }}>
+          <div style={{ display: "flex", gap: 24 }}>
             {["Privacidad", "Términos", "Cookies"].map(l => (
-              <a key={l} href="#" style={{ fontSize: 12, color: T.text.muted, textDecoration: "none", fontWeight: 300 }}>{l}</a>
+              <a key={l} href="#" style={{ fontSize: 12, color: "rgba(237,237,237,0.25)", textDecoration: "none", fontWeight: 300 }}>{l}</a>
             ))}
           </div>
-          <p style={{ fontSize: 11, color: T.text.label, fontWeight: 300 }}>© {new Date().getFullYear()} NutriAI</p>
+          <p style={{ fontSize: 11, color: "rgba(237,237,237,0.2)", fontWeight: 300 }}>© {new Date().getFullYear()} NutriAI · Nutrición de élite</p>
         </div>
       </footer>
 
