@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { useTheme, LIGHT, DARK } from "@/lib/theme";
 
 const features = [
   { title: "Menú semanal personalizado", desc: "7 días de platos adaptados a tu objetivo, intolerancias y tipo de dieta. Con ingredientes en gramos en crudo.", emoji: "🥗" },
@@ -56,28 +57,35 @@ const G = {
 const shine = { position: "absolute" as const, top: 0, left: 0, right: 0, height: 1, background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.95) 20%,white 50%,rgba(255,255,255,0.95) 80%,transparent)", pointerEvents: "none" as const };
 
 export default function Home() {
+  const { theme, toggle } = useTheme();
+  const T = theme === "dark" ? DARK : LIGHT;
+
   return (
-    <div style={{ fontFamily: "var(--font-instrument,sans-serif)", background: "radial-gradient(ellipse 80% 60% at 70% 10%,rgba(180,220,150,0.5) 0%,transparent 60%),radial-gradient(ellipse 60% 80% at 10% 80%,rgba(120,170,90,0.3) 0%,transparent 60%),linear-gradient(160deg,#B2CC9C 0%,#A4BF90 30%,#B8CFA6 60%,#9EBA8A 100%)", minHeight: "100vh" }}>
+    <div style={{ fontFamily: "var(--font-instrument,sans-serif)", background: T.bg, minHeight: "100vh" }}>
 
       {/* Orbs */}
       <div style={{ position: "fixed", width: 600, height: 600, borderRadius: "50%", background: "radial-gradient(circle,rgba(255,255,255,0.22),transparent 65%)", top: -200, right: -150, pointerEvents: "none", zIndex: 0 }} />
       <div style={{ position: "fixed", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle,rgba(60,100,40,0.15),transparent 65%)", bottom: -100, left: -80, pointerEvents: "none", zIndex: 0 }} />
 
       {/* NAV */}
-      <nav style={{ ...G.card, position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, borderRadius: 0, borderLeft: "none", borderRight: "none", borderTop: "none", padding: "0 40px", height: 56, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <nav style={{ ...T.card, position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, borderRadius: 0, borderLeft: "none", borderRight: "none", borderTop: "none", padding: "0 40px", height: 56, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={shine} />
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 10, ...G.matcha, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px rgba(44,74,20,0.45),inset 0 1px 0 rgba(255,255,255,0.18)" }}>
+          <div style={{ width: 32, height: 32, borderRadius: 10, ...T.matcha, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px rgba(44,74,20,0.45),inset 0 1px 0 rgba(255,255,255,0.18)" }}>
             <span style={{ fontFamily: "var(--font-playfair,serif)", color: "white", fontSize: 15, fontWeight: 600, fontStyle: "italic" }}>N</span>
           </div>
-          <span style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 18, fontWeight: 600, color: "#1A2E0A", letterSpacing: "-0.4px" }}>NutriAI</span>
+          <span style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 18, fontWeight: 600, color: T.text.primary, letterSpacing: "-0.4px" }}>NutriAI</span>
         </div>
         <div style={{ display: "flex", gap: 24, alignItems: "center" }}>
           {[["Funcionalidades", "#features"], ["Precios", "#precios"], ["FAQ", "#faq"]].map(([l, h]) => (
-            <a className="link-hover" key={l} href={h} style={{ fontSize: 13, color: "rgba(26,46,10,0.45)", fontWeight: 400, textDecoration: "none", letterSpacing: "0.01em" }}>{l}</a>
+            <a className="link-hover" key={l} href={h} style={{ fontSize: 13, color: T.text.secondary, fontWeight: 400, textDecoration: "none", letterSpacing: "0.01em" }}>{l}</a>
           ))}
-          <Link className="link-hover" href="/login" style={{ fontSize: 13, color: "rgba(26,46,10,0.45)", fontWeight: 400, textDecoration: "none" }}>Entrar</Link>
-          <Link className="btn-hover" href="/registro" style={{ ...G.matcha, padding: "8px 20px", borderRadius: 14, fontSize: 13, fontWeight: 500, color: "white", textDecoration: "none", letterSpacing: "0.02em" }}>
+          <Link className="link-hover" href="/login" style={{ fontSize: 13, color: T.text.secondary, fontWeight: 400, textDecoration: "none" }}>Entrar</Link>
+          <button onClick={toggle}
+            style={{...T.btnW, padding:"7px 12px", fontSize:13, borderRadius:12, marginRight:4}}>
+            {theme === "dark" ? "☀️" : "🌙"}
+          </button>
+          <Link className="btn-hover" href="/registro" style={{ ...T.matcha, padding: "8px 20px", borderRadius: 14, fontSize: 13, fontWeight: 500, color: "white", textDecoration: "none", letterSpacing: "0.02em" }}>
             Empezar gratis
           </Link>
         </div>
@@ -93,31 +101,31 @@ export default function Home() {
               <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#5E8842", boxShadow: "0 0 6px rgba(94,136,66,0.6)" }} />
               <span style={{ fontSize: 11, fontWeight: 600, color: "#3C6020", letterSpacing: "0.06em" }}>Nutrición clínica con IA</span>
             </div>
-            <h1 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 52, fontWeight: 700, color: "#1A2E0A", letterSpacing: "-2px", lineHeight: 1.05, marginBottom: 20 }}>
+            <h1 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 52, fontWeight: 700, color: T.text.primary, letterSpacing: "-2px", lineHeight: 1.05, marginBottom: 20 }}>
               Tu nutricionista<br />
               <em style={{ fontStyle: "italic", color: "#3C6020" }}>personal</em> siempre<br />
               contigo
             </h1>
-            <p style={{ fontSize: 16, color: "rgba(26,46,10,0.55)", lineHeight: 1.75, fontWeight: 300, marginBottom: 32, maxWidth: 440 }}>
+            <p style={{ fontSize: 16, color: T.text.secondary, lineHeight: 1.75, fontWeight: 300, marginBottom: 32, maxWidth: 440 }}>
               Nuria aprende de ti cada semana y adapta tu menú según cómo te sientes. Más de 34 patologías, 18 intolerancias y todos los tipos de alimentación.
             </p>
             <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 32 }}>
-              <Link className="btn-hover" href="/registro" style={{ ...G.matcha, padding: "12px 28px", borderRadius: 16, fontSize: 14, fontWeight: 500, color: "white", textDecoration: "none", letterSpacing: "0.02em", boxShadow: "0 8px 22px rgba(58,92,30,0.42)" }}>
+              <Link className="btn-hover" href="/registro" style={{ ...T.matcha, padding: "12px 28px", borderRadius: 16, fontSize: 14, fontWeight: 500, color: "white", textDecoration: "none", letterSpacing: "0.02em", boxShadow: "0 8px 22px rgba(58,92,30,0.42)" }}>
                 Crear mi plan gratis →
               </Link>
               <a href="#features" style={{ fontSize: 13, color: "#3C6020", fontWeight: 500, textDecoration: "none", letterSpacing: "0.01em" }}>
                 Ver cómo funciona ↓
               </a>
             </div>
-            <p style={{ fontSize: 11, color: "rgba(26,46,10,0.35)", fontWeight: 300, letterSpacing: "0.02em" }}>
+            <p style={{ fontSize: 11, color: T.text.muted, fontWeight: 300, letterSpacing: "0.02em" }}>
               Sin tarjeta · Cancela cuando quieras · Primer menú en 2 minutos
             </p>
             {/* Stats */}
             <div style={{ display: "flex", gap: 24, marginTop: 32, paddingTop: 28, borderTop: "0.5px solid rgba(94,136,66,0.15)" }}>
               {[["2 min", "Primer menú"], ["+34", "Patologías"], ["24h", "Nuria disponible"], ["7", "Días planificados"]].map(([n, l]) => (
                 <div key={l}>
-                  <p style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 22, fontWeight: 700, color: "#1A2E0A", letterSpacing: "-1px", lineHeight: 1 }}>{n}</p>
-                  <p style={{ fontSize: 10, color: "rgba(26,46,10,0.4)", marginTop: 4, fontWeight: 400, letterSpacing: "0.04em" }}>{l}</p>
+                  <p style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 22, fontWeight: 700, color: T.text.primary, letterSpacing: "-1px", lineHeight: 1 }}>{n}</p>
+                  <p style={{ fontSize: 10, color: T.text.muted, marginTop: 4, fontWeight: 400, letterSpacing: "0.04em" }}>{l}</p>
                 </div>
               ))}
             </div>
@@ -127,15 +135,15 @@ export default function Home() {
           <div className="reveal reveal-delay-2" style={{ position: "relative" }}>
             <div style={{ position: "absolute", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle,rgba(255,255,255,0.3),transparent 65%)", top: -80, right: -80, pointerEvents: "none" }} />
             {/* Panel flotante simulado */}
-            <div style={{ ...G.card, borderRadius: 28, overflow: "hidden", position: "relative", transform: "perspective(1200px) rotateY(-4deg) rotateX(2deg)", boxShadow: "0 40px 80px rgba(30,60,15,0.2),0 20px 40px rgba(30,60,15,0.12),0 1px 0 rgba(255,255,255,1) inset" }}>
+            <div style={{ ...T.card, borderRadius: 28, overflow: "hidden", position: "relative", transform: "perspective(1200px) rotateY(-4deg) rotateX(2deg)", boxShadow: "0 40px 80px rgba(30,60,15,0.2),0 20px 40px rgba(30,60,15,0.12),0 1px 0 rgba(255,255,255,1) inset" }}>
               <div style={shine} />
               {/* App nav */}
               <div style={{ padding: "12px 18px", borderBottom: "0.5px solid rgba(80,120,50,0.08)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <div style={{ width: 24, height: 24, borderRadius: 7, ...G.matcha, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ width: 24, height: 24, borderRadius: 7, ...T.matcha, display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <span style={{ fontFamily: "var(--font-playfair,serif)", color: "white", fontSize: 11, fontWeight: 600, fontStyle: "italic" }}>N</span>
                   </div>
-                  <span style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 14, fontWeight: 600, color: "#1A2E0A" }}>NutriAI</span>
+                  <span style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 14, fontWeight: 600, color: T.text.primary }}>NutriAI</span>
                 </div>
                 <div style={{ display: "flex", gap: 4 }}>
                   {["#E24B4A", "#EF9F27", "#5E8842"].map(c => <div key={c} style={{ width: 8, height: 8, borderRadius: "50%", background: c }} />)}
@@ -154,28 +162,28 @@ export default function Home() {
                 </div>
                 {/* main content mini */}
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  <p style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 16, fontWeight: 600, color: "#1A2E0A", letterSpacing: "-0.5px" }}>Tu plan de hoy</p>
+                  <p style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 16, fontWeight: 600, color: T.text.primary, letterSpacing: "-0.5px" }}>Tu plan de hoy</p>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
                     {[["~800", "kcal"], ["~56g", "prot"], ["2", "comidas"], ["4/7", "días"]].map(([v, l]) => (
-                      <div key={l} style={{ ...G.card, borderRadius: 10, padding: "8px 10px", position: "relative", overflow: "hidden" }}>
+                      <div key={l} style={{ ...T.card, borderRadius: 10, padding: "8px 10px", position: "relative", overflow: "hidden" }}>
                         <div style={{ ...shine }} />
-                        <p style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 14, fontWeight: 600, color: "#1A2E0A", letterSpacing: "-0.5px" }}>{v}</p>
-                        <p style={{ fontSize: 9, color: "rgba(26,46,10,0.4)", marginTop: 2 }}>{l}</p>
+                        <p style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 14, fontWeight: 600, color: T.text.primary, letterSpacing: "-0.5px" }}>{v}</p>
+                        <p style={{ fontSize: 9, color: T.text.muted, marginTop: 2 }}>{l}</p>
                       </div>
                     ))}
                   </div>
                   {[["☀️", "Comida", "Ensalada de atún"], ["🌙", "Cena", "Tortilla de espinacas"]].map(([e, t, n]) => (
-                    <div key={t} style={{ ...G.card, borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 10, position: "relative", overflow: "hidden" }}>
+                    <div key={t} style={{ ...T.card, borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", gap: 10, position: "relative", overflow: "hidden" }}>
                       <div style={shine} />
                       <div style={{ width: 32, height: 32, borderRadius: 9, background: "rgba(94,136,66,0.08)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>{e}</div>
                       <div>
-                        <p style={{ fontSize: 8, color: "rgba(26,46,10,0.35)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 2 }}>{t}</p>
-                        <p style={{ fontSize: 11, fontWeight: 600, color: "#1A2E0A" }}>{n}</p>
+                        <p style={{ fontSize: 8, color: T.text.muted, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 2 }}>{t}</p>
+                        <p style={{ fontSize: 11, fontWeight: 600, color: T.text.primary }}>{n}</p>
                       </div>
                     </div>
                   ))}
                   {/* Nuria card mini */}
-                  <div style={{ ...G.matcha, borderRadius: 12, padding: "10px 12px", position: "relative", overflow: "hidden" }}>
+                  <div style={{ ...T.matcha, borderRadius: 12, padding: "10px 12px", position: "relative", overflow: "hidden" }}>
                     <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "40%", background: "linear-gradient(180deg,rgba(255,255,255,0.1),transparent)", pointerEvents: "none", borderRadius: "inherit" }} />
                     <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 5, position: "relative", zIndex: 1 }}>
                       <div style={{ width: 18, height: 18, borderRadius: "50%", background: "linear-gradient(145deg,#B8D870,#5E8842)", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -197,8 +205,8 @@ export default function Home() {
       {/* COMO FUNCIONA */}
       <section style={{ padding: "80px 40px", maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 1 }}>
         <div className="reveal" style={{ textAlign: "center", marginBottom: 56 }}>
-          <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(26,46,10,0.4)", textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 12 }}>Cómo funciona</p>
-          <h2 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 38, fontWeight: 700, color: "#1A2E0A", letterSpacing: "-1.5px", lineHeight: 1.1 }}>
+          <p style={{ fontSize: 10, fontWeight: 600, color: T.text.muted, textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 12 }}>Cómo funciona</p>
+          <h2 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 38, fontWeight: 700, color: T.text.primary, letterSpacing: "-1.5px", lineHeight: 1.1 }}>
             Tres pasos. Un plan<br /><em style={{ fontStyle: "italic", color: "#3C6020" }}>que funciona.</em>
           </h2>
         </div>
@@ -208,13 +216,13 @@ export default function Home() {
             ["02", "Recibe tu menú personalizado", "GPT-4o genera tu menú de 7 días con recetas, ingredientes en gramos en crudo y macros calculados.", "🌿"],
             ["03", "Nuria se adapta cada semana", "Check-in diario, NutriScore semanal y reajuste automático. Tu plan mejora solo.", "✨"],
           ].map(([num, title, desc, emoji], i) => (
-            <div className={`reveal card-hover stagger-${i + 1}`} key={num} style={{ ...G.card, borderRadius: 24, padding: "28px 24px", position: "relative", overflow: "hidden" }}>
+            <div className={`reveal card-hover stagger-${i + 1}`} key={num} style={{ ...T.card, borderRadius: 24, padding: "28px 24px", position: "relative", overflow: "hidden" }}>
               <div style={shine} />
               <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg,#5E8842,transparent)", opacity: 0.5 }} />
-              <p style={{ fontSize: 11, fontWeight: 600, color: "rgba(26,46,10,0.3)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 16 }}>Paso {num}</p>
+              <p style={{ fontSize: 11, fontWeight: 600, color: T.text.label, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 16 }}>Paso {num}</p>
               <p style={{ fontSize: 32, marginBottom: 14 }}>{emoji}</p>
-              <h3 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 20, fontWeight: 600, color: "#1A2E0A", letterSpacing: "-0.5px", marginBottom: 10 }}>{title}</h3>
-              <p style={{ fontSize: 13, color: "rgba(26,46,10,0.5)", lineHeight: 1.7, fontWeight: 300 }}>{desc}</p>
+              <h3 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 20, fontWeight: 600, color: T.text.primary, letterSpacing: "-0.5px", marginBottom: 10 }}>{title}</h3>
+              <p style={{ fontSize: 13, color: T.text.secondary, lineHeight: 1.7, fontWeight: 300 }}>{desc}</p>
             </div>
           ))}
         </div>
@@ -223,18 +231,18 @@ export default function Home() {
       {/* FEATURES */}
       <section id="features" style={{ padding: "80px 40px", maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 1 }}>
         <div className="reveal" style={{ textAlign: "center", marginBottom: 56 }}>
-          <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(26,46,10,0.4)", textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 12 }}>Funcionalidades</p>
-          <h2 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 38, fontWeight: 700, color: "#1A2E0A", letterSpacing: "-1.5px", lineHeight: 1.1 }}>
+          <p style={{ fontSize: 10, fontWeight: 600, color: T.text.muted, textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 12 }}>Funcionalidades</p>
+          <h2 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 38, fontWeight: 700, color: T.text.primary, letterSpacing: "-1.5px", lineHeight: 1.1 }}>
             Todo lo que necesitas<br /><em style={{ fontStyle: "italic", color: "#3C6020" }}>para comer bien de verdad</em>
           </h2>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
           {features.map(({ title, desc, emoji }, i) => (
-            <div className={`reveal card-hover stagger-${i + 1}`} key={title} style={{ ...G.card, borderRadius: 22, padding: "22px 20px", position: "relative", overflow: "hidden" }}>
+            <div className={`reveal card-hover stagger-${i + 1}`} key={title} style={{ ...T.card, borderRadius: 22, padding: "22px 20px", position: "relative", overflow: "hidden" }}>
               <div style={shine} />
               <p style={{ fontSize: 28, marginBottom: 14 }}>{emoji}</p>
-              <h3 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 17, fontWeight: 600, color: "#1A2E0A", letterSpacing: "-0.4px", marginBottom: 8 }}>{title}</h3>
-              <p style={{ fontSize: 12, color: "rgba(26,46,10,0.5)", lineHeight: 1.7, fontWeight: 300 }}>{desc}</p>
+              <h3 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 17, fontWeight: 600, color: T.text.primary, letterSpacing: "-0.4px", marginBottom: 8 }}>{title}</h3>
+              <p style={{ fontSize: 12, color: T.text.secondary, lineHeight: 1.7, fontWeight: 300 }}>{desc}</p>
             </div>
           ))}
         </div>
@@ -243,28 +251,28 @@ export default function Home() {
       {/* TESTIMONIOS */}
       <section style={{ padding: "80px 40px", maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 1 }}>
         <div className="reveal" style={{ textAlign: "center", marginBottom: 56 }}>
-          <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(26,46,10,0.4)", textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 12 }}>Testimonios</p>
-          <h2 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 38, fontWeight: 700, color: "#1A2E0A", letterSpacing: "-1.5px" }}>
+          <p style={{ fontSize: 10, fontWeight: 600, color: T.text.muted, textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 12 }}>Testimonios</p>
+          <h2 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 38, fontWeight: 700, color: T.text.primary, letterSpacing: "-1.5px" }}>
             Personas reales,<br /><em style={{ fontStyle: "italic", color: "#3C6020" }}>resultados reales</em>
           </h2>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
           {testimonios.map(({ inicial, nombre, resultado, texto, color }, i) => (
-            <div className={`reveal card-hover stagger-${i + 1}`} key={nombre} style={{ ...G.card, borderRadius: 22, padding: "22px 20px", position: "relative", overflow: "hidden" }}>
+            <div className={`reveal card-hover stagger-${i + 1}`} key={nombre} style={{ ...T.card, borderRadius: 22, padding: "22px 20px", position: "relative", overflow: "hidden" }}>
               <div style={shine} />
               <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
                 <div style={{ width: 44, height: 44, borderRadius: "50%", background: `linear-gradient(145deg,${color}99,${color})`, display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid rgba(255,255,255,0.9)", flexShrink: 0 }}>
                   <span style={{ fontFamily: "var(--font-playfair,serif)", color: "white", fontSize: 18, fontWeight: 600, fontStyle: "italic" }}>{inicial}</span>
                 </div>
                 <div>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: "#1A2E0A" }}>{nombre}</p>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: T.text.primary }}>{nombre}</p>
                   <p style={{ fontSize: 11, color, fontWeight: 600, marginTop: 2 }}>{resultado}</p>
                 </div>
               </div>
               <div style={{ display: "flex", gap: 2, marginBottom: 10 }}>
                 {[...Array(5)].map((_, i) => <span key={i} style={{ color: "#5E8842", fontSize: 12 }}>★</span>)}
               </div>
-              <p style={{ fontSize: 13, color: "rgba(26,46,10,0.55)", lineHeight: 1.7, fontWeight: 300 }}>{texto}</p>
+              <p style={{ fontSize: 13, color: T.text.secondary, lineHeight: 1.7, fontWeight: 300 }}>{texto}</p>
             </div>
           ))}
         </div>
@@ -273,8 +281,8 @@ export default function Home() {
       {/* PRECIOS */}
       <section id="precios" style={{ padding: "80px 40px", maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 1 }}>
         <div className="reveal" style={{ textAlign: "center", marginBottom: 56 }}>
-          <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(26,46,10,0.4)", textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 12 }}>Precios</p>
-          <h2 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 38, fontWeight: 700, color: "#1A2E0A", letterSpacing: "-1.5px" }}>
+          <p style={{ fontSize: 10, fontWeight: 600, color: T.text.muted, textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 12 }}>Precios</p>
+          <h2 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 38, fontWeight: 700, color: T.text.primary, letterSpacing: "-1.5px" }}>
             Elige tu plan.<br /><em style={{ fontStyle: "italic", color: "#3C6020" }}>Sin permanencia.</em>
           </h2>
         </div>
@@ -285,22 +293,22 @@ export default function Home() {
             { nombre: "Élite", precio: "39,99€", badge: "", items: ["✓ Todo Pro", "✓ Protocolo hormonal", "✓ Gemelo metabólico", "✓ Seguimiento avanzado", "✓ Prioridad soporte"], cta: "Empezar", destacado: false, longevity: false },
             { nombre: "Longevity", precio: "59,99€", badge: "NUEVO", items: ["✓ Todo Élite", "✓ Plan antiedad", "✓ Protocolo antioxidante", "✓ Análisis longevidad", "✓ Suplementación antiedad"], cta: "Quiero vivir más", destacado: false, longevity: true },
           ].map(({ nombre, precio, badge, items, cta, destacado, longevity }, i) => (
-            <div className={`reveal card-hover stagger-${i + 1}`} key={nombre} style={{ ...G.card, borderRadius: 24, padding: "24px 20px", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", ...(destacado ? { borderRight: "1px solid rgba(94,136,66,0.3)", borderBottom: "1px solid rgba(94,136,66,0.3)" } : {}), ...(longevity ? { borderRight: "1px solid rgba(186,120,20,0.3)", borderBottom: "1px solid rgba(186,120,20,0.3)" } : {}) }}>
+            <div className={`reveal card-hover stagger-${i + 1}`} key={nombre} style={{ ...T.card, borderRadius: 24, padding: "24px 20px", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", ...(destacado ? { borderRight: "1px solid rgba(94,136,66,0.3)", borderBottom: "1px solid rgba(94,136,66,0.3)" } : {}), ...(longevity ? { borderRight: "1px solid rgba(186,120,20,0.3)", borderBottom: "1px solid rgba(186,120,20,0.3)" } : {}) }}>
               <div style={shine} />
               {badge && (
                 <div style={{ position: "absolute", top: -1, left: "50%", transform: "translateX(-50%)", background: destacado ? "linear-gradient(155deg,#5E8842,#3C6020)" : "linear-gradient(155deg,#C8A020,#A07818)", borderRadius: "0 0 12px 12px", padding: "4px 14px" }}>
                   <span style={{ fontSize: 9, fontWeight: 700, color: "white", letterSpacing: "0.06em" }}>{badge}</span>
                 </div>
               )}
-              <p style={{ fontSize: 15, fontWeight: 600, color: "#1A2E0A", marginTop: badge ? 12 : 0, marginBottom: 4 }}>{nombre}</p>
-              <p style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 28, fontWeight: 700, color: "#1A2E0A", letterSpacing: "-1px", marginBottom: 4 }}>{precio}</p>
-              <p style={{ fontSize: 10, color: "rgba(26,46,10,0.35)", fontWeight: 300, marginBottom: 16 }}>al mes</p>
+              <p style={{ fontSize: 15, fontWeight: 600, color: T.text.primary, marginTop: badge ? 12 : 0, marginBottom: 4 }}>{nombre}</p>
+              <p style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 28, fontWeight: 700, color: T.text.primary, letterSpacing: "-1px", marginBottom: 4 }}>{precio}</p>
+              <p style={{ fontSize: 10, color: T.text.muted, fontWeight: 300, marginBottom: 16 }}>al mes</p>
               <ul style={{ listStyle: "none", padding: 0, margin: 0, flex: 1, marginBottom: 20 }}>
                 {items.map(item => (
-                  <li key={item} style={{ fontSize: 12, color: item.startsWith("—") ? "rgba(26,46,10,0.3)" : "rgba(26,46,10,0.65)", fontWeight: item.startsWith("—") ? 300 : 400, marginBottom: 7, lineHeight: 1.4 }}>{item}</li>
+                  <li key={item} style={{ fontSize: 12, color: item.startsWith("—") ? T.text.label : T.text.secondary, fontWeight: item.startsWith("—") ? 300 : 400, marginBottom: 7, lineHeight: 1.4 }}>{item}</li>
                 ))}
               </ul>
-              <Link href="/registro" style={{ display: "block", textAlign: "center", padding: "10px 16px", borderRadius: 14, fontSize: 12, fontWeight: 500, textDecoration: "none", letterSpacing: "0.02em", ...(destacado ? { ...G.matcha, color: "white" } : longevity ? { background: "linear-gradient(155deg,#C8A020,#A07818)", color: "white", border: "none", boxShadow: "0 8px 22px rgba(160,120,24,0.35)" } : { background: "rgba(255,255,255,0.7)", color: "#2A3E16", border: "1px solid rgba(94,136,66,0.2)", boxShadow: "0 4px 14px rgba(30,60,15,0.08)" }) }}>
+              <Link href="/registro" style={{ display: "block", textAlign: "center", padding: "10px 16px", borderRadius: 14, fontSize: 12, fontWeight: 500, textDecoration: "none", letterSpacing: "0.02em", ...(destacado ? { ...T.matcha, color: "white" } : longevity ? { background: "linear-gradient(155deg,#C8A020,#A07818)", color: "white", border: "none", boxShadow: "0 8px 22px rgba(160,120,24,0.35)" } : { background: "rgba(255,255,255,0.7)", color: "#2A3E16", border: "1px solid rgba(94,136,66,0.2)", boxShadow: "0 4px 14px rgba(30,60,15,0.08)" }) }}>
                 {cta}
               </Link>
             </div>
@@ -311,17 +319,17 @@ export default function Home() {
       {/* FAQ */}
       <section id="faq" style={{ padding: "80px 40px", maxWidth: 700, margin: "0 auto", position: "relative", zIndex: 1 }}>
         <div style={{ textAlign: "center", marginBottom: 56 }}>
-          <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(26,46,10,0.4)", textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 12 }}>FAQ</p>
-          <h2 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 38, fontWeight: 700, color: "#1A2E0A", letterSpacing: "-1.5px" }}>
+          <p style={{ fontSize: 10, fontWeight: 600, color: T.text.muted, textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 12 }}>FAQ</p>
+          <h2 style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 38, fontWeight: 700, color: T.text.primary, letterSpacing: "-1.5px" }}>
             Preguntas<br /><em style={{ fontStyle: "italic", color: "#3C6020" }}>frecuentes</em>
           </h2>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {faqs.map(({ q, a }) => (
-            <div className="reveal card-hover" key={q} style={{ ...G.card, borderRadius: 20, padding: "18px 22px", position: "relative", overflow: "hidden" }}>
+            <div className="reveal card-hover" key={q} style={{ ...T.card, borderRadius: 20, padding: "18px 22px", position: "relative", overflow: "hidden" }}>
               <div style={shine} />
-              <p style={{ fontSize: 14, fontWeight: 600, color: "#1A2E0A", letterSpacing: "-0.3px", marginBottom: 8 }}>{q}</p>
-              <p style={{ fontSize: 13, color: "rgba(26,46,10,0.5)", lineHeight: 1.7, fontWeight: 300 }}>{a}</p>
+              <p style={{ fontSize: 14, fontWeight: 600, color: T.text.primary, letterSpacing: "-0.3px", marginBottom: 8 }}>{q}</p>
+              <p style={{ fontSize: 13, color: T.text.secondary, lineHeight: 1.7, fontWeight: 300 }}>{a}</p>
             </div>
           ))}
         </div>
@@ -329,7 +337,7 @@ export default function Home() {
 
       {/* CTA FINAL */}
       <section style={{ padding: "80px 40px", maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 1, paddingBottom: 120 }}>
-        <div style={{ ...G.dark, borderRadius: 32, padding: "60px 40px", textAlign: "center", position: "relative", overflow: "hidden" }}>
+        <div style={{ ...T.dark, borderRadius: 32, padding: "60px 40px", textAlign: "center", position: "relative", overflow: "hidden" }}>
           <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "40%", background: "linear-gradient(180deg,rgba(255,255,255,0.07),transparent)", pointerEvents: "none", borderRadius: "inherit" }} />
           <div style={{ position: "absolute", top: -80, right: -80, width: 250, height: 250, borderRadius: "50%", background: "radial-gradient(circle,rgba(200,240,160,0.12),transparent 70%)", pointerEvents: "none" }} />
           <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(180,240,140,0.38)", textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 16, position: "relative", zIndex: 1 }}>Empieza hoy</p>
@@ -339,7 +347,7 @@ export default function Home() {
           <p style={{ fontSize: 15, color: "rgba(210,248,180,0.45)", fontWeight: 300, lineHeight: 1.7, marginBottom: 32, position: "relative", zIndex: 1 }}>
             Tu primer menú personalizado en menos de 2 minutos. Sin tarjeta de crédito.
           </p>
-          <Link href="/registro" style={{ ...G.card, display: "inline-block", padding: "14px 32px", borderRadius: 16, fontSize: 14, fontWeight: 600, color: "#1A2E0A", textDecoration: "none", position: "relative", zIndex: 1, letterSpacing: "0.02em" }}>
+          <Link href="/registro" style={{ ...T.card, display: "inline-block", padding: "14px 32px", borderRadius: 16, fontSize: 14, fontWeight: 600, color: T.text.primary, textDecoration: "none", position: "relative", zIndex: 1, letterSpacing: "0.02em" }}>
             Crear mi cuenta gratis →
           </Link>
           <p style={{ fontSize: 11, color: "rgba(180,240,140,0.25)", marginTop: 16, fontWeight: 300, position: "relative", zIndex: 1 }}>
@@ -349,21 +357,21 @@ export default function Home() {
       </section>
 
       {/* FOOTER */}
-      <footer style={{ ...G.card, borderRadius: 0, borderLeft: "none", borderRight: "none", borderBottom: "none", padding: "24px 40px", position: "relative", zIndex: 1 }}>
+      <footer style={{ ...T.card, borderRadius: 0, borderLeft: "none", borderRight: "none", borderBottom: "none", padding: "24px 40px", position: "relative", zIndex: 1 }}>
         <div style={shine} />
         <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{ width: 24, height: 24, borderRadius: 7, ...G.matcha, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ width: 24, height: 24, borderRadius: 7, ...T.matcha, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <span style={{ fontFamily: "var(--font-playfair,serif)", color: "white", fontSize: 11, fontWeight: 600, fontStyle: "italic" }}>N</span>
             </div>
-            <span style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 15, fontWeight: 600, color: "#1A2E0A" }}>NutriAI</span>
+            <span style={{ fontFamily: "var(--font-playfair,serif)", fontSize: 15, fontWeight: 600, color: T.text.primary }}>NutriAI</span>
           </div>
           <div style={{ display: "flex", gap: 20 }}>
             {["Privacidad", "Términos", "Cookies"].map(l => (
-              <a key={l} href="#" style={{ fontSize: 12, color: "rgba(26,46,10,0.4)", textDecoration: "none", fontWeight: 300 }}>{l}</a>
+              <a key={l} href="#" style={{ fontSize: 12, color: T.text.muted, textDecoration: "none", fontWeight: 300 }}>{l}</a>
             ))}
           </div>
-          <p style={{ fontSize: 11, color: "rgba(26,46,10,0.3)", fontWeight: 300 }}>© {new Date().getFullYear()} NutriAI</p>
+          <p style={{ fontSize: 11, color: T.text.label, fontWeight: 300 }}>© {new Date().getFullYear()} NutriAI</p>
         </div>
       </footer>
 
