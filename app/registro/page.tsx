@@ -1,115 +1,184 @@
 "use client";
-
-import Link from "next/link";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
 export default function RegistroPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [nombre, setNombre] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string|null>(null);
+  const [success, setSuccess] = useState(false);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setError(null);
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add("vis"); }),
+      { threshold: 0.1 }
+    );
+    document.querySelectorAll(".rev").forEach(el => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
 
-    if (password !== confirmPassword) {
-      setError("Las contrasenas no coinciden.");
-      return;
+  async function handleRegistro(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true); setError(null);
+    const { data, error } = await supabase.auth.signUp({ email, password });
+    if (error) { setError(error.message); setLoading(false); return; }
+    if (data.user) {
+      await supabase.from("profiles").upsert({ id: data.user.id, form_data: { full_name: nombre }, updated_at: new Date().toISOString() });
+      setSuccess(true);
+      setTimeout(() => router.push("/onboarding"), 2000);
     }
-
-    setLoading(true);
-
-    const { data, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-
     setLoading(false);
-
-    if (signUpError) {
-      setError(signUpError.message);
-      return;
-    }
-
-    if (data.session || data.user) {
-      router.push("/dashboard");
-    }
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-white px-4">
-      <section className="w-full max-w-md rounded-2xl border border-neutral-200 p-8 shadow-sm">
-        <h1 className="text-2xl font-semibold text-[#0F6E56]">Crear cuenta</h1>
-        <p className="mt-2 text-sm text-neutral-600">Empieza tu plan personalizado con NutriAI.</p>
+    <div style={{ minHeight:"100vh", background:"#0B0B0B", display:"flex", fontFamily:"var(--font-instrument,-apple-system,sans-serif)", position:"relative", overflow:"hidden" }}>
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          <div>
-            <label htmlFor="email" className="mb-1 block text-sm font-medium text-neutral-700">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              required
-              className="w-full rounded-lg border border-neutral-300 px-3 py-2 outline-none ring-[#0F6E56] focus:ring-2"
-            />
+      <style>{`
+        .sf{font-family:var(--font-playfair,Georgia,serif)}
+        .rev{opacity:0;transform:translateY(24px);transition:opacity 0.9s cubic-bezier(0.16,1,0.3,1),transform 0.9s cubic-bezier(0.16,1,0.3,1)}
+        .rev.vis{opacity:1;transform:translateY(0)}
+        .d1{transition-delay:0.05s}.d2{transition-delay:0.12s}.d3{transition-delay:0.19s}.d4{transition-delay:0.26s}
+        .inp{background:rgba(237,237,237,0.04);border:1px solid rgba(237,237,237,0.1);border-radius:12px;padding:13px 18px;font-size:14px;color:#EDEDED;font-family:var(--font-instrument,-apple-system,sans-serif);outline:none;width:100%;transition:border-color 0.2s ease,background 0.2s ease;font-weight:300}
+        .inp:focus{border-color:rgba(237,237,237,0.25);background:rgba(237,237,237,0.06)}
+        .inp::placeholder{color:rgba(237,237,237,0.2)}
+        .btn-main{background:#EDEDED;color:#0B0B0B;border:none;border-radius:13px;padding:15px 20px;font-size:14px;font-weight:700;cursor:pointer;width:100%;font-family:var(--font-instrument,-apple-system,sans-serif);letter-spacing:0.01em;transition:transform 0.2s cubic-bezier(0.34,1.56,0.64,1),filter 0.2s ease}
+        .btn-main:hover{transform:translateY(-1px) scale(1.01);filter:brightness(1.05)}
+        .btn-main:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+        @keyframes pd{0%,100%{opacity:0.6;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}
+        .gdot{animation:pd 3s ease-in-out infinite}
+      `}</style>
+
+      {/* Background */}
+      <div style={{position:"absolute",top:-100,right:-80,width:600,height:600,borderRadius:"50%",background:"radial-gradient(circle,rgba(237,237,237,0.025),transparent 65%)",pointerEvents:"none"}}/>
+      <div style={{position:"absolute",bottom:-80,left:-60,width:400,height:400,borderRadius:"50%",background:"radial-gradient(circle,rgba(198,169,107,0.03),transparent 65%)",pointerEvents:"none"}}/>
+      <div style={{position:"absolute",inset:0,backgroundImage:"linear-gradient(rgba(237,237,237,0.018) 1px,transparent 1px),linear-gradient(90deg,rgba(237,237,237,0.018) 1px,transparent 1px)",backgroundSize:"80px 80px",pointerEvents:"none"}}/>
+
+      {/* LEFT - Editorial */}
+      <div style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"space-between",padding:"48px 64px",borderRight:"1px solid rgba(237,237,237,0.06)"}}>
+
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          <div style={{width:32,height:32,borderRadius:9,background:"linear-gradient(145deg,#C6A96B,#8A7240)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 14px rgba(198,169,107,0.35)"}}>
+            <span className="sf" style={{color:"white",fontSize:14,fontWeight:700,fontStyle:"italic"}}>N</span>
+          </div>
+          <span className="sf" style={{fontSize:18,fontWeight:600,color:"#EDEDED",letterSpacing:"-0.4px"}}>NutriAI</span>
+        </div>
+
+        <div className="rev" style={{maxWidth:480}}>
+          <div style={{display:"inline-flex",alignItems:"center",gap:8,border:"1px solid rgba(237,237,237,0.1)",borderRadius:50,padding:"5px 16px",marginBottom:40}}>
+            <div className="gdot" style={{width:5,height:5,borderRadius:"50%",background:"#C6A96B",boxShadow:"0 0 8px rgba(198,169,107,0.9)"}}/>
+            <span style={{fontSize:11,fontWeight:500,color:"rgba(237,237,237,0.4)",letterSpacing:"0.12em",textTransform:"uppercase"}}>Proceso de selección</span>
           </div>
 
-          <div>
-            <label htmlFor="password" className="mb-1 block text-sm font-medium text-neutral-700">
-              Contrasena
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              required
-              minLength={6}
-              className="w-full rounded-lg border border-neutral-300 px-3 py-2 outline-none ring-[#0F6E56] focus:ring-2"
-            />
+          <h1 className="sf" style={{fontSize:52,fontWeight:700,color:"#EDEDED",letterSpacing:"-2.5px",lineHeight:0.97,marginBottom:28}}>
+            Esto no<br/>es para<br/>
+            <em style={{fontStyle:"italic",color:"rgba(237,237,237,0.35)"}}>todo el mundo</em>
+          </h1>
+
+          <p style={{fontSize:15,color:"rgba(237,237,237,0.3)",lineHeight:1.9,fontWeight:300,marginBottom:36,maxWidth:400}}>
+            Trabajamos con pocas personas. Las que están listas para comprometerse con un proceso real de transformación fisiológica.
+          </p>
+
+          {/* Descalificación */}
+          <div style={{display:"flex",flexDirection:"column",gap:10}}>
+            {["Buscas soluciones rápidas sin proceso real","Quieres solo una dieta más, no una transformación","No estás dispuesta a comprometerte con el seguimiento"].map((item,i)=>(
+              <div key={i} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",border:"1px solid rgba(237,237,237,0.06)",borderRadius:11,background:"rgba(237,237,237,0.02)"}}>
+                <div style={{width:18,height:18,borderRadius:"50%",border:"1px solid rgba(237,237,237,0.1)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                  <span style={{color:"rgba(237,237,237,0.2)",fontSize:10}}>✕</span>
+                </div>
+                <p style={{fontSize:13,color:"rgba(237,237,237,0.3)",fontWeight:300}}>{item}</p>
+              </div>
+            ))}
           </div>
 
-          <div>
-            <label htmlFor="confirmPassword" className="mb-1 block text-sm font-medium text-neutral-700">
-              Confirmar contrasena
-            </label>
-            <input
-              id="confirmPassword"
-              type="password"
-              value={confirmPassword}
-              onChange={(event) => setConfirmPassword(event.target.value)}
-              required
-              minLength={6}
-              className="w-full rounded-lg border border-neutral-300 px-3 py-2 outline-none ring-[#0F6E56] focus:ring-2"
-            />
+          <p className="sf" style={{fontSize:15,color:"rgba(237,237,237,0.45)",fontStyle:"italic",marginTop:28,lineHeight:1.7}}>
+            "Si llegaste hasta aquí, probablemente sí eres la persona adecuada."
+          </p>
+        </div>
+
+        <div className="rev d2" style={{display:"flex",gap:0,borderTop:"1px solid rgba(237,237,237,0.07)",paddingTop:28}}>
+          {[["500+","Protocolos activos"],["+34","Condiciones clínicas"],["98%","Adherencia"]].map(([n,l],i)=>(
+            <div key={l} style={{flex:1,paddingRight:24,borderRight:i<2?"1px solid rgba(237,237,237,0.07)":"none",paddingLeft:i>0?24:0}}>
+              <p className="sf" style={{fontSize:24,fontWeight:700,color:"#EDEDED",letterSpacing:"-1px",lineHeight:1}}>{n}</p>
+              <p style={{fontSize:10,color:"rgba(237,237,237,0.22)",marginTop:5,fontWeight:300,letterSpacing:"0.05em"}}>{l}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* RIGHT - Registro form */}
+      <div style={{width:500,display:"flex",flexDirection:"column",justifyContent:"center",padding:"64px 56px"}}>
+
+        {success ? (
+          <div className="rev" style={{textAlign:"center"}}>
+            <div style={{width:60,height:60,borderRadius:"50%",background:"rgba(237,237,237,0.06)",border:"1px solid rgba(237,237,237,0.12)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 28px"}}>
+              <span style={{color:"#EDEDED",fontSize:24}}>✓</span>
+            </div>
+            <h2 className="sf" style={{fontSize:28,fontWeight:700,color:"#EDEDED",letterSpacing:"-1px",marginBottom:12}}>Acceso concedido</h2>
+            <p style={{fontSize:14,color:"rgba(237,237,237,0.35)",fontWeight:300,lineHeight:1.7}}>
+              Tu evaluación ha sido registrada. Redirigiendo a tu protocolo...
+            </p>
           </div>
+        ) : (
+          <>
+            <div className="rev" style={{marginBottom:40}}>
+              <p style={{fontSize:10,fontWeight:700,color:"rgba(237,237,237,0.22)",textTransform:"uppercase",letterSpacing:"0.18em",marginBottom:16}}>Solicitar evaluación</p>
+              <h2 className="sf" style={{fontSize:34,fontWeight:700,color:"#EDEDED",letterSpacing:"-1.5px",lineHeight:1.05,marginBottom:8}}>
+                Comenzar el proceso
+              </h2>
+              <p style={{fontSize:14,color:"rgba(237,237,237,0.3)",fontWeight:300,lineHeight:1.6}}>
+                Tu evaluación clínica inicial determina si este nivel de acompañamiento es el adecuado para ti.
+              </p>
+            </div>
 
-          {error ? <p className="text-sm text-red-600">{error}</p> : null}
+            <form onSubmit={handleRegistro} style={{display:"flex",flexDirection:"column",gap:13}}>
+              <div className="rev d1">
+                <label style={{fontSize:11,fontWeight:600,color:"rgba(237,237,237,0.35)",textTransform:"uppercase",letterSpacing:"0.1em",display:"block",marginBottom:8}}>Nombre</label>
+                <input type="text" value={nombre} onChange={e=>setNombre(e.target.value)} placeholder="Tu nombre" required className="inp"/>
+              </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-lg bg-[#0F6E56] px-4 py-2.5 font-semibold text-white transition hover:bg-[#0d5f4a] disabled:opacity-60"
-          >
-            {loading ? "Creando cuenta..." : "Crear cuenta"}
-          </button>
-        </form>
+              <div className="rev d2">
+                <label style={{fontSize:11,fontWeight:600,color:"rgba(237,237,237,0.35)",textTransform:"uppercase",letterSpacing:"0.1em",display:"block",marginBottom:8}}>Email</label>
+                <input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="tu@email.com" required className="inp"/>
+              </div>
 
-        <p className="mt-6 text-center text-sm text-neutral-600">
-          Ya tienes cuenta?{" "}
-          <Link href="/login" className="font-medium text-[#0F6E56] hover:underline">
-            Entrar
-          </Link>
-        </p>
-      </section>
-    </main>
+              <div className="rev d3">
+                <label style={{fontSize:11,fontWeight:600,color:"rgba(237,237,237,0.35)",textTransform:"uppercase",letterSpacing:"0.1em",display:"block",marginBottom:8}}>Contraseña</label>
+                <input type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Mínimo 8 caracteres" required minLength={8} className="inp"/>
+              </div>
+
+              {error && (
+                <div style={{padding:"12px 16px",background:"rgba(220,80,80,0.06)",border:"1px solid rgba(220,80,80,0.15)",borderRadius:10}}>
+                  <p style={{fontSize:13,color:"rgba(220,80,80,0.7)",fontWeight:300}}>{error}</p>
+                </div>
+              )}
+
+              <div className="rev d4" style={{marginTop:6}}>
+                <button type="submit" disabled={loading} className="btn-main">
+                  {loading?"Procesando evaluación...":"Solicitar acceso"}
+                </button>
+                <p style={{fontSize:11,color:"rgba(237,237,237,0.18)",textAlign:"center",marginTop:12,fontWeight:300,letterSpacing:"0.04em"}}>
+                  Al continuar aceptas los términos del proceso de selección
+                </p>
+              </div>
+            </form>
+
+            <div className="rev d4" style={{marginTop:32,paddingTop:24,borderTop:"1px solid rgba(237,237,237,0.07)"}}>
+              <p style={{fontSize:13,color:"rgba(237,237,237,0.25)",fontWeight:300,textAlign:"center"}}>
+                ¿Ya tienes acceso?{" "}
+                <Link href="/login" style={{color:"rgba(237,237,237,0.55)",textDecoration:"none",fontWeight:500,borderBottom:"1px solid rgba(237,237,237,0.2)"}}>Acceder</Link>
+              </p>
+              <p style={{fontSize:11,color:"rgba(237,237,237,0.15)",fontWeight:300,letterSpacing:"0.06em",textTransform:"uppercase",textAlign:"center",marginTop:14}}>
+                Proceso de selección · Plazas limitadas
+              </p>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
   );
 }
