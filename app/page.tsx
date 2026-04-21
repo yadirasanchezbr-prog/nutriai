@@ -69,8 +69,10 @@ export default function Home() {
           <span className="sf" style={{ fontSize:18, fontWeight:600, color:"#EDEDED", letterSpacing:"-0.4px" }}>NutriAI</span>
         </div>
         <div style={{ display:"flex", gap:36, alignItems:"center" }}>
-          {[["El método","#metodo"],["Servicio","#servicio"],["Resultados","#resultados"]].map(([l,h])=>(
-            <a key={l} href={h} className="lu" style={{ fontSize:13, color:"rgba(237,237,237,0.38)", fontWeight:400, letterSpacing:"0.01em" }}>{l}</a>
+          {[["El método","#metodo"],["Funcionalidades","#features"],["Planes","/planes"],["Resultados","#resultados"]].map(([l,h])=>(
+            <a key={l} href={h} className="nav-link link-e" style={{ fontSize:13, color:"rgba(237,237,237,0.42)", textDecoration:"none", position:"relative" }}>
+              {l}<span className="gold-line" />
+            </a>
           ))}
         </div>
         <div style={{ display:"flex", gap:12, alignItems:"center" }}>
