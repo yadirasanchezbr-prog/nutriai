@@ -1,876 +1,574 @@
 "use client";
-
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { FormEvent, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
-type ClinicalFormState = {
-  full_name: string;
-  age: number | "";
-  weight_kg: number | "";
-  height_cm: number | "";
-  biological_sex: string;
-  tiene_ciclo: boolean;
-  duracion_ciclo: number;
-  ultima_menstruacion: string;
-  activity_level: string;
-  main_goal: string;
-  eating_type: string;
-  eating_subtype: string;
-  ayuno_horas: string;
-  eating_details: string;
-  health_conditions: string[];
-  intolerances: string[];
-  bloating: string;
-  heavy_digestions: string;
-  constipation: string;
-  bowel_movements_per_day: string;
-  diarrea: string;
-  gases: string;
-  nauseas: string;
-  acidez: string;
-  digestion_urgencia: string;
-  dolor_abdominal: string;
-  digestion_empeora_con: string[];
-  digestion_mejora_con: string[];
-  sleep_hours: number;
-  stress_level: number;
-  cooks_at_home: string;
-  tiempo_cocina: string;
-  presupuesto_semanal: string;
-  comidas_fuera: string;
-  batch_cooking: string;
-  supplements: string[];
-  food_relationship: string;
-  emotional_eating: string;
-  disliked_foods: string;
-  note_for_nuria: string;
-  sintomas_hormonales: string[];
-  sintomas_piel_cabello: string[];
-  ciclo_irregular: string;
-  dolor_menstrual: string;
-};
-
-const TOTAL_STEPS = 6;
-
-const initialState: ClinicalFormState = {
-  full_name: "",
-  age: "",
-  weight_kg: "",
-  height_cm: "",
-  biological_sex: "",
-  tiene_ciclo: false,
-  duracion_ciclo: 28,
-  ultima_menstruacion: "",
-  activity_level: "",
-  main_goal: "",
-  eating_type: "",
-  eating_subtype: "",
-  ayuno_horas: "",
-  eating_details: "",
-  health_conditions: [],
-  intolerances: [],
-  bloating: "",
-  heavy_digestions: "",
-  constipation: "",
-  bowel_movements_per_day: "",
-  diarrea: "",
-  gases: "",
-  nauseas: "",
-  acidez: "",
-  digestion_urgencia: "",
-  dolor_abdominal: "",
-  digestion_empeora_con: [],
-  digestion_mejora_con: [],
-  sleep_hours: 7,
-  stress_level: 3,
-  cooks_at_home: "",
-  tiempo_cocina: "",
-  presupuesto_semanal: "",
-  comidas_fuera: "",
-  batch_cooking: "",
-  supplements: [],
-  food_relationship: "",
-  emotional_eating: "",
-  disliked_foods: "",
-  note_for_nuria: "",
-  sintomas_hormonales: [],
-  sintomas_piel_cabello: [],
-  ciclo_irregular: "",
-  dolor_menstrual: "",
-};
-
-function SingleSelectButtons({
-  options,
-  value,
-  onChange,
-}: {
-  options: string[];
-  value: string;
-  onChange: (next: string) => void;
-}) {
-  return (
-    <div className="mt-2 flex flex-wrap gap-2">
-      {options.map((option) => {
-        const active = value === option;
-        return (
-          <button
-            key={option}
-            type="button"
-            onClick={() => onChange(option)}
-            className={`rounded-lg border px-3 py-2 text-sm transition ${
-              active
-                ? "border-[#0F6E56] bg-emerald-50 text-[#0F6E56]"
-                : "border-neutral-300 text-neutral-700 hover:border-[#0F6E56]/60"
-            }`}
-          >
-            {option}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-function MultiSelectButtons({
-  options,
-  values,
-  onChange,
-}: {
-  options: string[];
-  values: string[];
-  onChange: (next: string[]) => void;
-}) {
-  function toggleOption(option: string) {
-    if (values.includes(option)) {
-      onChange(values.filter((value) => value !== option));
-      return;
-    }
-    onChange([...values, option]);
-  }
-
-  return (
-    <div className="mt-2 flex flex-wrap gap-2">
-      {options.map((option) => {
-        const active = values.includes(option);
-        return (
-          <button
-            key={option}
-            type="button"
-            onClick={() => toggleOption(option)}
-            className={`rounded-lg border px-3 py-2 text-sm transition ${
-              active
-                ? "border-[#0F6E56] bg-emerald-50 text-[#0F6E56]"
-                : "border-neutral-300 text-neutral-700 hover:border-[#0F6E56]/60"
-            }`}
-          >
-            {option}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
+const PASOS = ["Datos básicos","Objetivo","Historia clínica","Digestión","Hormonas","Alimentación","Estilo de vida","Revisión"];
+const PATOLOGIAS = ["Síndrome de intestino irritable","SIBO","Enfermedad de Crohn","Colitis ulcerosa","Reflujo / ERGE","Hipotiroidismo","Hipertiroidismo","Hashimoto","SOP","Endometriosis","Resistencia a la insulina","Diabetes tipo 2","Prediabetes","Artritis reumatoide","Psoriasis","Lupus","Fibromialgia","Migraña crónica","Ansiedad / Depresión","Osteoporosis","Anemia","Hígado graso","Hipertensión","Colesterol alto","Ninguna"];
+const INTOLERANCIAS = ["Gluten / Celíaca","Lactosa","Fructosa","Sorbitol","Histamina","Níquel","Huevo","Soja","Frutos secos","Marisco","Pescado","Maíz","Levadura","Nightshades","Cafeína","Alcohol","Ninguna"];
+const SINTOMAS_DIGESTIVOS = ["Hinchazón abdominal","Gases excesivos","Pesadez postprandial","Reflujo o acidez","Náuseas","Estreñimiento","Diarrea frecuente","Alternancia diarrea/estreñimiento","Dolor abdominal","Digestión lenta","Heces con moco","Urgencia defecatoria","Ninguno"];
+const TIPOS_ALIMENTACION = ["Omnívora","Vegetariana","Vegana","Pescetariana","Sin gluten","Sin lactosa","Keto / Low carb","Paleo","Ayuno intermitente","Personalizada / Mixta"];
+const NIVELES_ACTIVIDAD = ["Sedentaria (sin ejercicio)","Ligera (1-2 días/semana)","Moderada (3-4 días/semana)","Activa (5+ días/semana)","Muy activa (atleta / entreno diario)"];
+const OBJETIVOS = [
+  { id:"perdida_grasa", titulo:"Pérdida de grasa", desc:"Reducir masa grasa manteniendo músculo" },
+  { id:"recomp", titulo:"Recomposición corporal", desc:"Perder grasa y ganar músculo simultáneamente" },
+  { id:"ganancia_muscular", titulo:"Ganancia muscular", desc:"Aumentar masa muscular y fuerza" },
+  { id:"digestivo", titulo:"Salud digestiva", desc:"Mejorar síntomas digestivos y microbiota" },
+  { id:"hormonal", titulo:"Equilibrio hormonal", desc:"Regular ciclo, tiroides o insulina" },
+  { id:"antiinflamatorio", titulo:"Protocolo antiinflamatorio", desc:"Reducir inflamación sistémica" },
+  { id:"energia", titulo:"Mejorar energía y vitalidad", desc:"Optimizar niveles de energía diaria" },
+  { id:"longevity", titulo:"Longevidad y antiedad", desc:"Optimizar biología para vivir más y mejor" },
+];
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const [step, setStep] = useState(1);
-  const [form, setForm] = useState<ClinicalFormState>(initialState);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [paso, setPaso] = useState(0);
+  const [saving, setSaving] = useState(false);
+  const [userId, setUserId] = useState<string|null>(null);
+  const [nombre, setNombre] = useState("");
+  const [edad, setEdad] = useState("");
+  const [sexo, setSexo] = useState("");
+  const [peso, setPeso] = useState("");
+  const [altura, setAltura] = useState("");
+  const [objetivo, setObjetivo] = useState("");
+  const [pesoObjetivo, setPesoObjetivo] = useState("");
+  const [plazo, setPlazo] = useState("");
+  const [patologias, setPatologias] = useState<string[]>([]);
+  const [medicacion, setMedicacion] = useState("");
+  const [suplementos, setSuplementos] = useState("");
+  const [analiticas, setAnaliticas] = useState("");
+  const [sintomasDigestivos, setSintomasDigestivos] = useState<string[]>([]);
+  const [intolerancias, setIntolerancias] = useState<string[]>([]);
+  const [alergias, setAlergias] = useState("");
+  const [evacuaciones, setEvacuaciones] = useState("");
+  const [tieneCiclo, setTieneCiclo] = useState("");
+  const [duracionCiclo, setDuracionCiclo] = useState("");
+  const [ultimaMenstruacion, setUltimaMenstruacion] = useState("");
+  const [sintomasHormonales, setSintomasHormonales] = useState<string[]>([]);
+  const [tipoAlimentacion, setTipoAlimentacion] = useState<string[]>([]);
+  const [alimentosEvitar, setAlimentosEvitar] = useState("");
+  const [alimentosFavoritos, setAlimentosFavoritos] = useState("");
+  const [presupuesto, setPresupuesto] = useState("");
+  const [tiempoCocina, setTiempoCocina] = useState("");
+  const [numComidas, setNumComidas] = useState("3");
+  const [actividadFisica, setActividadFisica] = useState("");
+  const [tipoEjercicio, setTipoEjercicio] = useState("");
+  const [horasSueno, setHorasSueno] = useState("");
+  const [nivelEstres, setNivelEstres] = useState(5);
+  const [trabajoTipo, setTrabajoTipo] = useState("");
+  const [relacionComida, setRelacionComida] = useState("");
 
   useEffect(() => {
-    async function validateSession() {
+    async function load() {
       const { data } = await supabase.auth.getUser();
-      if (!data.user) {
-        router.replace("/login");
-      }
+      if (!data.user) { router.replace("/login"); return; }
+      setUserId(data.user.id);
+      const { data: profile } = await supabase.from("profiles").select("form_data").eq("id", data.user.id).single();
+      if (profile?.form_data?.full_name) setNombre(profile.form_data.full_name);
     }
-    validateSession();
+    load();
   }, [router]);
 
-  const progressPercentage = useMemo(() => Math.round((step / TOTAL_STEPS) * 100), [step]);
-
-  function updateField<K extends keyof ClinicalFormState>(field: K, value: ClinicalFormState[K]) {
-    setForm((prev) => ({ ...prev, [field]: value }));
+  function toggleArr(arr: string[], set: (v:string[])=>void, val: string) {
+    set(arr.includes(val) ? arr.filter(x=>x!==val) : [...arr, val]);
   }
 
-  function nextStep() {
-    setStep((prev) => Math.min(prev + 1, TOTAL_STEPS));
+  async function handleFinish() {
+    if (!userId) return;
+    setSaving(true);
+    const formData = {
+      full_name:nombre, edad, sexo, peso_kg:peso, altura_cm:altura,
+      objetivo, peso_objetivo:pesoObjetivo, plazo,
+      patologias, medicacion, suplementos, analiticas,
+      sintomas_digestivos:sintomasDigestivos, intolerancias, alergias, evacuaciones_dia:evacuaciones,
+      tiene_ciclo:tieneCiclo, duracion_ciclo:duracionCiclo, ultima_menstruacion:ultimaMenstruacion, sintomas_hormonales:sintomasHormonales,
+      tipo_alimentacion:tipoAlimentacion, alimentos_evitar:alimentosEvitar, alimentos_favoritos:alimentosFavoritos,
+      presupuesto_semana:presupuesto, tiempo_cocina:tiempoCocina, num_comidas:numComidas,
+      actividad_fisica:actividadFisica, tipo_ejercicio:tipoEjercicio, horas_sueno:horasSueno,
+      nivel_estres:nivelEstres, trabajo_tipo:trabajoTipo, relacion_comida:relacionComida,
+    };
+    await supabase.from("profiles").upsert({ id:userId, form_data:formData, updated_at:new Date().toISOString() });
+    await supabase.from("clinical_forms").upsert({ user_id:userId, ...formData, updated_at:new Date().toISOString() });
+    router.push("/dashboard");
   }
 
-  function previousStep() {
-    setStep((prev) => Math.max(prev - 1, 1));
-  }
-
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setError(null);
-    setLoading(true);
-
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-    if (userError || !userData.user) {
-      console.error("Error obteniendo usuario autenticado:", { userError, userData });
-      setLoading(false);
-      router.replace("/login");
-      return;
-    }
-
-    try {
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .upsert({
-          id: userData.user.id,
-          form_data: form,
-        });
-
-      if (profileError) {
-        console.error("Error completo al guardar en profiles:", profileError);
-        setError(profileError.message);
-        setLoading(false);
-        return;
-      }
-
-      if (form.tiene_ciclo && form.ultima_menstruacion) {
-        await supabase
-          .from("clinical_forms")
-          .upsert({
-            user_id: userData.user.id,
-            tiene_ciclo: form.tiene_ciclo,
-            duracion_ciclo: form.duracion_ciclo,
-            ultima_menstruacion: form.ultima_menstruacion,
-          }, { onConflict: "user_id" });
-      }
-
-      setLoading(false);
-      router.push("/dashboard");
-    } catch (unexpectedError) {
-      console.error("Error inesperado guardando onboarding:", unexpectedError);
-      setError("Ha ocurrido un error inesperado al guardar el formulario.");
-      setLoading(false);
-    }
-  }
+  const imc = peso && altura ? (parseFloat(peso)/Math.pow(parseFloat(altura)/100,2)).toFixed(1) : null;
+  const progreso = (paso/PASOS.length)*100;
 
   return (
-    <main className="min-h-screen bg-white px-4 py-10">
-      <section className="mx-auto w-full max-w-3xl rounded-2xl border border-neutral-200 p-6 shadow-sm sm:p-8">
-        <div className="mb-8">
-          <div className="flex items-center justify-between text-sm text-neutral-600">
-            <span>Paso {step} de 6</span>
-            <span>{progressPercentage}%</span>
+    <div style={{ minHeight:"100vh", background:"#0B0B0B", color:"#EDEDED", fontFamily:"var(--font-instrument,-apple-system,sans-serif)" }}>
+      <style>{`
+        .sf{font-family:var(--font-playfair,Georgia,serif)}
+        .inp{background:rgba(237,237,237,0.04);border:1px solid rgba(237,237,237,0.1);border-radius:12px;padding:13px 16px;font-size:14px;color:#EDEDED;font-family:var(--font-instrument,sans-serif);outline:none;width:100%;transition:border-color 0.2s ease;font-weight:300;line-height:1.5;box-sizing:border-box}
+        .inp:focus{border-color:rgba(237,237,237,0.28)}
+        .inp::placeholder{color:rgba(237,237,237,0.2)}
+        textarea.inp{resize:none}
+        select.inp{cursor:pointer}
+        select.inp option{background:#1A1A1A;color:#EDEDED}
+        label{font-size:11px;font-weight:600;color:rgba(237,237,237,0.3);text-transform:uppercase;letter-spacing:0.1em;display:block;margin-bottom:8px}
+        .chip{padding:8px 16px;border-radius:20px;cursor:pointer;font-size:13px;font-family:var(--font-instrument,sans-serif);border:1px solid rgba(237,237,237,0.08);background:transparent;color:rgba(237,237,237,0.38);transition:all 0.2s ease;font-weight:300;line-height:1}
+        .chip.on{background:#EDEDED;color:#0B0B0B;border-color:transparent;font-weight:600}
+        .chip:hover:not(.on){border-color:rgba(237,237,237,0.18);color:rgba(237,237,237,0.65)}
+        .obj-card{border:1px solid rgba(237,237,237,0.08);border-radius:16px;padding:20px 18px;cursor:pointer;transition:all 0.25s ease;background:transparent;width:100%;text-align:left}
+        .obj-card:hover{border-color:rgba(237,237,237,0.2);background:rgba(237,237,237,0.03)}
+        .obj-card.on{background:#EDEDED;border-color:transparent}
+        .btn-next{background:#EDEDED;color:#0B0B0B;border:none;border-radius:13px;padding:14px 36px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font-instrument,sans-serif);letter-spacing:0.01em;transition:transform 0.2s cubic-bezier(0.34,1.56,0.64,1),filter 0.2s ease}
+        .btn-next:hover{transform:translateY(-1px) scale(1.02);filter:brightness(1.05)}
+        .btn-next:disabled{opacity:0.4;cursor:not-allowed;transform:none}
+        .btn-back{background:transparent;color:rgba(237,237,237,0.35);border:1px solid rgba(237,237,237,0.1);border-radius:13px;padding:14px 24px;font-size:14px;font-weight:400;cursor:pointer;font-family:var(--font-instrument,sans-serif);transition:border-color 0.2s ease,color 0.2s ease}
+        .btn-back:hover{border-color:rgba(237,237,237,0.22);color:rgba(237,237,237,0.65)}
+        .slider{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;background:rgba(237,237,237,0.1);outline:none}
+        .slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#EDEDED;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.5)}
+        .act-btn{border:1px solid rgba(237,237,237,0.08);border-radius:12px;padding:12px 16px;cursor:pointer;text-align:left;transition:all 0.2s ease;background:transparent;width:100%;font-family:var(--font-instrument,sans-serif)}
+        .act-btn:hover{border-color:rgba(237,237,237,0.2);background:rgba(237,237,237,0.03)}
+        .act-btn.on{background:#EDEDED;border-color:transparent}
+        .fade-in{animation:fi 0.5s cubic-bezier(0.16,1,0.3,1)}
+        @keyframes fi{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+        *{box-sizing:border-box}
+      `}</style>
+
+      <div style={{position:"fixed",top:-100,right:-80,width:600,height:600,borderRadius:"50%",background:"radial-gradient(circle,rgba(237,237,237,0.02),transparent 65%)",pointerEvents:"none"}}/>
+      <div style={{position:"fixed",inset:0,backgroundImage:"linear-gradient(rgba(237,237,237,0.015) 1px,transparent 1px),linear-gradient(90deg,rgba(237,237,237,0.015) 1px,transparent 1px)",backgroundSize:"80px 80px",pointerEvents:"none"}}/>
+
+      {/* HEADER FIJO */}
+      <div style={{position:"fixed",top:0,left:0,right:0,zIndex:50,background:"rgba(11,11,11,0.97)",backdropFilter:"blur(40px)",WebkitBackdropFilter:"blur(40px)",borderBottom:"1px solid rgba(237,237,237,0.06)"}}>
+        <div style={{maxWidth:720,margin:"0 auto",padding:"18px 24px"}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16}}>
+            <div style={{display:"flex",alignItems:"center",gap:9}}>
+              <div style={{width:28,height:28,borderRadius:8,background:"linear-gradient(145deg,#C6A96B,#8A7240)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 3px 10px rgba(198,169,107,0.35)"}}>
+                <span className="sf" style={{color:"white",fontSize:13,fontWeight:700,fontStyle:"italic"}}>N</span>
+              </div>
+              <span className="sf" style={{fontSize:16,fontWeight:600,color:"#EDEDED",letterSpacing:"-0.3px"}}>NutriAI</span>
+            </div>
+            <div style={{textAlign:"right"}}>
+              <p style={{fontSize:10,fontWeight:600,color:"rgba(237,237,237,0.22)",textTransform:"uppercase",letterSpacing:"0.12em",marginBottom:2}}>Evaluación clínica</p>
+              <p style={{fontSize:12,color:"rgba(237,237,237,0.45)",fontWeight:300}}>{PASOS[paso]}</p>
+            </div>
           </div>
-          <div className="mt-2 h-2 w-full rounded-full bg-neutral-200">
-            <div
-              className="h-2 rounded-full bg-[#0F6E56] transition-all"
-              style={{ width: `${progressPercentage}%` }}
-            />
+          <div style={{height:2,background:"rgba(237,237,237,0.06)",borderRadius:2,overflow:"hidden"}}>
+            <div style={{height:"100%",background:"#EDEDED",borderRadius:2,width:`${progreso}%`,transition:"width 0.5s cubic-bezier(0.16,1,0.3,1)"}}/>
+          </div>
+          <div style={{display:"flex",justifyContent:"space-between",marginTop:10}}>
+            {PASOS.map((_,i)=>(
+              <button key={i} onClick={()=>i<paso&&setPaso(i)} style={{background:"none",border:"none",cursor:i<paso?"pointer":"default",padding:4}}>
+                <div style={{width:8,height:8,borderRadius:"50%",background:i<paso?"#EDEDED":i===paso?"rgba(237,237,237,0.6)":"rgba(237,237,237,0.12)",transform:i===paso?"scale(1.3)":"scale(1)",transition:"all 0.3s ease"}}/>
+              </button>
+            ))}
           </div>
         </div>
+      </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {step === 1 ? (
-            <>
-              <h1 className="text-2xl font-semibold text-[#0F6E56]">Datos fisicos</h1>
+      {/* CONTENIDO */}
+      <div style={{maxWidth:720,margin:"0 auto",padding:"130px 24px 80px",position:"relative",zIndex:1}}>
+
+        {/* PASO 0 */}
+        {paso===0 && (
+          <div className="fade-in">
+            <p style={{fontSize:10,fontWeight:700,color:"rgba(237,237,237,0.22)",textTransform:"uppercase",letterSpacing:"0.18em",marginBottom:16}}>Paso 1 de {PASOS.length}</p>
+            <h1 className="sf" style={{fontSize:52,fontWeight:700,color:"#EDEDED",letterSpacing:"-2.5px",lineHeight:0.97,marginBottom:16}}>
+              Cuéntanos<br/><em style={{fontStyle:"italic",color:"rgba(237,237,237,0.35)"}}>quién eres</em>
+            </h1>
+            <p style={{fontSize:15,color:"rgba(237,237,237,0.3)",fontWeight:300,lineHeight:1.75,marginBottom:48,maxWidth:500}}>
+              Nuria necesita estos datos para construir tu protocolo. Toda la información es confidencial.
+            </p>
+            <div style={{display:"flex",flexDirection:"column",gap:20}}>
               <div>
-                <label htmlFor="full_name" className="block text-sm font-medium text-neutral-700">
-                  Nombre completo
-                </label>
-                <input
-                  id="full_name"
-                  type="text"
-                  value={form.full_name}
-                  onChange={(event) => updateField("full_name", event.target.value)}
-                  className="mt-2 w-full rounded-lg border border-neutral-300 px-3 py-2 outline-none ring-[#0F6E56] focus:ring-2"
-                />
+                <label>Nombre completo</label>
+                <input value={nombre} onChange={e=>setNombre(e.target.value)} placeholder="Tu nombre" className="inp"/>
               </div>
-
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
                 <div>
-                  <label htmlFor="age" className="block text-sm font-medium text-neutral-700">
-                    Edad
-                  </label>
-                  <input
-                    id="age"
-                    type="number"
-                    min={0}
-                    value={form.age}
-                    onChange={(event) => updateField("age", event.target.value ? Number(event.target.value) : "")}
-                    className="mt-2 w-full rounded-lg border border-neutral-300 px-3 py-2 outline-none ring-[#0F6E56] focus:ring-2"
-                  />
+                  <label>Edad</label>
+                  <input type="number" value={edad} onChange={e=>setEdad(e.target.value)} placeholder="32" className="inp"/>
                 </div>
                 <div>
-                  <label htmlFor="weight_kg" className="block text-sm font-medium text-neutral-700">
-                    Peso en kg
-                  </label>
-                  <input
-                    id="weight_kg"
-                    type="number"
-                    min={0}
-                    value={form.weight_kg}
-                    onChange={(event) =>
-                      updateField("weight_kg", event.target.value ? Number(event.target.value) : "")
-                    }
-                    className="mt-2 w-full rounded-lg border border-neutral-300 px-3 py-2 outline-none ring-[#0F6E56] focus:ring-2"
-                  />
+                  <label>Sexo biológico</label>
+                  <select value={sexo} onChange={e=>setSexo(e.target.value)} className="inp">
+                    <option value="">Seleccionar</option>
+                    <option value="femenino">Femenino</option>
+                    <option value="masculino">Masculino</option>
+                  </select>
+                </div>
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+                <div>
+                  <label>Peso actual (kg)</label>
+                  <input type="number" value={peso} onChange={e=>setPeso(e.target.value)} placeholder="65" className="inp"/>
                 </div>
                 <div>
-                  <label htmlFor="height_cm" className="block text-sm font-medium text-neutral-700">
-                    Altura en cm
-                  </label>
-                  <input
-                    id="height_cm"
-                    type="number"
-                    min={0}
-                    value={form.height_cm}
-                    onChange={(event) =>
-                      updateField("height_cm", event.target.value ? Number(event.target.value) : "")
-                    }
-                    className="mt-2 w-full rounded-lg border border-neutral-300 px-3 py-2 outline-none ring-[#0F6E56] focus:ring-2"
-                  />
+                  <label>Altura (cm)</label>
+                  <input type="number" value={altura} onChange={e=>setAltura(e.target.value)} placeholder="168" className="inp"/>
                 </div>
               </div>
-
-              <div>
-                <p className="text-sm font-medium text-neutral-700">Sexo biologico</p>
-                <SingleSelectButtons
-                  options={["Mujer", "Hombre", "Prefiero no decir"]}
-                  value={form.biological_sex}
-                  onChange={(value) => updateField("biological_sex", value)}
-                />
-              </div>
-              {form.biological_sex === "Mujer" ? (
-                <>
+              {imc && (
+                <div style={{padding:"18px 22px",background:"rgba(237,237,237,0.04)",border:"1px solid rgba(237,237,237,0.08)",borderRadius:14,display:"flex",gap:24,alignItems:"center"}}>
                   <div>
-                    <p className="text-sm font-medium text-neutral-700">¿Tienes ciclo menstrual activo?</p>
-                    <SingleSelectButtons
-                      options={["Si", "No"]}
-                      value={form.tiene_ciclo ? "Si" : "No"}
-                      onChange={(value) => updateField("tiene_ciclo", value === "Si")}
-                    />
+                    <p style={{fontSize:9,color:"rgba(237,237,237,0.25)",textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:4,fontWeight:600}}>IMC calculado</p>
+                    <p className="sf" style={{fontSize:32,fontWeight:700,color:"#EDEDED",letterSpacing:"-1px",lineHeight:1}}>{imc}</p>
                   </div>
-                  {form.tiene_ciclo ? (
-                    <>
-                      <div>
-                        <label htmlFor="duracion_ciclo" className="block text-sm font-medium text-neutral-700">
-                          Duracion habitual del ciclo (dias): <span className="font-semibold text-[#0F6E56]">{form.duracion_ciclo}</span>
-                        </label>
-                        <input
-                          id="duracion_ciclo"
-                          type="range"
-                          min={21}
-                          max={35}
-                          step={1}
-                          value={form.duracion_ciclo}
-                          onChange={(event) => updateField("duracion_ciclo", Number(event.target.value))}
-                          className="mt-2 w-full accent-[#0F6E56]"
-                        />
-                        <div className="flex justify-between text-xs text-neutral-500 mt-1">
-                          <span>21 dias</span><span>35 dias</span>
-                        </div>
-                      </div>
-                      <div>
-                        <label htmlFor="ultima_menstruacion" className="block text-sm font-medium text-neutral-700">
-                          Fecha de inicio de tu ultima menstruacion
-                        </label>
-                        <input
-                          id="ultima_menstruacion"
-                          type="date"
-                          value={form.ultima_menstruacion}
-                          onChange={(event) => updateField("ultima_menstruacion", event.target.value)}
-                          className="mt-2 w-full rounded-lg border border-neutral-300 px-3 py-2 outline-none ring-[#0F6E56] focus:ring-2"
-                        />
-                      </div>
-                    </>
-                  ) : null}
-                </>
-              ) : null}
-
-              <div>
-                <p className="text-sm font-medium text-neutral-700">Nivel de actividad</p>
-                <SingleSelectButtons
-                  options={["Sedentario", "Ligero", "Moderado", "Activo", "Muy activo"]}
-                  value={form.activity_level}
-                  onChange={(value) => updateField("activity_level", value)}
-                />
-              </div>
-            </>
-          ) : null}
-
-          {step === 2 ? (
-            <>
-              <h1 className="text-2xl font-semibold text-[#0F6E56]">Objetivo y dieta</h1>
-              <div>
-                <p className="text-sm font-medium text-neutral-700">Objetivo principal</p>
-                <SingleSelectButtons
-                  options={["Perdida de grasa", "Recomposicion corporal", "Salud digestiva", "Antiinflamatorio", "Mejorar energia", "Mantenimiento", "Tratamiento de patologias"]}
-                  value={form.main_goal}
-                  onChange={(value) => updateField("main_goal", value)}
-                />
-              </div>
-
-              <div>
-                <p className="text-sm font-medium text-neutral-700">Tipo de alimentacion</p>
-                <SingleSelectButtons
-                  options={["Omnivoro", "Vegetariano", "Vegano", "Sin gluten", "Sin lactosa", "Keto", "Paleo", "OMAD (1 comida al dia)", "Ayuno intermitente", "Personalizado"]}
-                  value={form.eating_type}
-                  onChange={(value) => {
-                    updateField("eating_type", value)
-                    updateField("eating_subtype", "")
-                    updateField("ayuno_horas", "")
-                  }}
-                />
-              
-                {form.eating_type === "Vegetariano" ? (
-                  <div className="mt-4">
-                    <p className="text-sm font-medium text-neutral-700">Tipo de vegetarianismo</p>
-                    <SingleSelectButtons
-                      options={["Ovolactovegetariano", "Ovovegetariano", "Lactovegetariano", "Pescetariano"]}
-                      value={form.eating_subtype}
-                      onChange={(value) => updateField("eating_subtype", value)}
-                    />
-                    {form.eating_subtype ? (
-                      <p className="mt-2 text-xs text-neutral-500">
-                        {form.eating_subtype === "Ovolactovegetariano" ? "Sin carne ni pescado. Si come huevos y lacteos." :
-                         form.eating_subtype === "Ovovegetariano"      ? "Sin carne, pescado ni lacteos. Si come huevos." :
-                         form.eating_subtype === "Lactovegetariano"    ? "Sin carne, pescado ni huevos. Si come lacteos." :
-                         form.eating_subtype === "Pescetariano"        ? "Sin carne. Si come pescado, huevos y lacteos." : ""}
-                      </p>
-                    ) : null}
-                  </div>
-                ) : null}
-
-                {form.eating_type === "Vegano" ? (
-                  <div className="mt-4">
-                    <p className="text-sm font-medium text-neutral-700">Estilo vegano</p>
-                    <SingleSelectButtons
-                      options={["Vegano estandar", "Vegano raw (crudivegano)", "Vegano HCLF", "Vegano WFPB", "Vegano deportivo"]}
-                      value={form.eating_subtype}
-                      onChange={(value) => updateField("eating_subtype", value)}
-                    />
-                    {form.eating_subtype ? (
-                      <p className="mt-2 text-xs text-neutral-500">
-                        {form.eating_subtype === "Vegano estandar"        ? "Sin ningun producto animal." :
-                         form.eating_subtype === "Vegano raw (crudivegano)" ? "Solo alimentos crudos sin cocinar por encima de 42 grados." :
-                         form.eating_subtype === "Vegano HCLF"            ? "Alto en carbohidratos, bajo en grasa, sin aceites." :
-                         form.eating_subtype === "Vegano WFPB"            ? "Alimentos integrales sin procesados ni refinados." :
-                         form.eating_subtype === "Vegano deportivo"       ? "Mayor proteina vegetal orientado al rendimiento fisico." : ""}
-                      </p>
-                    ) : null}
-                  </div>
-                ) : null}
-
-                {form.eating_type === "Ayuno intermitente" ? (
-                  <div className="mt-4">
-                    <p className="text-sm font-medium text-neutral-700">Ventana de alimentacion</p>
-                    <SingleSelectButtons
-                      options={["12:12", "14:10", "16:8", "18:6", "20:4"]}
-                      value={form.ayuno_horas}
-                      onChange={(value) => updateField("ayuno_horas", value)}
-                    />
-                    {form.ayuno_horas ? (
-                      <p className="mt-2 text-xs text-neutral-500">
-                        {form.ayuno_horas === "12:12" ? "Ayuno 12h, comes en una ventana de 12h" :
-                         form.ayuno_horas === "14:10" ? "Ayuno 14h, comes en una ventana de 10h" :
-                         form.ayuno_horas === "16:8"  ? "Ayuno 16h, comes en una ventana de 8h (el mas popular)" :
-                         form.ayuno_horas === "18:6"  ? "Ayuno 18h, comes en una ventana de 6h (avanzado)" :
-                         form.ayuno_horas === "20:4"  ? "Ayuno 20h, comes en una ventana de 4h (muy avanzado)" : ""}
-                      </p>
-                    ) : null}
-                  </div>
-                ) : null}
-                {form.eating_type === "OMAD (1 comida al dia)" ? (
-                  <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3">
-                    <p className="text-xs text-amber-700">
-                      OMAD es una unica comida al dia. Nuria generara un menu con una comida principal muy completa y snacks opcionales si los necesitas.
+                  <div style={{width:1,height:40,background:"rgba(237,237,237,0.08)"}}/>
+                  <div>
+                    <p style={{fontSize:14,color:"rgba(237,237,237,0.55)",fontWeight:400,marginBottom:4}}>
+                      {parseFloat(imc)<18.5?"Bajo peso":parseFloat(imc)<25?"Normopeso":parseFloat(imc)<30?"Sobrepeso":"Obesidad"}
                     </p>
-                  </div>
-                ) : null}
-                {form.eating_type === "Keto" ? (
-                  <div className="mt-4 rounded-lg border border-emerald-100 bg-emerald-50 p-3">
-                    <p className="text-xs text-emerald-700">
-                      Dieta cetogenica: menos de 20-50g de carbohidratos al dia, alta en grasas saludables y proteinas moderadas.
-                    </p>
-                  </div>
-                ) : null}
-                {form.eating_type === "Paleo" ? (
-                  <div className="mt-4 rounded-lg border border-emerald-100 bg-emerald-50 p-3">
-                    <p className="text-xs text-emerald-700">
-                      Dieta paleo: alimentos naturales sin procesados, sin cereales, sin lacteos ni legumbres.
-                    </p>
-                  </div>
-                ) : null}
-              </div>
-            </>
-          ) : null}
-
-          {step === 3 ? (
-            <>
-              <h1 className="text-2xl font-semibold text-[#0F6E56]">Salud</h1>
-              <div>
-                <p className="text-sm font-medium text-neutral-700">Condiciones de salud</p>
-                <MultiSelectButtons
-                  options={[
-                    "Ninguna",
-                    "Problemas digestivos",
-                    "Colon irritable (SII)",
-                    "Enfermedad de Crohn",
-                    "Colitis ulcerosa",
-                    "Reflujo gastroesofagico (ERGE)",
-                    "Gastritis",
-                    "SIBO",
-                    "Candidiasis intestinal",
-                    "Alteracion hormonal",
-                    "Sindrome ovario poliquistico (SOP)",
-                    "Endometriosis",
-                    "Menopausia / perimenopausia",
-                    "Hipotiroidismo",
-                    "Hipertiroidismo",
-                    "Hashimoto",
-                    "Diabetes tipo 1",
-                    "Diabetes tipo 2",
-                    "Resistencia a la insulina",
-                    "Hipertension",
-                    "Colesterol alto",
-                    "Trigliceridos altos",
-                    "Higado graso (NAFLD)",
-                    "Anemia ferropenica",
-                    "Anemia por deficit B12",
-                    "Osteoporosis",
-                    "Artritis",
-                    "Fibromialgia",
-                    "Lupus",
-                    "Psoriasis",
-                    "Acne hormonal",
-                    "Ansiedad / estres cronico",
-                    "Depresion",
-                    "Fatiga cronica",
-                    "Cancer (en tratamiento o remision)",
-                  ]}
-                  values={form.health_conditions}
-                  onChange={(values) => updateField("health_conditions", values)}
-                />
-              </div>
-
-              <div>
-                <p className="text-sm font-medium text-neutral-700">Intolerancias</p>
-                <MultiSelectButtons
-                  options={["Ninguna", "Gluten", "Lactosa", "Fructosa", "Sorbitol", "Huevo", "Frutos secos", "Cacahuete", "Soja", "Marisco", "Pescado", "Mostaza", "Sesamo", "Sulfitos", "Histamina", "Lectinas", "Oxalatos", "FODMAP"]}
-                  values={form.intolerances}
-                  onChange={(values) => updateField("intolerances", values)}
-                />
-              </div>
-            </>
-          ) : null}
-
-          {step === 4 ? (
-            <>
-              <h1 className="text-2xl font-semibold text-[#0F6E56]">Digestion</h1>
-              <div>
-                <p className="text-sm font-medium text-neutral-700">Gases</p>
-                <SingleSelectButtons
-                  options={["Nunca", "A veces", "Frecuente", "Siempre"]}
-                  value={form.gases}
-                  onChange={(value) => updateField("gases", value)}
-                />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-neutral-700">Acidez o reflujo</p>
-                <SingleSelectButtons
-                  options={["Nunca", "A veces", "Frecuente", "Siempre"]}
-                  value={form.acidez}
-                  onChange={(value) => updateField("acidez", value)}
-                />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-neutral-700">Nauseas</p>
-                <SingleSelectButtons
-                  options={["Nunca", "A veces", "Frecuente", "Siempre"]}
-                  value={form.nauseas}
-                  onChange={(value) => updateField("nauseas", value)}
-                />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-neutral-700">Diarrea</p>
-                <SingleSelectButtons
-                  options={["Nunca", "A veces", "Frecuente", "Siempre"]}
-                  value={form.diarrea}
-                  onChange={(value) => updateField("diarrea", value)}
-                />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-neutral-700">Urgencia para ir al bano</p>
-                <SingleSelectButtons
-                  options={["Nunca", "A veces", "Frecuente", "Siempre"]}
-                  value={form.digestion_urgencia}
-                  onChange={(value) => updateField("digestion_urgencia", value)}
-                />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-neutral-700">Dolor abdominal</p>
-                <SingleSelectButtons
-                  options={["Nunca", "A veces", "Frecuente", "Siempre"]}
-                  value={form.dolor_abdominal}
-                  onChange={(value) => updateField("dolor_abdominal", value)}
-                />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-neutral-700">Hinchazon</p>
-                <SingleSelectButtons
-                  options={["Nunca", "A veces", "Frecuente", "Siempre"]}
-                  value={form.bloating}
-                  onChange={(value) => updateField("bloating", value)}
-                />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-neutral-700">Digestiones pesadas</p>
-                <SingleSelectButtons
-                  options={["Nunca", "A veces", "Frecuente", "Siempre"]}
-                  value={form.heavy_digestions}
-                  onChange={(value) => updateField("heavy_digestions", value)}
-                />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-neutral-700">Estrenimiento</p>
-                <SingleSelectButtons
-                  options={["Nunca", "A veces", "Frecuente", "Siempre"]}
-                  value={form.constipation}
-                  onChange={(value) => updateField("constipation", value)}
-                />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-neutral-700">Deposiciones al dia</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-neutral-700">La digestion empeora con</p>
-                <MultiSelectButtons
-                  options={["Lacteos", "Gluten", "Legumbres", "Crudos", "Grasas", "Cafe", "Alcohol", "Estres", "Picante", "Azucar", "Frutas", "Verduras crudas", "No identificado"]}
-                  values={form.digestion_empeora_con}
-                  onChange={(values) => updateField("digestion_empeora_con", values)}
-                />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-neutral-700">La digestion mejora con</p>
-                <MultiSelectButtons
-                  options={["Ayuno", "Comidas pequenas", "Alimentos cocidos", "Sin lacteos", "Sin gluten", "Probioticos", "Jengibre", "Infusiones", "Ejercicio suave", "No identificado"]}
-                  values={form.digestion_mejora_con}
-                  onChange={(values) => updateField("digestion_mejora_con", values)}
-                />
-                <SingleSelectButtons
-                  options={["0", "1", "2", "3+"]}
-                  value={form.bowel_movements_per_day}
-                  onChange={(value) => updateField("bowel_movements_per_day", value)}
-                />
-              </div>
-            </>
-          ) : null}
-
-          {step === 5 ? (
-            <>
-              <h1 className="text-2xl font-semibold text-[#0F6E56]">Habitos</h1>
-              <div>
-                <label htmlFor="sleep_hours" className="block text-sm font-medium text-neutral-700">
-                  Horas de sueno: <span className="font-semibold text-[#0F6E56]">{form.sleep_hours}</span>
-                </label>
-                <input
-                  id="sleep_hours"
-                  type="range"
-                  min={4}
-                  max={10}
-                  step={1}
-                  value={form.sleep_hours}
-                  onChange={(event) => updateField("sleep_hours", Number(event.target.value))}
-                  className="mt-2 w-full accent-[#0F6E56]"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="stress_level" className="block text-sm font-medium text-neutral-700">
-                  Nivel de estres: <span className="font-semibold text-[#0F6E56]">{form.stress_level}</span>
-                </label>
-                <input
-                  id="stress_level"
-                  type="range"
-                  min={1}
-                  max={5}
-                  step={1}
-                  value={form.stress_level}
-                  onChange={(event) => updateField("stress_level", Number(event.target.value))}
-                  className="mt-2 w-full accent-[#0F6E56]"
-                />
-              </div>
-
-              <div>
-                <p className="text-sm font-medium text-neutral-700">Cocinas en casa?</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-neutral-700">Tiempo disponible para cocinar al dia</p>
-                <SingleSelectButtons
-                  options={["Menos de 15 min", "15-30 min", "30-45 min", "45-60 min", "Mas de 1 hora"]}
-                  value={form.tiempo_cocina}
-                  onChange={(value) => updateField("tiempo_cocina", value)}
-                />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-neutral-700">Presupuesto semanal para alimentacion</p>
-                <SingleSelectButtons
-                  options={["Menos de 30 EUR", "30-50 EUR", "50-80 EUR", "80-120 EUR", "Mas de 120 EUR"]}
-                  value={form.presupuesto_semanal}
-                  onChange={(value) => updateField("presupuesto_semanal", value)}
-                />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-neutral-700">Cuantas veces comes fuera de casa a la semana</p>
-                <SingleSelectButtons
-                  options={["Nunca", "1-2 veces", "3-4 veces", "5 o mas veces"]}
-                  value={form.comidas_fuera}
-                  onChange={(value) => updateField("comidas_fuera", value)}
-                />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-neutral-700">Haces batch cooking (cocinar para varios dias)?</p>
-                <SingleSelectButtons
-                  options={["Si, habitualmente", "A veces", "No pero me gustaria", "No me interesa"]}
-                  value={form.batch_cooking}
-                  onChange={(value) => updateField("batch_cooking", value)}
-                />
-                <SingleSelectButtons
-                  options={["Si", "A veces", "Casi nunca"]}
-                  value={form.cooks_at_home}
-                  onChange={(value) => updateField("cooks_at_home", value)}
-                />
-              </div>
-
-              <div>
-                <p className="text-sm font-medium text-neutral-700">Suplementacion</p>
-                <MultiSelectButtons
-                  options={["Ninguna", "Magnesio", "Vitamina D", "Vitamina B12", "Omega-3", "Probioticos", "Proteina en polvo", "Hierro", "Zinc", "Colageno", "Curcuma", "Ashwagandha", "Melatonina", "Acido folico", "Yodo", "Creatina"]}
-                  values={form.supplements}
-                  onChange={(values) => updateField("supplements", values)}
-                />
-              </div>
-            </>
-          ) : null}
-
-          {step === 6 ? (
-            <>
-              <h1 className="text-2xl font-semibold text-[#0F6E56]">Relacion con la comida</h1>
-
-              {form.biological_sex === "Mujer" ? (
-                <div className="rounded-xl border border-pink-100 bg-pink-50 p-4 space-y-4">
-                  <p className="text-sm font-semibold text-pink-700">Sintomas hormonales (solo para mujeres)</p>
-                  <div>
-                    <p className="text-sm font-medium text-neutral-700">Sintomas hormonales frecuentes</p>
-                    <MultiSelectButtons
-                      options={["Ninguno", "Fatiga cronica", "Cambios de humor", "Irritabilidad", "Ansiedad premenstrual", "Depresion leve", "Falta de libido", "Sofocos", "Sudoracion nocturna", "Retención de liquidos", "Sensacion de frio constante", "Palpitaciones", "Niebla mental", "Insomnio hormonal"]}
-                      values={form.sintomas_hormonales}
-                      onChange={(values) => updateField("sintomas_hormonales", values)}
-                    />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-neutral-700">Sintomas de piel y cabello</p>
-                    <MultiSelectButtons
-                      options={["Ninguno", "Acne hormonal", "Piel seca", "Piel grasa", "Caida de cabello", "Cabello fino o fragil", "Exceso de vello", "Unas debiles", "Hiperpigmentacion", "Eccema o psoriasis"]}
-                      values={form.sintomas_piel_cabello}
-                      onChange={(values) => updateField("sintomas_piel_cabello", values)}
-                    />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-neutral-700">Ciclo menstrual regular</p>
-                    <SingleSelectButtons
-                      options={["Si, muy regular", "Bastante regular", "Irregular", "Muy irregular", "Sin ciclo (menopausia, DIU, etc)"]}
-                      value={form.ciclo_irregular}
-                      onChange={(value) => updateField("ciclo_irregular", value)}
-                    />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-neutral-700">Dolor menstrual</p>
-                    <SingleSelectButtons
-                      options={["Sin dolor", "Leve", "Moderado", "Intenso", "Muy intenso / incapacitante"]}
-                      value={form.dolor_menstrual}
-                      onChange={(value) => updateField("dolor_menstrual", value)}
-                    />
+                    <p style={{fontSize:11,color:"rgba(237,237,237,0.2)",fontWeight:300}}>Nuria adaptará tu protocolo a este dato</p>
                   </div>
                 </div>
-              ) : null}
-              <div>
-                <p className="text-sm font-medium text-neutral-700">Relacion con la comida</p>
-                <SingleSelectButtons
-                  options={["Tranquila", "Con conflictos", "Mucha ansiedad", "Muy dificil"]}
-                  value={form.food_relationship}
-                  onChange={(value) => updateField("food_relationship", value)}
-                />
-              </div>
-
-              <div>
-                <p className="text-sm font-medium text-neutral-700">Comer emocional</p>
-                <SingleSelectButtons
-                  options={["Raramente", "A veces", "Con frecuencia"]}
-                  value={form.emotional_eating}
-                  onChange={(value) => updateField("emotional_eating", value)}
-                />
-              </div>
-
-              <div>
-                <label htmlFor="disliked_foods" className="block text-sm font-medium text-neutral-700">
-                  Alimentos que no te gustan
-                </label>
-                <input
-                  id="disliked_foods"
-                  type="text"
-                  value={form.disliked_foods}
-                  onChange={(event) => updateField("disliked_foods", event.target.value)}
-                  className="mt-2 w-full rounded-lg border border-neutral-300 px-3 py-2 outline-none ring-[#0F6E56] focus:ring-2"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="note_for_nuria" className="block text-sm font-medium text-neutral-700">
-                  Nota para Nuria
-                </label>
-                <textarea
-                  id="note_for_nuria"
-                  value={form.note_for_nuria}
-                  onChange={(event) => updateField("note_for_nuria", event.target.value)}
-                  rows={4}
-                  className="mt-2 w-full rounded-lg border border-neutral-300 px-3 py-2 outline-none ring-[#0F6E56] focus:ring-2"
-                />
-              </div>
-            </>
-          ) : null}
-
-          {error ? <p className="text-sm text-red-600">{error}</p> : null}
-
-          <div className="flex items-center justify-between pt-4">
-            <button
-              type="button"
-              onClick={previousStep}
-              disabled={step === 1 || loading}
-              className="rounded-lg border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 transition hover:border-[#0F6E56] hover:text-[#0F6E56] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Atras
-            </button>
-
-            {step < TOTAL_STEPS ? (
-              <button
-                type="button"
-                onClick={nextStep}
-                disabled={loading}
-                className="rounded-lg bg-[#0F6E56] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0d5f4a] disabled:opacity-60"
-              >
-                Siguiente
-              </button>
-            ) : (
-              <button
-                type="submit"
-                disabled={loading}
-                className="rounded-lg bg-[#0F6E56] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0d5f4a] disabled:opacity-60"
-              >
-                {loading ? "Generando plan..." : "Generar mi plan"}
-              </button>
-            )}
+              )}
+            </div>
           </div>
-        </form>
-      </section>
-    </main>
+        )}
+
+        {/* PASO 1 */}
+        {paso===1 && (
+          <div className="fade-in">
+            <p style={{fontSize:10,fontWeight:700,color:"rgba(237,237,237,0.22)",textTransform:"uppercase",letterSpacing:"0.18em",marginBottom:16}}>Paso 2 de {PASOS.length}</p>
+            <h1 className="sf" style={{fontSize:52,fontWeight:700,color:"#EDEDED",letterSpacing:"-2.5px",lineHeight:0.97,marginBottom:16}}>
+              ¿Cuál es tu<br/><em style={{fontStyle:"italic",color:"rgba(237,237,237,0.35)"}}>objetivo principal?</em>
+            </h1>
+            <p style={{fontSize:15,color:"rgba(237,237,237,0.3)",fontWeight:300,marginBottom:40}}>Elige uno. El protocolo se construirá en torno a él.</p>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:28}}>
+              {OBJETIVOS.map(obj=>(
+                <button key={obj.id} onClick={()=>setObjetivo(obj.id)} className={`obj-card ${objetivo===obj.id?"on":""}`}>
+                  <p style={{fontSize:14,fontWeight:600,color:objetivo===obj.id?"#0B0B0B":"#EDEDED",marginBottom:4}}>{obj.titulo}</p>
+                  <p style={{fontSize:12,color:objetivo===obj.id?"rgba(0,0,0,0.5)":"rgba(237,237,237,0.3)",fontWeight:300,lineHeight:1.5}}>{obj.desc}</p>
+                </button>
+              ))}
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+              <div>
+                <label>Peso objetivo (kg) — opcional</label>
+                <input type="number" value={pesoObjetivo} onChange={e=>setPesoObjetivo(e.target.value)} placeholder="58" className="inp"/>
+              </div>
+              <div>
+                <label>Plazo aproximado</label>
+                <select value={plazo} onChange={e=>setPlazo(e.target.value)} className="inp">
+                  <option value="">Sin fecha límite</option>
+                  <option value="1mes">1 mes</option>
+                  <option value="3meses">3 meses</option>
+                  <option value="6meses">6 meses</option>
+                  <option value="1año">1 año o más</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* PASO 2 */}
+        {paso===2 && (
+          <div className="fade-in">
+            <p style={{fontSize:10,fontWeight:700,color:"rgba(237,237,237,0.22)",textTransform:"uppercase",letterSpacing:"0.18em",marginBottom:16}}>Paso 3 de {PASOS.length}</p>
+            <h1 className="sf" style={{fontSize:52,fontWeight:700,color:"#EDEDED",letterSpacing:"-2.5px",lineHeight:0.97,marginBottom:16}}>
+              Historia<br/><em style={{fontStyle:"italic",color:"rgba(237,237,237,0.35)"}}>clínica</em>
+            </h1>
+            <p style={{fontSize:15,color:"rgba(237,237,237,0.3)",fontWeight:300,marginBottom:40}}>Esta información permite a Nuria crear un protocolo seguro y adaptado a tu condición.</p>
+            <div style={{display:"flex",flexDirection:"column",gap:28}}>
+              <div>
+                <label>Patologías diagnosticadas</label>
+                <div style={{display:"flex",flexWrap:"wrap",gap:8,marginTop:4}}>
+                  {PATOLOGIAS.map(p=>(
+                    <button key={p} onClick={()=>toggleArr(patologias,setPatologias,p)} className={`chip ${patologias.includes(p)?"on":""}`}>{p}</button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label>Medicación actual</label>
+                <textarea value={medicacion} onChange={e=>setMedicacion(e.target.value)} placeholder="Ej: levotiroxina 50mcg, metformina 500mg..." rows={3} className="inp"/>
+              </div>
+              <div>
+                <label>Suplementación actual</label>
+                <input value={suplementos} onChange={e=>setSuplementos(e.target.value)} placeholder="Ej: vitamina D, magnesio, omega-3..." className="inp"/>
+              </div>
+              <div>
+                <label>Analíticas recientes relevantes</label>
+                <textarea value={analiticas} onChange={e=>setAnaliticas(e.target.value)} placeholder="Ej: vitamina D 18 ng/ml, ferritina 12, TSH 3.2..." rows={3} className="inp"/>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* PASO 3 */}
+        {paso===3 && (
+          <div className="fade-in">
+            <p style={{fontSize:10,fontWeight:700,color:"rgba(237,237,237,0.22)",textTransform:"uppercase",letterSpacing:"0.18em",marginBottom:16}}>Paso 4 de {PASOS.length}</p>
+            <h1 className="sf" style={{fontSize:52,fontWeight:700,color:"#EDEDED",letterSpacing:"-2.5px",lineHeight:0.97,marginBottom:16}}>
+              Tu sistema<br/><em style={{fontStyle:"italic",color:"rgba(237,237,237,0.35)"}}>digestivo</em>
+            </h1>
+            <p style={{fontSize:15,color:"rgba(237,237,237,0.3)",fontWeight:300,marginBottom:40}}>El 70% de los problemas de salud tienen origen digestivo.</p>
+            <div style={{display:"flex",flexDirection:"column",gap:28}}>
+              <div>
+                <label>Síntomas digestivos habituales</label>
+                <div style={{display:"flex",flexWrap:"wrap",gap:8,marginTop:4}}>
+                  {SINTOMAS_DIGESTIVOS.map(s=>(
+                    <button key={s} onClick={()=>toggleArr(sintomasDigestivos,setSintomasDigestivos,s)} className={`chip ${sintomasDigestivos.includes(s)?"on":""}`}>{s}</button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label>Intolerancias y sensibilidades</label>
+                <div style={{display:"flex",flexWrap:"wrap",gap:8,marginTop:4}}>
+                  {INTOLERANCIAS.map(i=>(
+                    <button key={i} onClick={()=>toggleArr(intolerancias,setIntolerancias,i)} className={`chip ${intolerancias.includes(i)?"on":""}`}>{i}</button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label>Alergias alimentarias confirmadas</label>
+                <input value={alergias} onChange={e=>setAlergias(e.target.value)} placeholder="Ej: frutos secos (anafilaxia), marisco..." className="inp"/>
+              </div>
+              <div>
+                <label>Frecuencia de evacuaciones</label>
+                <select value={evacuaciones} onChange={e=>setEvacuaciones(e.target.value)} className="inp">
+                  <option value="">Seleccionar</option>
+                  <option value="menos1">Menos de 1 vez al día</option>
+                  <option value="1dia">1 vez al día</option>
+                  <option value="2-3dia">2-3 veces al día</option>
+                  <option value="mas3">Más de 3 veces al día</option>
+                  <option value="variable">Variable / irregular</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* PASO 4 */}
+        {paso===4 && (
+          <div className="fade-in">
+            <p style={{fontSize:10,fontWeight:700,color:"rgba(237,237,237,0.22)",textTransform:"uppercase",letterSpacing:"0.18em",marginBottom:16}}>Paso 5 de {PASOS.length}</p>
+            <h1 className="sf" style={{fontSize:52,fontWeight:700,color:"#EDEDED",letterSpacing:"-2.5px",lineHeight:0.97,marginBottom:16}}>
+              Perfil<br/><em style={{fontStyle:"italic",color:"rgba(237,237,237,0.35)"}}>hormonal</em>
+            </h1>
+            <p style={{fontSize:15,color:"rgba(237,237,237,0.3)",fontWeight:300,marginBottom:40}}>La alimentación y las hormonas están profundamente conectadas.</p>
+            <div style={{display:"flex",flexDirection:"column",gap:24}}>
+              <div>
+                <label>¿Tienes ciclo menstrual activo?</label>
+                <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+                  {["Sí","No","Menopausia","Post-menopausia"].map(v=>(
+                    <button key={v} onClick={()=>setTieneCiclo(v)} className={`chip ${tieneCiclo===v?"on":""}`}>{v}</button>
+                  ))}
+                </div>
+              </div>
+              {tieneCiclo==="Sí" && (
+                <>
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+                    <div>
+                      <label>Duración del ciclo (días)</label>
+                      <input type="number" value={duracionCiclo} onChange={e=>setDuracionCiclo(e.target.value)} placeholder="28" className="inp"/>
+                    </div>
+                    <div>
+                      <label>Fecha última menstruación</label>
+                      <input type="date" value={ultimaMenstruacion} onChange={e=>setUltimaMenstruacion(e.target.value)} className="inp"/>
+                    </div>
+                  </div>
+                  <div>
+                    <label>Síntomas hormonales</label>
+                    <div style={{display:"flex",flexWrap:"wrap",gap:8,marginTop:4}}>
+                      {["Ciclo irregular","Reglas dolorosas","SPM intenso","Retención de líquidos","Cambios de humor","Acné hormonal","Pérdida de cabello","Fatiga premenstrual","Antojos intensos","Insomnio premenstrual","Libido baja","Ninguno"].map(s=>(
+                        <button key={s} onClick={()=>toggleArr(sintomasHormonales,setSintomasHormonales,s)} className={`chip ${sintomasHormonales.includes(s)?"on":""}`}>{s}</button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* PASO 5 */}
+        {paso===5 && (
+          <div className="fade-in">
+            <p style={{fontSize:10,fontWeight:700,color:"rgba(237,237,237,0.22)",textTransform:"uppercase",letterSpacing:"0.18em",marginBottom:16}}>Paso 6 de {PASOS.length}</p>
+            <h1 className="sf" style={{fontSize:52,fontWeight:700,color:"#EDEDED",letterSpacing:"-2.5px",lineHeight:0.97,marginBottom:16}}>
+              Tus preferencias<br/><em style={{fontStyle:"italic",color:"rgba(237,237,237,0.35)"}}>alimentarias</em>
+            </h1>
+            <p style={{fontSize:15,color:"rgba(237,237,237,0.3)",fontWeight:300,marginBottom:40}}>El protocolo se adapta a ti, no al revés.</p>
+            <div style={{display:"flex",flexDirection:"column",gap:24}}>
+              <div>
+                <label>Tipo de alimentación</label>
+                <div style={{display:"flex",flexWrap:"wrap",gap:8,marginTop:4}}>
+                  {TIPOS_ALIMENTACION.map(t=>(
+                    <button key={t} onClick={()=>toggleArr(tipoAlimentacion,setTipoAlimentacion,t)} className={`chip ${tipoAlimentacion.includes(t)?"on":""}`}>{t}</button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label>Alimentos que NO quieres en tu menú</label>
+                <textarea value={alimentosEvitar} onChange={e=>setAlimentosEvitar(e.target.value)} placeholder="Ej: no me gusta el pescado azul, evito el cerdo..." rows={3} className="inp"/>
+              </div>
+              <div>
+                <label>Alimentos favoritos que quieres incluir</label>
+                <textarea value={alimentosFavoritos} onChange={e=>setAlimentosFavoritos(e.target.value)} placeholder="Ej: me encanta el aguacate, el pollo, las legumbres..." rows={3} className="inp"/>
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14}}>
+                <div>
+                  <label>Presupuesto semanal</label>
+                  <select value={presupuesto} onChange={e=>setPresupuesto(e.target.value)} className="inp">
+                    <option value="">Seleccionar</option>
+                    <option value="menos30">Menos de 30€</option>
+                    <option value="30-60">30-60€</option>
+                    <option value="60-100">60-100€</option>
+                    <option value="mas100">Más de 100€</option>
+                  </select>
+                </div>
+                <div>
+                  <label>Tiempo para cocinar</label>
+                  <select value={tiempoCocina} onChange={e=>setTiempoCocina(e.target.value)} className="inp">
+                    <option value="">Seleccionar</option>
+                    <option value="menos15">Menos de 15 min</option>
+                    <option value="15-30">15-30 min</option>
+                    <option value="30-60">30-60 min</option>
+                    <option value="mas60">Más de 1 hora</option>
+                  </select>
+                </div>
+                <div>
+                  <label>Comidas al día</label>
+                  <select value={numComidas} onChange={e=>setNumComidas(e.target.value)} className="inp">
+                    <option value="2">2 comidas</option>
+                    <option value="3">3 comidas</option>
+                    <option value="4">4 comidas</option>
+                    <option value="5">5 comidas</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* PASO 6 */}
+        {paso===6 && (
+          <div className="fade-in">
+            <p style={{fontSize:10,fontWeight:700,color:"rgba(237,237,237,0.22)",textTransform:"uppercase",letterSpacing:"0.18em",marginBottom:16}}>Paso 7 de {PASOS.length}</p>
+            <h1 className="sf" style={{fontSize:52,fontWeight:700,color:"#EDEDED",letterSpacing:"-2.5px",lineHeight:0.97,marginBottom:16}}>
+              Tu estilo<br/><em style={{fontStyle:"italic",color:"rgba(237,237,237,0.35)"}}>de vida</em>
+            </h1>
+            <p style={{fontSize:15,color:"rgba(237,237,237,0.3)",fontWeight:300,marginBottom:40}}>El contexto de tu vida influye directamente en tu metabolismo.</p>
+            <div style={{display:"flex",flexDirection:"column",gap:24}}>
+              <div>
+                <label>Nivel de actividad física</label>
+                <div style={{display:"flex",flexDirection:"column",gap:8,marginTop:4}}>
+                  {NIVELES_ACTIVIDAD.map(n=>(
+                    <button key={n} onClick={()=>setActividadFisica(n)} className={`act-btn ${actividadFisica===n?"on":""}`}>
+                      <span style={{fontSize:13,fontWeight:actividadFisica===n?600:300,color:actividadFisica===n?"#0B0B0B":"rgba(237,237,237,0.45)"}}>{n}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label>Tipo de ejercicio que practicas</label>
+                <input value={tipoEjercicio} onChange={e=>setTipoEjercicio(e.target.value)} placeholder="Ej: musculación 4 días, running 2 días..." className="inp"/>
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+                <div>
+                  <label>Horas de sueño habituales</label>
+                  <select value={horasSueno} onChange={e=>setHorasSueno(e.target.value)} className="inp">
+                    <option value="">Seleccionar</option>
+                    <option value="menos5">Menos de 5h</option>
+                    <option value="5-6">5-6 horas</option>
+                    <option value="6-7">6-7 horas</option>
+                    <option value="7-8">7-8 horas</option>
+                    <option value="mas8">Más de 8h</option>
+                  </select>
+                </div>
+                <div>
+                  <label>Tipo de trabajo</label>
+                  <select value={trabajoTipo} onChange={e=>setTrabajoTipo(e.target.value)} className="inp">
+                    <option value="">Seleccionar</option>
+                    <option value="sedentario">Sedentario (oficina)</option>
+                    <option value="mixto">Mixto</option>
+                    <option value="activo">Activo (de pie)</option>
+                    <option value="turnos">Trabajo por turnos</option>
+                    <option value="nocturno">Turno nocturno</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+                  <label style={{margin:0}}>Nivel de estrés habitual</label>
+                  <span className="sf" style={{fontSize:24,fontWeight:700,color:"#EDEDED",letterSpacing:"-0.5px"}}>{nivelEstres}<span style={{fontSize:13,color:"rgba(237,237,237,0.3)",fontWeight:300}}>/10</span></span>
+                </div>
+                <input type="range" min={1} max={10} value={nivelEstres} onChange={e=>setNivelEstres(parseInt(e.target.value))} className="slider"/>
+                <div style={{display:"flex",justifyContent:"space-between",marginTop:8}}>
+                  <span style={{fontSize:10,color:"rgba(237,237,237,0.2)"}}>Sin estrés</span>
+                  <span style={{fontSize:10,color:"rgba(237,237,237,0.2)"}}>Estrés extremo</span>
+                </div>
+              </div>
+              <div>
+                <label>Relación con la comida</label>
+                <div style={{display:"flex",flexWrap:"wrap",gap:8,marginTop:4}}>
+                  {["Muy buena — como con placer","Neutral — la comida es funcional","Complicada — ansiedad o restricción","Como por emociones / aburrimiento","Historial de TCA","Prefiero no responder"].map(r=>(
+                    <button key={r} onClick={()=>setRelacionComida(r)} className={`chip ${relacionComida===r?"on":""}`}>{r}</button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* PASO 7 - REVISIÓN */}
+        {paso===7 && (
+          <div className="fade-in">
+            <p style={{fontSize:10,fontWeight:700,color:"rgba(237,237,237,0.22)",textTransform:"uppercase",letterSpacing:"0.18em",marginBottom:16}}>Último paso</p>
+            <h1 className="sf" style={{fontSize:52,fontWeight:700,color:"#EDEDED",letterSpacing:"-2.5px",lineHeight:0.97,marginBottom:16}}>
+              Todo listo para<br/><em style={{fontStyle:"italic",color:"rgba(237,237,237,0.35)"}}>tu protocolo</em>
+            </h1>
+            <p style={{fontSize:15,color:"rgba(237,237,237,0.3)",fontWeight:300,marginBottom:48,maxWidth:500}}>
+              Nuria tiene toda la información necesaria. En menos de 2 minutos tendrás tu primer menú.
+            </p>
+            <div style={{background:"rgba(237,237,237,0.03)",border:"1px solid rgba(237,237,237,0.08)",borderRadius:20,padding:"28px",marginBottom:32,position:"relative",overflow:"hidden"}}>
+              <div style={{position:"absolute",top:0,left:0,right:0,height:"1px",background:"linear-gradient(90deg,transparent,rgba(237,237,237,0.1) 50%,transparent)"}}/>
+              <p style={{fontSize:10,fontWeight:700,color:"rgba(237,237,237,0.22)",textTransform:"uppercase",letterSpacing:"0.14em",marginBottom:20}}>Resumen de tu evaluación</p>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                {[
+                  ["Nombre",nombre||"—"],
+                  ["Edad / Sexo",edad&&sexo?`${edad} años · ${sexo}`:"—"],
+                  ["Peso / Altura",peso&&altura?`${peso}kg · ${altura}cm`:"—"],
+                  ["IMC",imc??"—"],
+                  ["Objetivo",OBJETIVOS.find(o=>o.id===objetivo)?.titulo||"—"],
+                  ["Alimentación",tipoAlimentacion.length>0?tipoAlimentacion.slice(0,2).join(", "):"—"],
+                  ["Patologías",patologias.length>0?`${patologias.length} registradas`:"Ninguna"],
+                  ["Intolerancias",intolerancias.length>0?intolerancias.slice(0,2).join(", "):"Ninguna"],
+                  ["Actividad",actividadFisica||"—"],
+                  ["Estrés",`${nivelEstres}/10`],
+                ].map(([k,v])=>(
+                  <div key={k} style={{padding:"12px 0",borderBottom:"1px solid rgba(237,237,237,0.05)"}}>
+                    <p style={{fontSize:9,color:"rgba(237,237,237,0.22)",fontWeight:600,textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:4}}>{k}</p>
+                    <p style={{fontSize:13,color:"rgba(237,237,237,0.6)",fontWeight:300}}>{v}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div style={{background:"rgba(237,237,237,0.03)",border:"1px solid rgba(198,169,107,0.15)",borderRadius:18,padding:"22px 24px",marginBottom:36,position:"relative",overflow:"hidden"}}>
+              <div style={{position:"absolute",top:0,left:0,right:0,height:"1px",background:"linear-gradient(90deg,transparent,rgba(198,169,107,0.3) 50%,transparent)"}}/>
+              <div style={{display:"flex",alignItems:"center",gap:9,marginBottom:10}}>
+                <div style={{width:24,height:24,borderRadius:"50%",background:"linear-gradient(145deg,#C6A96B,#8A7240)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                  <span className="sf" style={{color:"white",fontSize:11,fontWeight:700,fontStyle:"italic"}}>N</span>
+                </div>
+                <p style={{fontSize:9,fontWeight:600,color:"rgba(198,169,107,0.5)",textTransform:"uppercase",letterSpacing:"0.1em"}}>Nuria</p>
+              </div>
+              <p className="sf" style={{fontSize:14,color:"rgba(237,237,237,0.42)",lineHeight:1.8,fontStyle:"italic"}}>
+                "He analizado toda tu información. Voy a generar un protocolo nutricional adaptado a tu biología, objetivos y estilo de vida."
+              </p>
+            </div>
+            <button onClick={handleFinish} disabled={saving} className="btn-next" style={{width:"100%",padding:"18px",fontSize:15}}>
+              {saving?"Generando tu protocolo...":"Generar mi protocolo →"}
+            </button>
+            <p style={{fontSize:11,color:"rgba(237,237,237,0.15)",textAlign:"center",marginTop:14,fontWeight:300,letterSpacing:"0.04em"}}>
+              Puedes actualizar tu evaluación en cualquier momento desde tu perfil
+            </p>
+          </div>
+        )}
+
+        {/* NAVEGACIÓN */}
+        <div style={{display:"flex",gap:12,marginTop:52,alignItems:"center"}}>
+          {paso>0 && (
+            <button onClick={()=>setPaso(p=>p-1)} className="btn-back">← Anterior</button>
+          )}
+          {paso<7 && (
+            <button onClick={()=>setPaso(p=>p+1)} className="btn-next" style={{marginLeft:"auto"}}>Siguiente →</button>
+          )}
+        </div>
+
+      </div>
+    </div>
   );
 }
