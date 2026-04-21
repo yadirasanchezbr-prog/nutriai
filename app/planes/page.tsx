@@ -357,7 +357,7 @@ export default function PlanesPage() {
                 </div>
 
                 <div style={{display:"flex",gap:12,alignItems:"center",marginTop:"auto"}}>
-                  <Link href="/registro" className="btn-p" style={{
+                  <Link href={plan.nombre==="Longevity"?"/registro?plan=longevity":plan.nombre==="Premium 1:1"?"/registro?plan=premium":"/registro"} className="btn-p" style={{
                     flex:1,
                     padding:"14px 20px",
                     borderRadius:14,
